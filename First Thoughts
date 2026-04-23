@@ -1,0 +1,174 @@
+Proposed direction
+Colors. Deep forest green as primary (think pine forest, not mint). Sage/moss as secondary. Warm cream or off-white as background (never pure white — pure white is 2015 SaaS, not nature). Charcoal for text, never pure black. The chain colors are their own thing: mossy dark green, softer sage green, warm ochre (not alarming yellow), dusty terracotta (not aggressive red).
+Typography. Editorial serif for headings — something like Fraunces, GT Sectra, or Recoleta. Clean geometric sans for UI and body — Inter or Söhne. This combination is what makes it feel editorial/professional instead of app-y. Headings with serifs feel considered, permanent. Most habit apps use all sans-serif and that's why they read as generic.
+Layout. Generous whitespace, wider margins than feel necessary, content breathes. Cards/tiles have subtle borders, not heavy drop shadows. Rounded corners but subtle (8–12px, not 20px+). Texture used minimally — maybe a barely-there paper grain on the background, nothing more.
+The home screen visual anchor. Instead of a tree, the chain itself is the hero. A horizontal row of recent weeks, each week a colored tile. Current week at the right, glowing softly, not yet "sealed" until Sunday. Past weeks slightly dimmer. This is the image you want burned into your mind — the chain, unbroken, stretching back.
+Let me show you what I'm imagining.
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+VvisualizeVvisualize show_widgetA few design notes on what you're looking at:
+The chain is the hero. Eight weeks visible at a glance, each a solid tile. Dark green = ideal week, lighter green = strong, ochre = yellow week. The current week (far right) is slightly faded with a dashed outline because it isn't "sealed" until Sunday's review. No tree, no garden, no scene — just the honest record of what you did. This is the image you want to see every morning.
+Editorial typography. The greeting and section headers use a serif (Fraunces-style). Everything else is clean sans. That mix is 80% of the "professional but warm" feeling — apps that use all sans-serif read as generic SaaS; apps that use all serif read as overwrought. The combination is what newspapers and Kinfolk and Monocle all figured out.
+Warm cream, not white. That background is #F5F1E8 — paper, not screen. Tiny change, big shift in feel. Pure white makes the app read as software; cream makes it read as a journal.
+Forest green used sparingly. Only in the chain tiles, the checkmark circle, and accent text. Most of the surface is neutral. Restraint is what keeps "nature themed" from tipping into "wellness app."
+The log-a-session tiles show averages. This is a small but important detail — seeing "Avg 22 min" next to Reading removes the question of "how long should I do this today?" You already know your own rhythm, so the app reflects it back instead of asking.
+What I deliberately didn't include: no motivational quotes, no "day X of 90" counter, no percentage-of-week-complete bar, no notifications, no streak dramatization. All of that is noise.
+Things worth deciding next:
+
+Mobile-first or equally weighted? The mockup is phone-shaped because that's where you'll log sessions. Desktop can show more — probably the same Today column on the left, with a larger year-grid view on the right, more like a GitHub contribution graph. Different layout, same palette.
+The weekly color — who decides? Two options: you assign it Sunday during review (intentional, reflective), or the app computes it from session counts (automatic, less agency). I'd lean toward you assigning it, because the whole point is that yellow weeks aren't failures — and letting you name them yellow yourself is part of making peace with them.
+The exact green. The forest green I used (#2D4A3E) is quite dark. Could go warmer (olive-leaning) or cooler (pine-leaning). Worth picking a specific real-world reference — is the feeling more Limburg forest in autumn, more Scottish Highlands, more Mediterranean olive grove? The specific image changes the palette.
+
+
+
+The Framework
+Core Principles
+The goal is not perfection. The goal is the chain. A strong week done perfectly is worth the same as a chaotic week where you hit minimum viable — both keep the chain alive. The chain is what breaks the two-month ceiling.
+Never miss twice in a row. One missed session is data. Two consecutive missed sessions is a new pattern forming. If Monday doesn't happen, Tuesday is non-negotiable. If both don't happen, Wednesday becomes a gym day.
+Context beats willpower. The Canada summers worked because the environment made training the easiest choice. Everything in this framework is designed to reduce friction — gym bag to work, gym on the bus route home, fallback options pre-decided so you don't negotiate in the moment.
+Minimum viable > zero. A 20-minute bodyweight session at home counts. A walk counts. What doesn't count is doing nothing and telling yourself next week will be better.
+
+The Ideal Week (Dark Green)
+Monday — Work 7:30–3:30. Gym on way home, upper body, ~45 min. Home by 5. Shower, cook, relax with Roberta. Phone away at 10:30. 20 min reading. Sleep.
+Tuesday — Work 7:30–3:30. Gym on way home, lower body, ~45 min. Same evening rhythm.
+Wednesday — Work from home. Evening: 30 min yoga + 10 min meditation at home. This is the midweek reset, not a rest day — active recovery + the meditation slot.
+Thursday — Work 7:30–3:30. Open evening. Roberta time, reading, friends, errands, whatever life needs.
+Friday — Work 7:30–3:30. Gym on way home, full-body or weakest area from the week, ~45 min. Walk into the weekend feeling strong.
+Saturday / Sunday — Genuinely free. Optional active stuff (parkrun, walks, padel, whatever). No mandatory training. Weekend is rest and Roberta and life.
+Daily anchors every day:
+
+Up at 6:00–6:30
+Phone away by 10:30
+20 min reading before sleep
+In bed by 10:30–11:00 aiming for 7–8 hours
+
+
+Why This Shape Works
+7:30 work start is the keystone. It's what makes 3:30 departure politically bulletproof. Nobody critiques someone who's at their desk before everyone else for leaving early. It removes the guilt variable that usually kills early-leave intentions.
+Gym on the way home removes the hardest decision. Going home first and trying to leave again for the gym is where routines die. Bag already with you, bus stops at the door, no decision to make.
+Mon/Tue intensity, Wed recovery, Fri close-out creates natural wave structure. Hard start, midweek breath, strong finish. You're not grinding five days of workouts — you're building a rhythm.
+Friday gym protects the weekend. Weekend workouts sound virtuous but compete with too many other priorities. Closing the week with Friday gym means Saturday and Sunday are genuinely free without guilt.
+Friday gym also solves after-work drinks. Built-in reason you can't go. No need to justify the no.
+
+Split: Upper / Lower / Full-Body
+Monday — Upper body. Chest, back, shoulders, arms.
+Tuesday — Lower body. Legs, glutes, core.
+Friday — Full body, or whichever area felt weakest that week.
+This split works for back-to-back Mon/Tue because different muscle groups. Legs get a full week between sessions, which matters most when you go hard. (Workout specifics to be designed separately — this is the scaffolding.)
+
+The Chain: Color-Coded Weeks
+A week gets rated as a whole at the end of Sunday. The colors are about honest self-assessment, not grading.
+🟢 Dark Green — Ideal Week
+
+3 gym sessions (Mon + Tue + Fri, or equivalent days)
+Wednesday yoga + meditation
+Reading most nights
+Sleep broadly on schedule
+
+🟩 Light Green — Strong Week
+
+2 gym sessions + 1 home workout, OR
+3 gym sessions but Wednesday yoga missed
+Reading most nights
+Sleep mostly on track
+
+Light green is a genuinely good week. Not a failure. Most weeks will be here or dark green if the system works.
+🟡 Yellow — Hard Week, Chain Intact
+
+1 gym session (any day) + some movement most days
+Walks, stretching, yoga, bodyweight — anything that breaks sedentary
+Reading and sleep where possible, no pressure
+
+Yellow is the minimum viable week. This is the version you hit during exam weeks, illness recovery, travel, life chaos. Yellow is not failure — yellow is how you survive bad weeks without breaking the chain.
+🔴 Red — Chain Broken
+
+Zero gym sessions AND no meaningful movement all week
+This is the only outcome that breaks the chain
+
+Red is rare and means something real is wrong — illness, genuine crisis, burnout. If two reds happen back-to-back, that's the signal to stop and diagnose, not push harder.
+
+Fallback Scenarios
+Exam Week Hell Mode
+Work runs to 6–7pm, brain fried, no energy.
+
+Don't push through and gym at 8pm. That's how injuries happen and how people start hating the gym.
+Do walk home from work if weather permits (free cardio + decompression).
+Do one gym session on Saturday morning to keep the week non-zero. Short is fine.
+Accept this is a maintenance week, not a progress week. Maintenance is a real training phase.
+
+Target: Yellow week. Chain stays alive.
+Sick or Genuinely Exhausted
+Skip. No guilt, no makeup session, no "I'll do a light one."
+
+Rest is part of training.
+Most two-month ceilings come from pushing through illness and burning out.
+Illness week is the exception where red is acceptable — you didn't break the chain, your body did.
+
+Roberta Wants to Do Something on a Gym Day
+Swap the days. The rule is "3 sessions this week," not "sessions on specific days." Monday can become Wednesday. Wednesday yoga can move to Thursday. The plan is not a cage.
+Bad Weather or Motivation Zero
+Default to the home fallback workout (below). It's not as good as the gym, but it counts. "It counts" is the whole game when the goal is breaking the two-month ceiling. You're not training for the Olympics — you're training to be someone who trains.
+Travel or Weekend Away
+
+Running shoes in the bag. One session outside somewhere.
+Or skip if it's a short trip. Don't try to find a gym in another city — that's friction you'll fail at.
+Short travel = legitimate rest. Long travel = pack shoes.
+
+Work Ran Over, Home by 5:30 Instead of 4
+Still gym if possible — 30 min session is fine. If not, home fallback workout. Don't skip unless actually exhausted.
+Monday Gym Didn't Happen
+Tuesday gym is non-negotiable. No swapping, no "I'll do Wednesday instead." This is the never-miss-twice rule in action.
+Both Mon and Tue Didn't Happen
+Wednesday becomes a gym day. Yoga gets bumped to Thursday or skipped. Chain protection overrides ideal schedule.
+
+The Home Fallback Workout
+20-minute bodyweight circuit you can do anywhere. The point is low friction — a session you can start within 60 seconds of deciding to.
+(Exact structure to be designed, but should involve: squats, push-ups, a hinge movement, a pulling movement if possible, a core element. 3–4 rounds. Done.)
+This exists as a fallback, not a substitute. Using it two weeks in a row means something's wrong with the plan and needs to be looked at.
+
+Meditation Within the Framework
+Primary slot: Wednesday evening, 10 minutes after yoga. Parasympathetic wind-down context, body already relaxed, easiest time to actually do it.
+Secondary slot: Sunday evening, 10 minutes. Helps set up the week mentally.
+Bonus slots if it becomes a thing: 5 min after morning shower, or 5 min post-gym while cooling down.
+Meditation is the lowest-pressure of the three pillars in this framework. If workout + reading are consistent and meditation happens 1–2x/week, that's fine. Don't let meditation perfectionism tank the framework.
+
+Reading Within the Framework
+The slot: 20 minutes in bed before sleep, phone in another room or across the room on airplane mode. Physical book.
+The rule: Phone away by 10:30. The phone-away is the actual habit — the reading follows naturally because there's nothing else to do.
+Book choice matters. Keep it engaging. Fiction, history, biography, whatever pulls you in. Don't grind through a book you hate out of obligation — that's how the habit dies.
+Reading is probably the easiest pillar to sustain because the friction is so low. Defend the slot.
+
+Weekly Review (Sunday, 10 minutes)
+End of Sunday, before the week starts. Non-negotiable, even if brief.
+
+What color was this week? (Dark green / light green / yellow / red)
+What's on the calendar next week that could threaten training days?
+Any swaps or adjustments needed in advance?
+One-sentence note: how am I feeling about the overall direction?
+
+This is where the system stays calibrated instead of drifting.
+
+The Two-Month Ceiling Defense
+Week 8 is the historical failure point. When week 8 approaches:
+
+Expect motivation to drop. This is normal, not a sign the plan failed.
+The chain is what carries you through. Novelty carries weeks 1–6. Identity and chain carry weeks 7 onward.
+If week 8 is a yellow week — good. Yellow at week 8 is exactly how you beat the ceiling.
+The goal isn't to feel motivated at week 8. The goal is to do the minimum viable week at week 8 whether you feel like it or not.
+
+Past week 8, the math changes. Weeks 9–12 are where the identity cements. If you're still showing up at week 12, you're no longer "someone trying to build a habit" — you're "someone who trains." That's the actual win condition.
+
+What's Deliberately NOT In This Framework
+
+No food tracking
+No weight tracking
+No PR tracking
+No mood logging
+No goal setting beyond "keep the chain"
+No notifications or reminders
+
+These can be added later if they earn their place. For now, they're friction.
