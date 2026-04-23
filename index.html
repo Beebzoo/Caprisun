@@ -2145,6 +2145,7 @@
       byCategory: {}, // { [cat]: { seen, correct } }
     },
     quizSeen: {}, // { [questionId]: lastSeenISO }
+    quizPrefs: { mode: 'choice', category: null }, // remembered across sessions
     startDate: '2026-04-27',
   });
 
@@ -4420,6 +4421,72 @@
     return picked;
   }
 
+  function buildChoices(q, all) {
+    const pool = all.filter(o => o.category === q.category && o.id !== q.id);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const distractors = [];
+    const seen = new Set([(q.answer || '').toLowerCase().trim()]);
+    for (const other of pool) {
+      const a = (other.answer || '').trim();
+      const key = a.toLowerCase();
+      if (!seen.has(key)) {
+        distractors.push(a);
+        seen.add(key);
+      }
+      if (distractors.length === 3) break;
+    }
+    const options = [...distractors, q.answer];
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    return options;
+  }
+
+  function normalizeAns(s) {
+    return (s || '')
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/[.,;:!?—\-–()\[\]{}"'`“”‘’]/g, ' ')
+      .replace(/\b(the|a|an)\b/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function acceptableAnswers(correct) {
+    const variants = new Set();
+    const raw = correct || '';
+    variants.add(normalizeAns(raw));
+    const pm = raw.match(/\(([^)]+)\)/);
+    if (pm) variants.add(normalizeAns(pm[1]));
+    variants.add(normalizeAns(raw.replace(/[()]/g, ' ')));
+    // Split "X and Y" as alternates so partial credit is possible
+    const noParens = normalizeAns(raw.replace(/\([^)]*\)/g, ' '));
+    for (const sep of [' and ', ' or ', ' / ']) {
+      if (noParens.includes(sep)) {
+        noParens.split(sep).forEach(part => variants.add(part.trim()));
+      }
+    }
+    return [...variants].filter(v => v && v.length > 0);
+  }
+
+  function isTypedCorrect(userInput, correctAnswer) {
+    const u = normalizeAns(userInput);
+    if (!u || u.length < 2) return false;
+    const variants = acceptableAnswers(correctAnswer);
+    for (const v of variants) {
+      if (v === u) return true;
+      // Accept meaningful substring matches: user-typed is a substring of variant,
+      // and covers at least half the variant (so "aug" doesn't pass for "augustus").
+      if (v.includes(u) && u.length >= 4 && u.length >= v.length * 0.5) return true;
+      if (u.includes(v) && v.length >= 4) return true;
+    }
+    return false;
+  }
+
   function renderPlayTile() {
     const sub = document.getElementById('play-sub');
     if (!sub) return;
@@ -4462,28 +4529,40 @@
       });
   }
 
+  const QUIZ_MODES = [
+    { key: 'choice', label: 'Multiple choice', sub: 'Four options' },
+    { key: 'typed',  label: 'Type answer',    sub: 'Free text' },
+    { key: 'flash',  label: 'Flash card',     sub: 'Self-rate' },
+  ];
+
   function renderQuizHubBody() {
     const body = document.getElementById('quiz-hub-body');
     if (!body) return;
     const counts = categoryCounts();
     const total = quizQuestions.length;
     const s = state.quizStats || {};
+    const prefs = state.quizPrefs || { mode: 'choice', category: null };
     const rate = s.questionsSeen > 0 ? Math.round((s.questionsCorrect / s.questionsSeen) * 100) : null;
 
-    let selected = null; // null = all
+    let selectedCat = prefs.category || null;
+    let selectedMode = prefs.mode || 'choice';
 
-    const renderChips = () => {
-      return `
-        <button class="cat-chip ${selected === null ? 'on' : ''}" data-cat="">
-          All<span class="ccount">${total} questions</span>
+    const renderCats = () => `
+      <button class="cat-chip ${selectedCat === null ? 'on' : ''}" data-cat="">
+        All<span class="ccount">${total} questions</span>
+      </button>
+      ${QUIZ_CATEGORIES.map(c => `
+        <button class="cat-chip ${selectedCat === c.key ? 'on' : ''}" data-cat="${c.key}">
+          ${c.label}<span class="ccount">${counts[c.key]} questions</span>
         </button>
-        ${QUIZ_CATEGORIES.map(c => `
-          <button class="cat-chip ${selected === c.key ? 'on' : ''}" data-cat="${c.key}">
-            ${c.label}<span class="ccount">${counts[c.key]} questions</span>
-          </button>
-        `).join('')}
-      `;
-    };
+      `).join('')}
+    `;
+
+    const renderModes = () => QUIZ_MODES.map(m => `
+      <button class="cat-chip ${selectedMode === m.key ? 'on' : ''}" data-mode="${m.key}">
+        ${m.label}<span class="ccount">${m.sub}</span>
+      </button>
+    `).join('');
 
     body.innerHTML = `
       <div class="summary-grid" style="margin-bottom:18px">
@@ -4501,8 +4580,11 @@
         </div>
       </div>
 
-      <p class="sheet-section-label">Category</p>
-      <div class="cat-grid" id="cat-grid">${renderChips()}</div>
+      <p class="sheet-section-label">Mode</p>
+      <div class="cat-grid" id="mode-grid">${renderModes()}</div>
+
+      <p class="sheet-section-label" style="margin-top:18px">Category</p>
+      <div class="cat-grid" id="cat-grid">${renderCats()}</div>
 
       <div class="sheet-actions" style="margin-top:18px">
         <button class="btn btn-ghost" id="cancel">Close</button>
@@ -4510,30 +4592,60 @@
       </div>
     `;
 
-    const grid = body.querySelector('#cat-grid');
-    grid.addEventListener('click', (e) => {
+    const catGrid = body.querySelector('#cat-grid');
+    catGrid.addEventListener('click', (e) => {
       const chip = e.target.closest('.cat-chip');
       if (!chip) return;
-      const cat = chip.dataset.cat || null;
-      selected = cat;
-      grid.innerHTML = renderChips();
+      selectedCat = chip.dataset.cat || null;
+      catGrid.innerHTML = renderCats();
+    });
+    const modeGrid = body.querySelector('#mode-grid');
+    modeGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      selectedMode = chip.dataset.mode;
+      modeGrid.innerHTML = renderModes();
     });
 
     body.querySelector('#cancel').addEventListener('click', closeSheet);
     body.querySelector('#start').addEventListener('click', () => {
-      const batch = pickBatch(quizQuestions, selected);
-      if (batch.length === 0) {
-        alert('No questions available for that selection.');
-        return;
-      }
-      startQuiz(batch, selected);
+      const batch = pickBatch(quizQuestions, selectedCat);
+      if (batch.length === 0) { alert('No questions available for that selection.'); return; }
+      state.quizPrefs = { mode: selectedMode, category: selectedCat };
+      save();
+      startQuiz(batch, selectedCat, selectedMode);
     });
   }
 
-  function startQuiz(batch, categoryKey) {
+  function startQuiz(batch, categoryKey, mode) {
     let index = 0;
     let revealed = false;
-    const results = []; // { question, userCorrect }
+    let currentChoices = null; // cached options for choice mode
+    let chosenOption = null;   // for choice mode after reveal
+    let typedValue = '';       // for typed mode across renders
+    let typedMatched = null;   // null = not submitted; true/false after submit
+    const results = [];
+
+    const markSeen = (q) => {
+      if (!state.quizSeen) state.quizSeen = {};
+      state.quizSeen[q.id] = new Date().toISOString();
+    };
+
+    const advance = () => {
+      index++;
+      revealed = false;
+      currentChoices = null;
+      chosenOption = null;
+      typedValue = '';
+      typedMatched = null;
+      if (index >= batch.length) finishQuiz(results, categoryKey, mode);
+      else render();
+    };
+
+    const commitResult = (q, correct) => {
+      results.push({ question: q, correct });
+      markSeen(q);
+    };
 
     const render = () => {
       const q = batch[index];
@@ -4543,6 +4655,74 @@
       }).join('');
       const catLabel = (QUIZ_CATEGORIES.find(c => c.key === q.category) || {}).label || q.category;
 
+      let interaction = '';
+      if (mode === 'choice') {
+        if (!currentChoices) currentChoices = buildChoices(q, quizQuestions);
+        const opts = currentChoices.map(opt => {
+          let cls = 'quiz-option';
+          if (revealed) {
+            if (opt === q.answer) cls += ' correct';
+            else if (opt === chosenOption) cls += ' wrong';
+            else cls += ' muted';
+          }
+          return `<button class="${cls}" data-opt="${opt.replace(/"/g, '&quot;')}"${revealed ? ' disabled' : ''}>${opt.replace(/</g, '&lt;')}</button>`;
+        }).join('');
+        interaction = `
+          <div class="quiz-options">${opts}</div>
+          ${revealed ? `
+            <div class="quiz-a-reveal" style="margin-top:16px">
+              <p class="alabel">Answer</p>
+              <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
+              ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+            </div>
+            <div class="sheet-actions"><button class="btn btn-primary" id="next">Next</button></div>
+          ` : ''}
+        `;
+      } else if (mode === 'typed') {
+        if (typedMatched === null) {
+          interaction = `
+            <input class="practice-input" id="typed-input" placeholder="Type your answer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="${typedValue.replace(/"/g, '&quot;')}">
+            <p class="practice-hint">Close is usually enough. Capitalisation doesn't matter.</p>
+            <div class="sheet-actions" style="margin-top:10px">
+              <button class="btn btn-ghost" id="giveup">Give up</button>
+              <button class="btn btn-primary" id="submit">Submit</button>
+            </div>
+          `;
+        } else {
+          interaction = `
+            <div class="quiz-a-reveal">
+              <p class="alabel">${typedMatched ? 'Your answer · correct' : 'You typed'}</p>
+              <p class="aans" style="color:${typedMatched ? 'var(--green-deep)' : 'var(--terracotta)'}">${typedValue.replace(/</g, '&lt;') || '—'}</p>
+              <p class="alabel" style="margin-top:12px">Correct answer</p>
+              <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
+              ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+            </div>
+            ${!typedMatched ? `
+              <div class="rating-row" style="grid-template-columns: 1fr 1fr; margin-bottom:10px">
+                <button class="rating-btn forgot" id="move-on">Move on</button>
+                <button class="rating-btn good" id="mark-right">Actually right</button>
+              </div>
+            ` : ''}
+            <div class="sheet-actions"><button class="btn btn-primary" id="next">Next</button></div>
+          `;
+        }
+      } else {
+        // flash
+        interaction = revealed ? `
+          <div class="quiz-a-reveal">
+            <p class="alabel">Answer</p>
+            <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
+            ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+          </div>
+          <div class="rating-row" style="grid-template-columns: 1fr 1fr">
+            <button class="rating-btn forgot" data-got="no">Didn't know</button>
+            <button class="rating-btn good" data-got="yes">Got it</button>
+          </div>
+        ` : `
+          <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show answer</button></div>
+        `;
+      }
+
       openSheet(`
         <h2>Trivia</h2>
         <p class="review-progress"><span>Round of ${batch.length}</span><span>${index + 1} of ${batch.length}</span></p>
@@ -4551,19 +4731,7 @@
         <span class="quiz-cat-tag">${catLabel}</span>
         <p class="quiz-q">${q.question.replace(/</g, '&lt;')}</p>
 
-        ${revealed ? `
-          <div class="quiz-a-reveal">
-            <p class="alabel">Answer</p>
-            <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-            ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
-          </div>
-          <div class="rating-row" style="grid-template-columns: 1fr 1fr">
-            <button class="rating-btn forgot" data-got="no">Didn't know</button>
-            <button class="rating-btn good"   data-got="yes">Got it</button>
-          </div>
-        ` : `
-          <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show answer</button></div>
-        `}
+        ${interaction}
 
         <div class="sheet-actions" style="margin-top:18px">
           <button class="btn btn-ghost" id="quit">Quit</button>
@@ -4574,34 +4742,74 @@
         if (!confirm('Quit the round? Your progress will be lost.')) return;
         closeSheet();
       });
-      const revealBtn = sheet.querySelector('#reveal');
-      if (revealBtn) revealBtn.addEventListener('click', () => { revealed = true; render(); });
-      sheet.querySelectorAll('[data-got]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const gotIt = btn.dataset.got === 'yes';
-          results.push({ question: q, correct: gotIt });
-          // Mark seen
-          if (!state.quizSeen) state.quizSeen = {};
-          state.quizSeen[q.id] = new Date().toISOString();
-          advance();
-        });
-      });
-    };
 
-    const advance = () => {
-      index++;
-      revealed = false;
-      if (index >= batch.length) {
-        finishQuiz(results, categoryKey);
+      if (mode === 'choice') {
+        sheet.querySelectorAll('.quiz-option[data-opt]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (revealed) return;
+            chosenOption = btn.dataset.opt;
+            const correct = chosenOption === q.answer;
+            commitResult(q, correct);
+            revealed = true;
+            render();
+          });
+        });
+        const next = sheet.querySelector('#next');
+        if (next) next.addEventListener('click', advance);
+      } else if (mode === 'typed') {
+        const input = sheet.querySelector('#typed-input');
+        if (input) {
+          setTimeout(() => input.focus(), 60);
+          input.addEventListener('input', (e) => { typedValue = e.target.value; });
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); sheet.querySelector('#submit')?.click(); }
+          });
+        }
+        const submitBtn = sheet.querySelector('#submit');
+        if (submitBtn) submitBtn.addEventListener('click', () => {
+          if (!typedValue.trim()) return;
+          const ok = isTypedCorrect(typedValue, q.answer);
+          typedMatched = ok;
+          if (ok) commitResult(q, true);
+          render();
+        });
+        const giveUp = sheet.querySelector('#giveup');
+        if (giveUp) giveUp.addEventListener('click', () => {
+          typedMatched = false;
+          commitResult(q, false);
+          render();
+        });
+        const markRight = sheet.querySelector('#mark-right');
+        if (markRight) markRight.addEventListener('click', () => {
+          // Override: user insists they were right
+          const idx = results.findIndex(r => r.question.id === q.id);
+          if (idx >= 0) results[idx].correct = true;
+          else commitResult(q, true);
+          typedMatched = true;
+          render();
+        });
+        const moveOn = sheet.querySelector('#move-on');
+        if (moveOn) moveOn.addEventListener('click', advance);
+        const next = sheet.querySelector('#next');
+        if (next) next.addEventListener('click', advance);
       } else {
-        render();
+        // flash
+        const revealBtn = sheet.querySelector('#reveal');
+        if (revealBtn) revealBtn.addEventListener('click', () => { revealed = true; render(); });
+        sheet.querySelectorAll('[data-got]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const gotIt = btn.dataset.got === 'yes';
+            commitResult(q, gotIt);
+            advance();
+          });
+        });
       }
     };
 
     render();
   }
 
-  function finishQuiz(results, categoryKey) {
+  function finishQuiz(results, categoryKey, mode) {
     const correct = results.filter(r => r.correct).length;
     const total = results.length;
 
@@ -4663,7 +4871,7 @@
     sheet.querySelector('#again').addEventListener('click', () => {
       const batch = pickBatch(quizQuestions, categoryKey);
       if (batch.length === 0) { closeSheet(); return; }
-      startQuiz(batch, categoryKey);
+      startQuiz(batch, categoryKey, mode || (state.quizPrefs && state.quizPrefs.mode) || 'choice');
     });
   }
 
