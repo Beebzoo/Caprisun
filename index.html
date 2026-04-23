@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Caprisun</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,7 +11,9 @@
   :root {
     --bg: #F5F1E8;
     --surface: #FBF8F0;
+    --surface-2: #EFE9DB;
     --border: #E2DBC9;
+    --border-strong: #CFC5AC;
     --ink: #2B2B2B;
     --ink-soft: #6B6358;
     --ink-faint: #A69E90;
@@ -22,6 +24,9 @@
     --terracotta: #B86C5A;
 
     --radius: 10px;
+    --radius-lg: 14px;
+
+    --shadow-sheet: 0 -8px 40px rgba(43, 43, 43, 0.08);
   }
 
   * { box-sizing: border-box; }
@@ -35,12 +40,22 @@
     font-size: 16px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
   }
 
   .app {
-    max-width: 420px;
+    max-width: 440px;
     margin: 0 auto;
-    padding: 40px 24px 64px;
+    padding: 44px 24px 80px;
   }
 
   .serif {
@@ -49,13 +64,12 @@
     letter-spacing: -0.01em;
   }
 
-  header {
-    margin-bottom: 40px;
-  }
+  /* Header */
+  header { margin-bottom: 40px; }
 
   .greeting {
-    font-size: 28px;
-    line-height: 1.15;
+    font-size: 30px;
+    line-height: 1.1;
     margin: 0 0 6px;
   }
 
@@ -65,18 +79,29 @@
     letter-spacing: 0.02em;
   }
 
-  section {
-    margin-bottom: 44px;
-  }
+  section { margin-bottom: 40px; }
 
   .section-label {
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     color: var(--ink-faint);
     margin: 0 0 14px;
     font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
   }
+
+  .section-label button {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .section-label button:hover { color: var(--ink); }
 
   /* The chain */
   .chain {
@@ -90,16 +115,28 @@
     border-radius: 6px;
     background: var(--border);
     position: relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
+
+  .week:hover { transform: translateY(-1px); }
 
   .week.deep   { background: var(--green-deep); }
   .week.soft   { background: var(--green-soft); }
   .week.ochre  { background: var(--ochre); }
   .week.terra  { background: var(--terracotta); }
+  .week.blank  { background: var(--surface-2); }
 
   .week.current {
     background: transparent;
     border: 1px dashed var(--green-deep);
+  }
+
+  .week.current.ready {
+    background: repeating-linear-gradient(
+      45deg,
+      transparent 0 6px,
+      rgba(45, 74, 62, 0.08) 6px 12px
+    );
   }
 
   .chain-legend {
@@ -111,7 +148,35 @@
     letter-spacing: 0.02em;
   }
 
-  /* Today — log tiles */
+  .seal-banner {
+    margin-top: 14px;
+    background: var(--green-deep);
+    color: var(--bg);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .seal-banner p {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+
+  .seal-banner button {
+    background: rgba(245, 241, 232, 0.14);
+    color: var(--bg);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Today tiles */
   .tiles {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -122,28 +187,40 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px 14px;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    padding: 16px 14px 14px;
     text-align: left;
-    font: inherit;
-    color: inherit;
+    position: relative;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
-  .tile:hover {
-    border-color: var(--ink-faint);
-  }
+  .tile:hover { border-color: var(--border-strong); }
+  .tile:active { transform: scale(0.98); }
 
   .tile .name {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 18px;
     font-weight: 500;
-    margin: 0 0 4px;
+    margin: 0;
   }
 
   .tile .avg {
     font-size: 12px;
     color: var(--ink-soft);
+    margin: 2px 0 0;
+  }
+
+  .tile .plan-dot {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-soft);
   }
 
   .tile.logged {
@@ -152,92 +229,817 @@
     color: var(--bg);
   }
 
-  .tile.logged .avg { color: rgba(245, 241, 232, 0.75); }
+  .tile.logged .avg { color: rgba(245, 241, 232, 0.7); }
+  .tile.logged .plan-dot { background: rgba(245, 241, 232, 0.5); }
 
-  .tile .check {
+  .tile .logged-row {
     display: none;
-    margin-top: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    gap: 8px;
+  }
+
+  .tile.logged .logged-row { display: flex; }
+
+  .tile .duration-pill {
     font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(245, 241, 232, 0.14);
+    letter-spacing: 0.02em;
+  }
+
+  .tile .edit-link {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.7;
+  }
+
+  .tile .edit-link:hover { opacity: 1; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 56px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .footer-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    font-style: normal;
+  }
+
+  .footer-actions button {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+  }
+
+  .footer-actions button:hover { color: var(--ink-soft); }
+
+  /* Overlay + sheet */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 43, 43, 0.28);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .overlay.open { display: flex; }
+
+  .sheet {
+    background: var(--bg);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 18px 18px 0 0;
+    padding: 24px 24px 32px;
+    box-shadow: var(--shadow-sheet);
+    animation: slideUp 0.22s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0.6; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 999px;
+    margin: 0 auto 18px;
+  }
+
+  .sheet h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 4px;
+  }
+
+  .sheet .subtle {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+  }
+
+  .sheet-section {
+    margin-bottom: 22px;
+  }
+
+  .sheet-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: 0 0 10px;
+  }
+
+  /* Duration stepper */
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px;
+  }
+
+  .stepper button {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 20px;
+    color: var(--ink-soft);
+  }
+
+  .stepper button:hover { background: var(--surface-2); }
+
+  .stepper .value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+  }
+
+  .stepper .value small {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-left: 4px;
+    font-weight: 400;
     letter-spacing: 0.04em;
   }
 
-  .tile.logged .check { display: block; }
+  /* Color picker for week review */
+  .color-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
 
-  /* Footer note — intentional minimalism reminder, delete later */
-  .footnote {
-    font-size: 12px;
-    color: var(--ink-faint);
-    margin-top: 56px;
-    text-align: center;
-    font-style: italic;
+  .color-option {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    transition: border-color 0.15s ease;
+  }
+
+  .color-option:hover { border-color: var(--border-strong); }
+
+  .color-option.selected {
+    border-color: var(--ink);
+    background: var(--surface-2);
+  }
+
+  .color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .color-swatch.deep  { background: var(--green-deep); }
+  .color-swatch.soft  { background: var(--green-soft); }
+  .color-swatch.ochre { background: var(--ochre); }
+  .color-swatch.terra { background: var(--terracotta); }
+
+  .color-label {
     font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .color-desc {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  /* Action row */
+  .sheet-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    background: var(--green-deep);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover { background: #1F362D; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { border-color: var(--border-strong); color: var(--ink); }
+
+  .btn-danger-ghost {
+    background: transparent;
+    color: var(--terracotta);
+    flex: 0;
+    padding: 14px 0;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Session list in week review */
+  .session-list {
+    display: grid;
+    gap: 6px;
+  }
+
+  .session-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+  }
+
+  .session-row .day { color: var(--ink-soft); }
+
+  .session-row .summary {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+  }
+
+  .session-empty {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 10px 2px;
+  }
+
+  /* Year view */
+  .year-grid {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .year-grid .week {
+    aspect-ratio: 1;
+    border-radius: 3px;
+  }
+
+  .year-labels {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 9px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Desktop polish — slightly roomier */
+  @media (min-width: 720px) {
+    .app { padding-top: 64px; }
   }
 </style>
 </head>
 <body>
   <main class="app">
     <header>
-      <h1 class="greeting serif">Good morning.</h1>
+      <h1 class="greeting serif" id="greeting">Good morning.</h1>
       <div class="date" id="date"></div>
     </header>
 
-    <section>
-      <p class="section-label">The chain</p>
-      <div class="chain" id="chain">
-        <div class="week deep"></div>
-        <div class="week soft"></div>
-        <div class="week deep"></div>
-        <div class="week ochre"></div>
-        <div class="week soft"></div>
-        <div class="week deep"></div>
-        <div class="week soft"></div>
-        <div class="week current"></div>
-      </div>
+    <section id="chain-section">
+      <p class="section-label">
+        <span>The chain</span>
+        <button id="open-year">View year</button>
+      </p>
+      <div class="chain" id="chain"></div>
       <div class="chain-legend">
-        <span>8 weeks ago</span>
+        <span id="chain-start-label">8 weeks ago</span>
         <span>this week</span>
       </div>
+      <div id="seal-slot"></div>
     </section>
 
     <section>
-      <p class="section-label">Today</p>
-      <div class="tiles">
-        <button class="tile" data-name="Gym">
-          <p class="name">Gym</p>
-          <p class="avg">Avg 45 min</p>
-          <p class="check">Logged</p>
-        </button>
-        <button class="tile" data-name="Yoga">
-          <p class="name">Yoga</p>
-          <p class="avg">Avg 30 min</p>
-          <p class="check">Logged</p>
-        </button>
-        <button class="tile" data-name="Meditation">
-          <p class="name">Meditation</p>
-          <p class="avg">Avg 10 min</p>
-          <p class="check">Logged</p>
-        </button>
-        <button class="tile" data-name="Reading">
-          <p class="name">Reading</p>
-          <p class="avg">Avg 22 min</p>
-          <p class="check">Logged</p>
-        </button>
-      </div>
+      <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
+      <div class="tiles" id="tiles"></div>
     </section>
 
-    <p class="footnote">Keep the chain.</p>
+    <p class="footer serif">Keep the chain.</p>
+    <div class="footer-actions">
+      <button id="open-settings">Settings</button>
+      <button id="open-year-2">History</button>
+    </div>
   </main>
 
-  <script>
-    const today = new Date();
-    const fmt = new Intl.DateTimeFormat('en-GB', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    });
-    document.getElementById('date').textContent = fmt.format(today);
+  <!-- Overlay / sheet — reused for log, week review, year view, settings -->
+  <div class="overlay" id="overlay">
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+  </div>
 
-    document.querySelectorAll('.tile').forEach((tile) => {
-      tile.addEventListener('click', () => tile.classList.toggle('logged'));
+<script>
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'caprisun.v0';
+
+  const ACTIVITIES = [
+    { key: 'gym',        name: 'Gym',        defaultAvg: 45 },
+    { key: 'yoga',       name: 'Yoga',       defaultAvg: 30 },
+    { key: 'meditation', name: 'Meditation', defaultAvg: 10 },
+    { key: 'reading',    name: 'Reading',    defaultAvg: 22 },
+  ];
+
+  // Mon=1 ... Sun=0 (JS). Plan: Mon gym, Tue gym, Wed yoga+meditation, Fri gym, reading daily.
+  const PLAN_BY_DAY = {
+    1: ['gym', 'reading'],
+    2: ['gym', 'reading'],
+    3: ['yoga', 'meditation', 'reading'],
+    4: ['reading'],
+    5: ['gym', 'reading'],
+    6: ['reading'],
+    0: ['reading'],
+  };
+
+  const COLOR_META = {
+    deep:  { label: 'Dark green',  desc: 'Ideal week'       },
+    soft:  { label: 'Light green', desc: 'Strong week'      },
+    ochre: { label: 'Yellow',      desc: 'Hard, chain intact' },
+    terra: { label: 'Red',         desc: 'Chain broken'     },
+  };
+
+  // --- State ---------------------------------------------------------------
+
+  const defaultState = () => ({
+    sessions: {},   // key: YYYY-MM-DD, value: { gym: minutes, yoga: ... }
+    weekColors: {}, // key: YYYY-MM-DD (Monday of the ISO week), value: color key
+  });
+
+  let state = load();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultState();
+      return { ...defaultState(), ...JSON.parse(raw) };
+    } catch { return defaultState(); }
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+
+  // --- Date helpers --------------------------------------------------------
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const toISODate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  function startOfWeek(d) {
+    const out = new Date(d);
+    out.setHours(0, 0, 0, 0);
+    const day = out.getDay(); // 0 = Sun
+    const diff = (day + 6) % 7; // Monday-start
+    out.setDate(out.getDate() - diff);
+    return out;
+  }
+
+  function addDays(d, n) {
+    const out = new Date(d);
+    out.setDate(out.getDate() + n);
+    return out;
+  }
+
+  function monthShort(d) {
+    return d.toLocaleString('en-GB', { month: 'short' });
+  }
+
+  // --- Computed ------------------------------------------------------------
+
+  function avgFor(activity) {
+    const mins = [];
+    for (const day of Object.values(state.sessions)) {
+      const v = day?.[activity.key];
+      if (typeof v === 'number' && v > 0) mins.push(v);
+    }
+    if (mins.length === 0) return activity.defaultAvg;
+    return Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
+  }
+
+  function sessionsForDate(dateISO) {
+    return state.sessions[dateISO] || {};
+  }
+
+  function sessionsForWeek(monday) {
+    const out = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(monday, i);
+      const iso = toISODate(d);
+      out.push({ date: d, iso, sessions: sessionsForDate(iso) });
+    }
+    return out;
+  }
+
+  function weekSummary(weekDays) {
+    let gymCount = 0, yogaCount = 0, medCount = 0, readCount = 0, anyMovement = 0;
+    for (const { sessions } of weekDays) {
+      if (sessions.gym > 0) { gymCount++; anyMovement++; }
+      if (sessions.yoga > 0) { yogaCount++; anyMovement++; }
+      if (sessions.meditation > 0) medCount++;
+      if (sessions.reading > 0) readCount++;
+    }
+    return { gymCount, yogaCount, medCount, readCount, anyMovement };
+  }
+
+  function suggestColor(weekDays) {
+    const s = weekSummary(weekDays);
+    if (s.gymCount >= 3 && s.yogaCount >= 1) return 'deep';
+    if (s.gymCount >= 2) return 'soft';
+    if (s.anyMovement >= 1) return 'ochre';
+    return 'terra';
+  }
+
+  // --- Rendering: header ---------------------------------------------------
+
+  function hourOfDay() { return new Date().getHours(); }
+
+  function renderHeader() {
+    const h = hourOfDay();
+    const greet =
+      h < 5 ? 'Still up.' :
+      h < 12 ? 'Good morning.' :
+      h < 17 ? 'Good afternoon.' :
+      h < 21 ? 'Good evening.' : 'Good night.';
+    document.getElementById('greeting').textContent = greet;
+    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('date').textContent = fmt.format(new Date());
+  }
+
+  // --- Rendering: chain ----------------------------------------------------
+
+  const WEEKS_SHOWN = 8;
+
+  function renderChain() {
+    const chain = document.getElementById('chain');
+    chain.innerHTML = '';
+    const thisMonday = startOfWeek(new Date());
+
+    for (let i = WEEKS_SHOWN - 1; i >= 0; i--) {
+      const monday = addDays(thisMonday, -i * 7);
+      const iso = toISODate(monday);
+      const color = state.weekColors[iso];
+      const isCurrent = i === 0;
+      const btn = document.createElement('button');
+      btn.className = 'week';
+      if (isCurrent) {
+        btn.classList.add('current');
+        if (new Date().getDay() === 0) btn.classList.add('ready'); // Sunday: ready to seal
+      } else if (color) {
+        btn.classList.add(color);
+      } else {
+        btn.classList.add('blank');
+      }
+      btn.setAttribute('aria-label', `Week of ${monthShort(monday)} ${monday.getDate()}`);
+      btn.addEventListener('click', () => openWeekReview(monday));
+      chain.appendChild(btn);
+    }
+
+    // Update "8 weeks ago" label to the actual month
+    const oldestMonday = addDays(thisMonday, -(WEEKS_SHOWN - 1) * 7);
+    document.getElementById('chain-start-label').textContent = `${monthShort(oldestMonday)} ${oldestMonday.getDate()}`;
+
+    // Sunday seal banner
+    const slot = document.getElementById('seal-slot');
+    slot.innerHTML = '';
+    if (new Date().getDay() === 0 && !state.weekColors[toISODate(thisMonday)]) {
+      const banner = document.createElement('div');
+      banner.className = 'seal-banner';
+      banner.innerHTML = `
+        <p>Sunday. Time to seal the week.</p>
+        <button>Review</button>
+      `;
+      banner.querySelector('button').addEventListener('click', () => openWeekReview(thisMonday));
+      slot.appendChild(banner);
+    }
+  }
+
+  // --- Rendering: today tiles ----------------------------------------------
+
+  function renderTiles() {
+    const today = new Date();
+    const todayISO = toISODate(today);
+    const plan = PLAN_BY_DAY[today.getDay()] || [];
+    const plannedNames = plan.map(k => ACTIVITIES.find(a => a.key === k)?.name).filter(Boolean);
+    document.getElementById('plan-label').textContent = plannedNames.length ? `Plan: ${plannedNames.join(' · ')}` : '';
+
+    const container = document.getElementById('tiles');
+    container.innerHTML = '';
+
+    for (const act of ACTIVITIES) {
+      const mins = state.sessions[todayISO]?.[act.key] || 0;
+      const logged = mins > 0;
+      const planned = plan.includes(act.key);
+
+      const tile = document.createElement('button');
+      tile.className = 'tile' + (logged ? ' logged' : '');
+      tile.innerHTML = `
+        ${planned ? '<span class="plan-dot" aria-label="planned for today"></span>' : ''}
+        <div>
+          <p class="name">${act.name}</p>
+          <p class="avg">Avg ${avgFor(act)} min</p>
+        </div>
+        <div class="logged-row">
+          <span class="duration-pill">${mins} min</span>
+          <span class="edit-link">Edit</span>
+        </div>
+      `;
+      tile.addEventListener('click', () => openLog(act, todayISO));
+      container.appendChild(tile);
+    }
+  }
+
+  // --- Overlay/sheet -------------------------------------------------------
+
+  const overlay = document.getElementById('overlay');
+  const sheet = document.getElementById('sheet');
+
+  function closeSheet() {
+    overlay.classList.remove('open');
+    sheet.innerHTML = '';
+  }
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeSheet();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSheet();
+  });
+
+  function openSheet(html) {
+    sheet.innerHTML = `<div class="sheet-handle"></div>` + html;
+    overlay.classList.add('open');
+  }
+
+  // --- Log sheet -----------------------------------------------------------
+
+  function openLog(activity, dateISO) {
+    const current = state.sessions[dateISO]?.[activity.key] || 0;
+    const avg = avgFor(activity);
+    let value = current > 0 ? current : avg;
+
+    openSheet(`
+      <h2>${activity.name}</h2>
+      <p class="subtle">${current > 0 ? `Logged ${current} min today. Adjust or remove.` : `Tap save to log your usual ${avg} min — or adjust first.`}</p>
+      <div class="sheet-section">
+        <p class="sheet-section-label">Duration</p>
+        <div class="stepper">
+          <button id="dec" aria-label="Decrease">−</button>
+          <span class="value"><span id="val">${value}</span><small>min</small></span>
+          <button id="inc" aria-label="Increase">+</button>
+        </div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Cancel</button>
+        <button class="btn btn-primary" id="save">${current > 0 ? 'Update' : 'Log it'}</button>
+      </div>
+      ${current > 0 ? `<div class="sheet-actions"><button class="btn btn-danger-ghost" id="remove">Remove</button></div>` : ''}
+    `);
+
+    const valEl = sheet.querySelector('#val');
+    const step = (delta) => { value = Math.max(0, value + delta); valEl.textContent = value; };
+    sheet.querySelector('#dec').addEventListener('click', () => step(-5));
+    sheet.querySelector('#inc').addEventListener('click', () => step(5));
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelector('#save').addEventListener('click', () => {
+      if (!state.sessions[dateISO]) state.sessions[dateISO] = {};
+      if (value <= 0) delete state.sessions[dateISO][activity.key];
+      else state.sessions[dateISO][activity.key] = value;
+      save();
+      renderTiles();
+      closeSheet();
     });
-  </script>
+    const remove = sheet.querySelector('#remove');
+    if (remove) remove.addEventListener('click', () => {
+      if (state.sessions[dateISO]) {
+        delete state.sessions[dateISO][activity.key];
+        save();
+      }
+      renderTiles();
+      closeSheet();
+    });
+  }
+
+  // --- Week review sheet ---------------------------------------------------
+
+  function openWeekReview(monday) {
+    const iso = toISODate(monday);
+    const weekDays = sessionsForWeek(monday);
+    const isCurrent = iso === toISODate(startOfWeek(new Date()));
+    const existing = state.weekColors[iso];
+    const suggested = suggestColor(weekDays);
+    const endOfRange = addDays(monday, 6);
+    const rangeLabel = `${monthShort(monday)} ${monday.getDate()} – ${monthShort(endOfRange)} ${endOfRange.getDate()}`;
+
+    const summary = weekSummary(weekDays);
+    const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+    const rows = weekDays.map(({ date, sessions }, i) => {
+      const parts = [];
+      if (sessions.gym) parts.push(`Gym ${sessions.gym}m`);
+      if (sessions.yoga) parts.push(`Yoga ${sessions.yoga}m`);
+      if (sessions.meditation) parts.push(`Meditation ${sessions.meditation}m`);
+      if (sessions.reading) parts.push(`Reading ${sessions.reading}m`);
+      return `
+        <div class="session-row">
+          <span class="day">${dayNames[i]} · ${date.getDate()} ${monthShort(date)}</span>
+          <span class="summary">${parts.length ? parts.join(' · ') : '—'}</span>
+        </div>
+      `;
+    }).join('');
+
+    const colorOptions = Object.entries(COLOR_META).map(([key, meta]) => {
+      const selected = (existing || suggested) === key ? 'selected' : '';
+      return `
+        <button class="color-option ${selected}" data-color="${key}">
+          <span class="color-swatch ${key}"></span>
+          <span>
+            <p class="color-label">${meta.label}</p>
+            <p class="color-desc">${meta.desc}</p>
+          </span>
+        </button>
+      `;
+    }).join('');
+
+    const title = isCurrent ? 'This week' : 'Week review';
+    const subtitleExtra = isCurrent && new Date().getDay() !== 0
+      ? ' · You can seal this on Sunday.'
+      : '';
+
+    openSheet(`
+      <h2>${title}</h2>
+      <p class="subtle">${rangeLabel}${subtitleExtra}</p>
+
+      <div class="sheet-section">
+        <p class="sheet-section-label">Sessions</p>
+        <div class="session-list">
+          ${rows || '<p class="session-empty">No sessions logged this week.</p>'}
+        </div>
+      </div>
+
+      <div class="sheet-section">
+        <p class="sheet-section-label">Color this week</p>
+        <div class="color-grid">${colorOptions}</div>
+        ${!existing ? `<p class="subtle" style="margin-top:10px">Suggested: <strong>${COLOR_META[suggested].label}</strong> based on ${summary.gymCount} gym · ${summary.yogaCount} yoga · ${summary.medCount} meditation · ${summary.readCount} reading.</p>` : ''}
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+        <button class="btn btn-primary" id="save">${existing ? 'Update' : 'Seal week'}</button>
+      </div>
+      ${existing ? `<div class="sheet-actions"><button class="btn btn-danger-ghost" id="clear">Clear color</button></div>` : ''}
+    `);
+
+    let chosen = existing || suggested;
+    sheet.querySelectorAll('.color-option').forEach(el => {
+      el.addEventListener('click', () => {
+        sheet.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        chosen = el.dataset.color;
+      });
+    });
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelector('#save').addEventListener('click', () => {
+      state.weekColors[iso] = chosen;
+      save();
+      renderChain();
+      closeSheet();
+    });
+    const clear = sheet.querySelector('#clear');
+    if (clear) clear.addEventListener('click', () => {
+      delete state.weekColors[iso];
+      save();
+      renderChain();
+      closeSheet();
+    });
+  }
+
+  // --- Year view sheet -----------------------------------------------------
+
+  function openYearView() {
+    const today = new Date();
+    const thisMonday = startOfWeek(today);
+    const weeks = 52;
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+
+    const tiles = [];
+    const monthMarkers = new Array(13).fill('');
+    for (let i = 0; i < weeks; i++) {
+      const m = addDays(firstMonday, i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      const isCurrent = i === weeks - 1;
+      let cls = 'week blank';
+      if (isCurrent) cls = 'week current';
+      else if (color) cls = `week ${color}`;
+      tiles.push(`<button class="${cls}" data-iso="${iso}" aria-label="Week of ${monthShort(m)} ${m.getDate()}"></button>`);
+      const col = i % 13;
+      if (!monthMarkers[col]) monthMarkers[col] = monthShort(m);
+    }
+
+    openSheet(`
+      <h2>The year</h2>
+      <p class="subtle">Every week, colored the way you saw it.</p>
+      <div class="year-grid">${tiles.join('')}</div>
+      <div class="year-labels">${monthMarkers.map(m => `<span>${m}</span>`).join('')}</div>
+      <div class="sheet-actions" style="margin-top:22px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelectorAll('.year-grid .week').forEach(el => {
+      el.addEventListener('click', () => {
+        const iso = el.dataset.iso;
+        const [y, mo, d] = iso.split('-').map(Number);
+        closeSheet();
+        setTimeout(() => openWeekReview(new Date(y, mo - 1, d)), 200);
+      });
+    });
+  }
+
+  // --- Settings sheet ------------------------------------------------------
+
+  function openSettings() {
+    openSheet(`
+      <h2>Settings</h2>
+      <p class="subtle">Small for now. More later, only if they earn their place.</p>
+      <div class="sheet-section">
+        <p class="sheet-section-label">Data</p>
+        <p class="subtle">Everything lives in your browser. No account, no server.</p>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+        <button class="btn btn-danger-ghost" id="reset">Reset everything</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelector('#reset').addEventListener('click', () => {
+      if (!confirm('Erase all logged sessions and week colors?')) return;
+      state = defaultState();
+      save();
+      renderAll();
+      closeSheet();
+    });
+  }
+
+  // --- Boot ----------------------------------------------------------------
+
+  function renderAll() {
+    renderHeader();
+    renderChain();
+    renderTiles();
+  }
+
+  document.getElementById('open-year').addEventListener('click', openYearView);
+  document.getElementById('open-year-2').addEventListener('click', openYearView);
+  document.getElementById('open-settings').addEventListener('click', openSettings);
+
+  renderAll();
+})();
+</script>
 </body>
 </html>
