@@ -530,6 +530,185 @@
     text-transform: uppercase;
   }
 
+  /* Pre-start banner */
+  .start-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 20px;
+    text-align: center;
+    margin-top: 6px;
+  }
+  .start-banner .eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+  .start-banner h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 6px;
+  }
+  .start-banner p {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin: 0;
+  }
+  .start-banner .countdown {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--green-deep);
+    color: var(--bg);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Pre-start chain tile */
+  .week.pre-start {
+    background: transparent;
+    border: 1px solid var(--border);
+    opacity: 0.55;
+    cursor: default;
+  }
+  .week.pre-start:hover { transform: none; }
+
+  /* Tappable session row */
+  .session-row.tappable { cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+  .session-row.tappable:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .session-row .chev { color: var(--ink-faint); margin-left: 8px; }
+  .session-row .has-note {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* Note textarea */
+  .note-area {
+    width: 100%;
+    min-height: 84px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    resize: vertical;
+    font-family: 'Fraunces', Georgia, serif;
+    line-height: 1.4;
+  }
+  .note-area:focus { outline: none; border-color: var(--border-strong); }
+
+  .today-note-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+    font-size: 13px;
+    text-align: left;
+    background: transparent;
+    font-family: 'Fraunces', Georgia, serif;
+  }
+  .today-note-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .today-note-btn.has-note {
+    border-style: solid;
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  /* Day sheet activity list */
+  .day-activities {
+    display: grid;
+    gap: 8px;
+  }
+  .day-activity-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .day-activity-row .aname {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+  .day-activity-row .asub {
+    font-size: 11px;
+    color: var(--ink-faint);
+    display: block;
+    margin-top: 2px;
+  }
+  .mini-stepper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mini-stepper button {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    color: var(--ink-soft);
+    font-size: 16px;
+    background: var(--surface-2);
+  }
+  .mini-stepper .mval {
+    min-width: 54px;
+    text-align: center;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+  .mini-stepper .mval small {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink-faint);
+    font-size: 10px;
+    margin-left: 3px;
+  }
+
+  /* Guide sheet */
+  .guide-item {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .guide-item:last-child { border-bottom: 0; }
+  .guide-swatch {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+  }
+  .guide-tier {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 2px;
+  }
+  .guide-sub {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin: 0 0 6px;
+  }
+  .guide-body {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -556,13 +735,24 @@
       <div id="seal-slot"></div>
     </section>
 
-    <section>
+    <section id="today-section">
       <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
       <div class="tiles" id="tiles"></div>
+      <button class="today-note-btn" id="today-note-btn">Leave a note for today…</button>
+    </section>
+
+    <section id="prestart-section" style="display:none">
+      <div class="start-banner">
+        <p class="eyebrow">The chain starts</p>
+        <h3 id="start-title">Monday, 27 April</h3>
+        <p id="start-sub">A fresh week. The first link.</p>
+        <div class="countdown" id="start-countdown">In 4 days</div>
+      </div>
     </section>
 
     <p class="footer serif">Keep the chain.</p>
     <div class="footer-actions">
+      <button id="open-guide">Guide</button>
       <button id="open-settings">Settings</button>
       <button id="open-year-2">History</button>
     </div>
@@ -609,6 +799,9 @@
   const defaultState = () => ({
     sessions: {},   // key: YYYY-MM-DD, value: { gym: minutes, yoga: ... }
     weekColors: {}, // key: YYYY-MM-DD (Monday of the ISO week), value: color key
+    dayNotes: {},   // key: YYYY-MM-DD, value: note text
+    weekNotes: {},  // key: YYYY-MM-DD (Monday), value: note text
+    startDate: '2026-04-27', // first Monday the framework is live
   });
 
   let state = load();
@@ -646,6 +839,30 @@
 
   function monthShort(d) {
     return d.toLocaleString('en-GB', { month: 'short' });
+  }
+
+  function parseISO(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function daysBetween(a, b) {
+    const ms = startOfDay(b) - startOfDay(a);
+    return Math.round(ms / 86400000);
+  }
+
+  function startOfDay(d) {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  function getStartMonday() {
+    return startOfWeek(parseISO(state.startDate));
+  }
+
+  function isPreStart() {
+    return startOfDay(new Date()) < startOfDay(parseISO(state.startDate));
   }
 
   // --- Computed ------------------------------------------------------------
@@ -717,35 +934,52 @@
     const chain = document.getElementById('chain');
     chain.innerHTML = '';
     const thisMonday = startOfWeek(new Date());
+    const startMonday = getStartMonday();
+    const pre = isPreStart();
+    const rightMostMonday = pre ? startMonday : thisMonday;
 
     for (let i = WEEKS_SHOWN - 1; i >= 0; i--) {
-      const monday = addDays(thisMonday, -i * 7);
+      const monday = addDays(rightMostMonday, -i * 7);
       const iso = toISODate(monday);
       const color = state.weekColors[iso];
-      const isCurrent = i === 0;
+      const isRightmost = i === 0;
+      const beforeStart = monday < startMonday;
+
       const btn = document.createElement('button');
       btn.className = 'week';
-      if (isCurrent) {
+
+      if (beforeStart) {
+        btn.classList.add('pre-start');
+        btn.disabled = true;
+      } else if (isRightmost) {
         btn.classList.add('current');
-        if (new Date().getDay() === 0) btn.classList.add('ready'); // Sunday: ready to seal
+        if (!pre && new Date().getDay() === 0) btn.classList.add('ready');
+        btn.addEventListener('click', () => openWeekReview(monday));
       } else if (color) {
         btn.classList.add(color);
+        btn.addEventListener('click', () => openWeekReview(monday));
       } else {
         btn.classList.add('blank');
+        btn.addEventListener('click', () => openWeekReview(monday));
       }
+
       btn.setAttribute('aria-label', `Week of ${monthShort(monday)} ${monday.getDate()}`);
-      btn.addEventListener('click', () => openWeekReview(monday));
       chain.appendChild(btn);
     }
 
-    // Update "8 weeks ago" label to the actual month
-    const oldestMonday = addDays(thisMonday, -(WEEKS_SHOWN - 1) * 7);
-    document.getElementById('chain-start-label').textContent = `${monthShort(oldestMonday)} ${oldestMonday.getDate()}`;
+    // Left-edge label
+    const oldestMonday = addDays(rightMostMonday, -(WEEKS_SHOWN - 1) * 7);
+    const leftLabel = oldestMonday < startMonday
+      ? `before ${monthShort(startMonday)} ${startMonday.getDate()}`
+      : `${monthShort(oldestMonday)} ${oldestMonday.getDate()}`;
+    document.getElementById('chain-start-label').textContent = leftLabel;
+    const legendRight = chain.parentElement.querySelector('.chain-legend span:last-child');
+    if (legendRight) legendRight.textContent = pre ? 'first week' : 'this week';
 
-    // Sunday seal banner
+    // Sunday seal banner (not pre-start)
     const slot = document.getElementById('seal-slot');
     slot.innerHTML = '';
-    if (new Date().getDay() === 0 && !state.weekColors[toISODate(thisMonday)]) {
+    if (!pre && new Date().getDay() === 0 && !state.weekColors[toISODate(thisMonday)]) {
       const banner = document.createElement('div');
       banner.className = 'seal-banner';
       banner.innerHTML = `
@@ -757,9 +991,22 @@
     }
   }
 
+  function renderPreStart() {
+    const pre = isPreStart();
+    document.getElementById('today-section').style.display = pre ? 'none' : '';
+    document.getElementById('prestart-section').style.display = pre ? '' : 'none';
+    if (!pre) return;
+    const start = parseISO(state.startDate);
+    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('start-title').textContent = fmt.format(start);
+    const days = daysBetween(new Date(), start);
+    document.getElementById('start-countdown').textContent = days <= 0 ? 'Starts today' : `In ${days} day${days === 1 ? '' : 's'}`;
+  }
+
   // --- Rendering: today tiles ----------------------------------------------
 
   function renderTiles() {
+    if (isPreStart()) return;
     const today = new Date();
     const todayISO = toISODate(today);
     const plan = PLAN_BY_DAY[today.getDay()] || [];
@@ -878,19 +1125,22 @@
     const summary = weekSummary(weekDays);
     const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-    const rows = weekDays.map(({ date, sessions }, i) => {
+    const rows = weekDays.map(({ date, iso: dIso, sessions }, i) => {
       const parts = [];
       if (sessions.gym) parts.push(`Gym ${sessions.gym}m`);
       if (sessions.yoga) parts.push(`Yoga ${sessions.yoga}m`);
       if (sessions.meditation) parts.push(`Meditation ${sessions.meditation}m`);
       if (sessions.reading) parts.push(`Reading ${sessions.reading}m`);
+      const hasNote = !!(state.dayNotes[dIso] && state.dayNotes[dIso].trim());
       return `
-        <div class="session-row">
-          <span class="day">${dayNames[i]} · ${date.getDate()} ${monthShort(date)}</span>
-          <span class="summary">${parts.length ? parts.join(' · ') : '—'}</span>
-        </div>
+        <button class="session-row tappable" data-date="${dIso}">
+          <span class="day">${dayNames[i]} · ${date.getDate()} ${monthShort(date)}${hasNote ? '<span class="has-note" title="Note"></span>' : ''}</span>
+          <span class="summary">${parts.length ? parts.join(' · ') : '—'}<span class="chev">›</span></span>
+        </button>
       `;
     }).join('');
+
+    const weekNote = state.weekNotes[iso] || '';
 
     const colorOptions = Object.entries(COLOR_META).map(([key, meta]) => {
       const selected = (existing || suggested) === key ? 'selected' : '';
@@ -927,6 +1177,11 @@
         ${!existing ? `<p class="subtle" style="margin-top:10px">Suggested: <strong>${COLOR_META[suggested].label}</strong> based on ${summary.gymCount} gym · ${summary.yogaCount} yoga · ${summary.medCount} meditation · ${summary.readCount} reading.</p>` : ''}
       </div>
 
+      <div class="sheet-section">
+        <p class="sheet-section-label">Note on the week</p>
+        <textarea class="note-area" id="week-note" placeholder="How did this week feel? What got in the way? What worked?">${weekNote.replace(/</g, '&lt;')}</textarea>
+      </div>
+
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
         <button class="btn btn-primary" id="save">${existing ? 'Update' : 'Seal week'}</button>
@@ -942,9 +1197,25 @@
         chosen = el.dataset.color;
       });
     });
-    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelectorAll('.session-row.tappable').forEach(el => {
+      el.addEventListener('click', () => {
+        const d = el.dataset.date;
+        closeSheet();
+        setTimeout(() => openDay(d, () => openWeekReview(monday)), 180);
+      });
+    });
+    sheet.querySelector('#cancel').addEventListener('click', () => {
+      const note = sheet.querySelector('#week-note')?.value ?? '';
+      if (note.trim()) state.weekNotes[iso] = note;
+      else delete state.weekNotes[iso];
+      save();
+      closeSheet();
+    });
     sheet.querySelector('#save').addEventListener('click', () => {
       state.weekColors[iso] = chosen;
+      const note = sheet.querySelector('#week-note')?.value ?? '';
+      if (note.trim()) state.weekNotes[iso] = note;
+      else delete state.weekNotes[iso];
       save();
       renderChain();
       closeSheet();
@@ -955,6 +1226,87 @@
       save();
       renderChain();
       closeSheet();
+    });
+  }
+
+  // --- Day sheet -----------------------------------------------------------
+
+  function openDay(dateISO, onClose) {
+    const date = parseISO(dateISO);
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const title = dayNames[date.getDay()];
+    const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
+    const sessions = state.sessions[dateISO] || {};
+    const note = state.dayNotes[dateISO] || '';
+
+    const activityRows = ACTIVITIES.map(act => {
+      const mins = sessions[act.key] || 0;
+      return `
+        <div class="day-activity-row" data-key="${act.key}">
+          <span>
+            <span class="aname">${act.name}</span>
+            <span class="asub">Avg ${avgFor(act)} min</span>
+          </span>
+          <span class="mini-stepper">
+            <button data-delta="-5" aria-label="Decrease">−</button>
+            <span class="mval"><span class="mv">${mins}</span><small>min</small></span>
+            <button data-delta="5" aria-label="Increase">+</button>
+          </span>
+        </div>
+      `;
+    }).join('');
+
+    openSheet(`
+      <h2>${title}</h2>
+      <p class="subtle">${fmt.format(date)}</p>
+      <div class="sheet-section">
+        <p class="sheet-section-label">Sessions</p>
+        <div class="day-activities">${activityRows}</div>
+      </div>
+      <div class="sheet-section">
+        <p class="sheet-section-label">Note</p>
+        <textarea class="note-area" id="day-note" placeholder="A line or two. How it went, how it felt.">${note.replace(/</g, '&lt;')}</textarea>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Cancel</button>
+        <button class="btn btn-primary" id="save">Save</button>
+      </div>
+    `);
+
+    // Local working copy
+    const working = { ...sessions };
+    sheet.querySelectorAll('.day-activity-row').forEach(row => {
+      const key = row.dataset.key;
+      const mv = row.querySelector('.mv');
+      row.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const delta = Number(btn.dataset.delta);
+          const next = Math.max(0, (working[key] || 0) + delta);
+          working[key] = next;
+          mv.textContent = next;
+        });
+      });
+    });
+
+    sheet.querySelector('#cancel').addEventListener('click', () => {
+      closeSheet();
+      if (onClose) setTimeout(onClose, 180);
+    });
+    sheet.querySelector('#save').addEventListener('click', () => {
+      const clean = {};
+      for (const [k, v] of Object.entries(working)) if (v > 0) clean[k] = v;
+      if (Object.keys(clean).length) state.sessions[dateISO] = clean;
+      else delete state.sessions[dateISO];
+
+      const noteVal = sheet.querySelector('#day-note').value;
+      if (noteVal.trim()) state.dayNotes[dateISO] = noteVal;
+      else delete state.dayNotes[dateISO];
+
+      save();
+      renderTiles();
+      renderTodayNoteBtn();
+      closeSheet();
+      if (onClose) setTimeout(onClose, 180);
     });
   }
 
@@ -1008,17 +1360,32 @@
       <h2>Settings</h2>
       <p class="subtle">Small for now. More later, only if they earn their place.</p>
       <div class="sheet-section">
+        <p class="sheet-section-label">Start date</p>
+        <input id="start-input" type="date" value="${state.startDate}" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font:inherit;color:var(--ink);font-family:'Fraunces',Georgia,serif;font-size:15px;" />
+        <p class="subtle" style="margin-top:8px">The first Monday the framework is live. Days before this are hidden.</p>
+      </div>
+      <div class="sheet-section">
         <p class="sheet-section-label">Data</p>
         <p class="subtle">Everything lives in your browser. No account, no server.</p>
       </div>
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
+        <button class="btn btn-primary" id="save-settings">Save</button>
+      </div>
+      <div class="sheet-actions">
         <button class="btn btn-danger-ghost" id="reset">Reset everything</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelector('#save-settings').addEventListener('click', () => {
+      const val = sheet.querySelector('#start-input').value;
+      if (val) state.startDate = val;
+      save();
+      renderAll();
+      closeSheet();
+    });
     sheet.querySelector('#reset').addEventListener('click', () => {
-      if (!confirm('Erase all logged sessions and week colors?')) return;
+      if (!confirm('Erase all logged sessions, notes, and week colors?')) return;
       state = defaultState();
       save();
       renderAll();
@@ -1026,17 +1393,95 @@
     });
   }
 
+  // --- Guide sheet ---------------------------------------------------------
+
+  const GUIDE_TIERS = [
+    {
+      color: 'deep',
+      tier: 'Top week',
+      sub: 'Dark green',
+      body: 'Three gym sessions (Mon + Tue + Fri, or equivalents). Wednesday yoga + meditation. Reading most nights. Sleep broadly on schedule. The ideal shape — rare but real.',
+    },
+    {
+      color: 'soft',
+      tier: 'Sub-top week',
+      sub: 'Light green',
+      body: 'Two gym + one home workout, or three gym sessions but Wednesday yoga missed. Reading most nights. Sleep mostly on track. A genuinely good week — not a consolation prize. Most weeks live here or above.',
+    },
+    {
+      color: 'ochre',
+      tier: 'Medium week',
+      sub: 'Yellow — hard, chain intact',
+      body: 'One gym session plus movement most days — walks, stretching, yoga, bodyweight. Reading and sleep where possible, no pressure. The minimum viable week: exam weeks, illness recovery, travel, life chaos. Yellow is not failure. Yellow is how you survive bad weeks without breaking the chain.',
+    },
+    {
+      color: 'terra',
+      tier: 'Bad week',
+      sub: 'Red — chain broken',
+      body: 'Zero gym and no meaningful movement all week. The only outcome that breaks the chain. Rare — means something real is wrong (illness, genuine crisis, burnout). Two reds back-to-back is a signal to stop and diagnose, not push harder.',
+    },
+  ];
+
+  function openGuide() {
+    const items = GUIDE_TIERS.map(t => `
+      <div class="guide-item">
+        <span class="guide-swatch ${t.color}"></span>
+        <div>
+          <p class="guide-tier">${t.tier}</p>
+          <p class="guide-sub">${t.sub}</p>
+          <p class="guide-body">${t.body}</p>
+        </div>
+      </div>
+    `).join('');
+
+    openSheet(`
+      <h2>How weeks get colored</h2>
+      <p class="subtle">You decide the color on Sunday. The system only suggests.</p>
+      <div class="sheet-section">
+        ${items}
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
+  // --- Today note button ---------------------------------------------------
+
+  function renderTodayNoteBtn() {
+    const btn = document.getElementById('today-note-btn');
+    if (!btn) return;
+    const iso = toISODate(new Date());
+    const note = state.dayNotes[iso] || '';
+    if (note.trim()) {
+      btn.classList.add('has-note');
+      const preview = note.length > 60 ? note.slice(0, 60).trim() + '…' : note;
+      btn.textContent = preview;
+    } else {
+      btn.classList.remove('has-note');
+      btn.textContent = 'Leave a note for today…';
+    }
+  }
+
   // --- Boot ----------------------------------------------------------------
 
   function renderAll() {
     renderHeader();
     renderChain();
+    renderPreStart();
     renderTiles();
+    renderTodayNoteBtn();
   }
 
   document.getElementById('open-year').addEventListener('click', openYearView);
   document.getElementById('open-year-2').addEventListener('click', openYearView);
   document.getElementById('open-settings').addEventListener('click', openSettings);
+  document.getElementById('open-guide').addEventListener('click', openGuide);
+  document.getElementById('today-note-btn').addEventListener('click', () => {
+    const iso = toISODate(new Date());
+    openDay(iso);
+  });
 
   renderAll();
 })();
