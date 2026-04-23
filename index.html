@@ -812,6 +812,128 @@
   .summary-tile.wide { grid-column: 1 / -1; }
   .summary-tile.wide .svalue { font-size: 15px; }
 
+  /* Moment tiles */
+  .moment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .moment-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    min-height: 92px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .moment-tile:hover { border-color: var(--border-strong); }
+  .moment-tile .meyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+  }
+  .moment-tile .mtitle {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .moment-tile.answered {
+    background: var(--surface-2);
+  }
+  .moment-tile .mbadge {
+    margin-top: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green-soft);
+  }
+  .moment-tile .mbadge.wrong { color: var(--terracotta); }
+
+  /* Quote sheet */
+  .quote-body {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    line-height: 1.35;
+    margin: 6px 0 14px;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .quote-attrib {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    letter-spacing: 0.02em;
+  }
+  .quote-attrib strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .quote-meaning-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+  .quote-meaning {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Quiz sheet */
+  .quiz-question {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    line-height: 1.3;
+    margin: 4px 0 20px;
+  }
+  .quiz-options {
+    display: grid;
+    gap: 8px;
+  }
+  .quiz-option {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    text-align: left;
+    color: var(--ink);
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--border-strong); }
+  .quiz-option.correct {
+    background: var(--green-deep);
+    color: var(--bg);
+    border-color: var(--green-deep);
+  }
+  .quiz-option.wrong {
+    background: var(--terracotta);
+    color: var(--bg);
+    border-color: var(--terracotta);
+  }
+  .quiz-option.muted { opacity: 0.55; }
+  .quiz-result {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .quiz-result strong { color: var(--ink); font-weight: 500; }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -850,6 +972,20 @@
         <h3 id="start-title">Monday, 27 April</h3>
         <p id="start-sub">A fresh week. The first link.</p>
         <div class="countdown" id="start-countdown">In 4 days</div>
+      </div>
+    </section>
+
+    <section id="moment-section">
+      <p class="section-label"><span>A moment</span></p>
+      <div class="moment-grid">
+        <button class="moment-tile" id="open-quote">
+          <span class="meyebrow">Quote of the day</span>
+          <span class="mtitle" id="quote-preview">A line to sit with.</span>
+        </button>
+        <button class="moment-tile" id="open-quiz">
+          <span class="meyebrow">Geography</span>
+          <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
+        </button>
       </div>
     </section>
 
@@ -897,6 +1033,96 @@
     { key: 'shower',    name: 'Shower' },
   ];
 
+  const QUOTES = [
+    { text: "The obstacle is the way.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Impediments to action become the path forward. What stands in the way, rightly met, reveals the way." },
+    { text: "The unexamined life is not worth living.", author: "Socrates", year: "399 BC", source: "Plato's Apology", meaning: "Living without reflection — without questioning your beliefs and choices — strips life of its real value. The asking is the living." },
+    { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", year: "1889", source: "Twilight of the Idols", meaning: "Meaning makes suffering bearable. Comfort without purpose crushes us; purpose makes even hardship endurable." },
+    { text: "We suffer more often in imagination than in reality.", author: "Seneca", year: "c. 65 AD", source: "Letters from a Stoic", meaning: "The mind rehearses disasters that rarely arrive. Most of what you dread, you never actually live through." },
+    { text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Freedom sits in the response, not the circumstance. The world happens; how you meet it is yours." },
+    { text: "No man ever steps in the same river twice, for it's not the same river and he's not the same man.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Change is the one constant. The river has moved and so have you. Don't expect to find the same ground twice." },
+    { text: "I think, therefore I am.", author: "René Descartes", year: "1637", source: "Discourse on the Method", meaning: "The one thing you can't doubt is the fact that you're doubting. Your existence is certain even when everything else is in question." },
+    { text: "Man is condemned to be free.", author: "Jean-Paul Sartre", year: "1943", source: "Being and Nothingness", meaning: "We have no fixed nature. We are forever responsible for who we become — whether we want the responsibility or not." },
+    { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Before understanding the world, understand your own motives, patterns, and limits. Self-knowledge is the foundation." },
+    { text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus", year: "c. 108 AD", source: "Discourses", meaning: "Events are neutral. Your judgment of them is what creates suffering or acceptance." },
+    { text: "Man is born free, and everywhere he is in chains.", author: "Jean-Jacques Rousseau", year: "1762", source: "The Social Contract", meaning: "We arrive with an innate freedom, but society and its institutions bind us. The question is which chains are worth keeping." },
+    { text: "The heart has its reasons of which reason knows nothing.", author: "Blaise Pascal", year: "1670", source: "Pensées", meaning: "Some forms of knowing — faith, intuition, love — operate outside pure logic, and are no less true for it." },
+    { text: "Whereof one cannot speak, thereof one must be silent.", author: "Ludwig Wittgenstein", year: "1921", source: "Tractatus Logico-Philosophicus", meaning: "Language has limits. Some truths can only be shown — by how you live — not said." },
+    { text: "Do not spoil what you have by desiring what you have not.", author: "Epicurus", year: "c. 300 BC", source: "Letters", meaning: "The present is already full. Craving what's absent is how you ruin what's already here." },
+    { text: "Happiness depends upon ourselves.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Flourishing is a matter of character and action, not circumstance. It's built, not given." },
+    { text: "God is dead.", author: "Friedrich Nietzsche", year: "1882", source: "The Gay Science", meaning: "With the collapse of shared religious belief, we must create our own values. A challenge, not a celebration." },
+    { text: "Hell is other people.", author: "Jean-Paul Sartre", year: "1944", source: "No Exit", meaning: "We can't escape being seen by others, and their judgment shapes our sense of self. Sometimes unbearably." },
+    { text: "The only true wisdom is in knowing you know nothing.", author: "Socrates", year: "c. 399 BC", source: "Plato's Apology", meaning: "Real wisdom begins with admitting the limits of what you know. Certainty is often the enemy of understanding." },
+    { text: "Man is the measure of all things.", author: "Protagoras", year: "c. 450 BC", source: "via Plato", meaning: "Truth is relative to the observer. There is no view from nowhere — every perspective is situated." },
+    { text: "It is not death that a man should fear, but he should fear never beginning to live.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Mortality isn't the real tragedy. The real tragedy is arriving at death without ever fully showing up." },
+    { text: "Virtue is its own reward.", author: "Cicero", year: "c. 45 BC", source: "De Finibus", meaning: "Acting well isn't a transaction for future gain. Doing the right thing is already the thing worth doing." },
+    { text: "A man who views the world the same at fifty as he did at twenty has wasted thirty years of his life.", author: "Muhammad Ali", year: "1975", source: "interview (often cited as philosophical)", meaning: "Change is growth. Holding the same shape for decades isn't constancy — it's stagnation." },
+    { text: "One cannot step in the same river twice.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Reality is flux. The world you returned to isn't the one you left." },
+    { text: "To be is to do.", author: "Jean-Paul Sartre", year: "1943", source: "paraphrase of Being and Nothingness", meaning: "You are not your intentions or self-image. You are the sum of what you actually do." },
+  ];
+
+  const CAPITALS = [
+    { country: "France", capital: "Paris" },
+    { country: "Germany", capital: "Berlin" },
+    { country: "Italy", capital: "Rome" },
+    { country: "Spain", capital: "Madrid" },
+    { country: "Portugal", capital: "Lisbon" },
+    { country: "the Netherlands", capital: "Amsterdam" },
+    { country: "Belgium", capital: "Brussels" },
+    { country: "the United Kingdom", capital: "London" },
+    { country: "Ireland", capital: "Dublin" },
+    { country: "Norway", capital: "Oslo" },
+    { country: "Sweden", capital: "Stockholm" },
+    { country: "Denmark", capital: "Copenhagen" },
+    { country: "Finland", capital: "Helsinki" },
+    { country: "Poland", capital: "Warsaw" },
+    { country: "Czechia", capital: "Prague" },
+    { country: "Austria", capital: "Vienna" },
+    { country: "Switzerland", capital: "Bern" },
+    { country: "Greece", capital: "Athens" },
+    { country: "Hungary", capital: "Budapest" },
+    { country: "Romania", capital: "Bucharest" },
+    { country: "Bulgaria", capital: "Sofia" },
+    { country: "Russia", capital: "Moscow" },
+    { country: "Ukraine", capital: "Kyiv" },
+    { country: "Turkey", capital: "Ankara" },
+    { country: "Japan", capital: "Tokyo" },
+    { country: "China", capital: "Beijing" },
+    { country: "South Korea", capital: "Seoul" },
+    { country: "India", capital: "New Delhi" },
+    { country: "Pakistan", capital: "Islamabad" },
+    { country: "Indonesia", capital: "Jakarta" },
+    { country: "Thailand", capital: "Bangkok" },
+    { country: "Vietnam", capital: "Hanoi" },
+    { country: "the Philippines", capital: "Manila" },
+    { country: "Malaysia", capital: "Kuala Lumpur" },
+    { country: "Australia", capital: "Canberra" },
+    { country: "New Zealand", capital: "Wellington" },
+    { country: "Egypt", capital: "Cairo" },
+    { country: "Morocco", capital: "Rabat" },
+    { country: "Nigeria", capital: "Abuja" },
+    { country: "Kenya", capital: "Nairobi" },
+    { country: "Ethiopia", capital: "Addis Ababa" },
+    { country: "Ghana", capital: "Accra" },
+    { country: "Tanzania", capital: "Dodoma" },
+    { country: "the United States", capital: "Washington, D.C." },
+    { country: "Canada", capital: "Ottawa" },
+    { country: "Mexico", capital: "Mexico City" },
+    { country: "Brazil", capital: "Brasília" },
+    { country: "Argentina", capital: "Buenos Aires" },
+    { country: "Chile", capital: "Santiago" },
+    { country: "Peru", capital: "Lima" },
+    { country: "Colombia", capital: "Bogotá" },
+    { country: "Venezuela", capital: "Caracas" },
+    { country: "Cuba", capital: "Havana" },
+    { country: "Iran", capital: "Tehran" },
+    { country: "Iraq", capital: "Baghdad" },
+    { country: "Saudi Arabia", capital: "Riyadh" },
+    { country: "the United Arab Emirates", capital: "Abu Dhabi" },
+    { country: "Israel", capital: "Jerusalem" },
+    { country: "Lebanon", capital: "Beirut" },
+    { country: "Jordan", capital: "Amman" },
+  ];
+
   const COLOR_META = {
     deep:  { label: 'Dark green',  desc: 'Ideal week'       },
     soft:  { label: 'Light green', desc: 'Strong week'      },
@@ -913,6 +1139,7 @@
     weekNotes: {},  // key: YYYY-MM-DD (Monday), value: note text
     habits: {},     // key: YYYY-MM-DD, value: { teeth: bool, breakfast: bool, vitamins: bool, shower: bool }
     sleep: {},      // key: YYYY-MM-DD, value: number (hours)
+    quizResults: {},// key: YYYY-MM-DD, value: { answer: string, correct: bool }
     startDate: '2026-04-27', // first Monday the framework is live
   });
 
@@ -975,6 +1202,40 @@
 
   function isPreStart() {
     return startOfDay(new Date()) < startOfDay(parseISO(state.startDate));
+  }
+
+  function daySeed(date) {
+    // YYYYMMDD as a single integer — stable, sortable, distinct per day.
+    return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  }
+
+  function pickQuoteForDate(date) {
+    const seed = daySeed(date);
+    return QUOTES[seed % QUOTES.length];
+  }
+
+  function pickQuizForDate(date) {
+    const seed = daySeed(date);
+    const idx = seed % CAPITALS.length;
+    const correct = CAPITALS[idx];
+    const distractors = [];
+    let step = 1;
+    while (distractors.length < 3 && step < CAPITALS.length) {
+      const i = (idx + step * 7) % CAPITALS.length;
+      const cand = CAPITALS[i];
+      if (cand.country !== correct.country && !distractors.find(d => d.capital === cand.capital)) {
+        distractors.push(cand);
+      }
+      step++;
+    }
+    const options = new Array(4);
+    const correctPos = seed % 4;
+    options[correctPos] = correct.capital;
+    let di = 0;
+    for (let i = 0; i < 4; i++) {
+      if (i !== correctPos) options[i] = distractors[di++].capital;
+    }
+    return { country: correct.country, answer: correct.capital, options };
   }
 
   // --- Computed ------------------------------------------------------------
@@ -1706,6 +1967,117 @@
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
   }
 
+  // --- Moment: quote & quiz ------------------------------------------------
+
+  function openQuote() {
+    const q = pickQuoteForDate(new Date());
+    openSheet(`
+      <h2>Quote of the day</h2>
+      <p class="subtle">A line from the canon. Sit with it if it earns it.</p>
+      <p class="quote-body">"${q.text}"</p>
+      <p class="quote-attrib"><strong>${q.author}</strong> · ${q.year} · ${q.source}</p>
+      <p class="quote-meaning-label">What it means</p>
+      <p class="quote-meaning">${q.meaning}</p>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
+  function openQuiz() {
+    const todayISO = toISODate(new Date());
+    const quiz = pickQuizForDate(new Date());
+    const prior = state.quizResults[todayISO];
+
+    const optionBtns = quiz.options.map(opt => {
+      let cls = 'quiz-option';
+      if (prior) {
+        if (opt === quiz.answer) cls += ' correct';
+        else if (opt === prior.answer) cls += ' wrong';
+        else cls += ' muted';
+      }
+      return `<button class="${cls}" data-opt="${opt.replace(/"/g, '&quot;')}"${prior ? ' disabled' : ''}>${opt}</button>`;
+    }).join('');
+
+    let resultHTML = '';
+    if (prior) {
+      resultHTML = prior.correct
+        ? `<div class="quiz-result"><strong>You got it.</strong> ${quiz.answer} is the capital of ${quiz.country}.</div>`
+        : `<div class="quiz-result"><strong>Not quite.</strong> The capital of ${quiz.country} is <strong>${quiz.answer}</strong>.</div>`;
+    }
+
+    openSheet(`
+      <h2>Geography</h2>
+      <p class="subtle">One question a day. Same question if you come back later.</p>
+      <p class="quiz-question">What is the capital of ${quiz.country}?</p>
+      <div class="quiz-options" id="quiz-opts">${optionBtns}</div>
+      <div id="quiz-result-slot">${resultHTML}</div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+
+    if (!prior) {
+      sheet.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const chosen = btn.dataset.opt;
+          const correct = chosen === quiz.answer;
+          state.quizResults[todayISO] = { answer: chosen, correct };
+          save();
+
+          // Re-style options in place
+          sheet.querySelectorAll('.quiz-option').forEach(b => {
+            b.disabled = true;
+            const v = b.dataset.opt;
+            if (v === quiz.answer) b.classList.add('correct');
+            else if (v === chosen) b.classList.add('wrong');
+            else b.classList.add('muted');
+          });
+
+          const slot = sheet.querySelector('#quiz-result-slot');
+          slot.innerHTML = correct
+            ? `<div class="quiz-result"><strong>You got it.</strong> ${quiz.answer} is the capital of ${quiz.country}.</div>`
+            : `<div class="quiz-result"><strong>Not quite.</strong> The capital of ${quiz.country} is <strong>${quiz.answer}</strong>.</div>`;
+
+          renderMomentTiles();
+        });
+      });
+    }
+  }
+
+  function renderMomentTiles() {
+    const q = pickQuoteForDate(new Date());
+    const preview = q.text.length > 52 ? q.text.slice(0, 52).trim() + '…' : q.text;
+    const qp = document.getElementById('quote-preview');
+    if (qp) qp.textContent = '"' + preview + '"';
+
+    const todayISO = toISODate(new Date());
+    const prior = state.quizResults[todayISO];
+    const quiz = pickQuizForDate(new Date());
+    const quizTile = document.getElementById('open-quiz');
+    const qzp = document.getElementById('quiz-preview');
+    if (!qzp || !quizTile) return;
+
+    // Clear old badge
+    const oldBadge = quizTile.querySelector('.mbadge');
+    if (oldBadge) oldBadge.remove();
+
+    if (prior) {
+      qzp.textContent = `Capital of ${quiz.country}`;
+      quizTile.classList.add('answered');
+      const badge = document.createElement('span');
+      badge.className = 'mbadge' + (prior.correct ? '' : ' wrong');
+      badge.textContent = prior.correct ? 'Answered correctly' : 'Answered';
+      quizTile.appendChild(badge);
+    } else {
+      qzp.textContent = `Capital of ${quiz.country}?`;
+      quizTile.classList.remove('answered');
+    }
+  }
+
   // --- Today note button ---------------------------------------------------
 
   function renderTodayNoteBtn() {
@@ -1731,12 +2103,15 @@
     renderPreStart();
     renderTiles();
     renderTodayNoteBtn();
+    renderMomentTiles();
   }
 
   document.getElementById('open-year').addEventListener('click', openYearView);
   document.getElementById('open-year-2').addEventListener('click', openYearView);
   document.getElementById('open-settings').addEventListener('click', openSettings);
   document.getElementById('open-guide').addEventListener('click', openGuide);
+  document.getElementById('open-quote').addEventListener('click', openQuote);
+  document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('today-note-btn').addEventListener('click', () => {
     const iso = toISODate(new Date());
     openDay(iso);
