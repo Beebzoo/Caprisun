@@ -1626,6 +1626,9 @@
     quizResults: {},
     seenQuotes: {},
     seenWords: {},
+    // 5x drill counts (motor-memory) — independent of SRS deck
+    quotePractice: {}, // key: YYYY-MM-DD → number of completed repetitions (0..5)
+    wordPractice: {},  // key: YYYY-MM-DD → number of completed repetitions (0..5)
     // SRS decks — keyed by word / quote text
     // Each entry: { stage, nextReview, lastReview, firstSeen, personalSentence/personalNote, usedInWild, history: [{date, rating}] }
     wordDeck: {},
@@ -2539,6 +2542,15 @@
     const deckEntry = state.quoteDeck[q.text];
     const deckHTML = isToday ? renderQuoteDeckSection(q, deckEntry) : '';
 
+    const practiceCount = state.quotePractice[dateISO] || 0;
+    const practiceHTML = isToday ? renderPracticeBlock({
+      target: q.text,
+      count: practiceCount,
+      placeholder: 'Type the quote. Press enter after each attempt.',
+      label: 'Practice writing',
+      longForm: q.text.length > 80,
+    }) : '';
+
     openSheet(`
       <h2>Quote of the day</h2>
       <p class="subtle">${subtitle}</p>
@@ -2547,13 +2559,26 @@
       <p class="quote-meaning-label">What it means</p>
       <p class="quote-meaning">${q.meaning}</p>
       ${deckHTML}
+      ${practiceHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
-    if (isToday) wireQuoteDeckSection(q);
+    if (isToday) {
+      wireQuoteDeckSection(q);
+      wirePractice({
+        target: q.text,
+        getCount: () => state.quotePractice[dateISO] || 0,
+        setCount: (n) => {
+          if (n > 0) state.quotePractice[dateISO] = n;
+          else delete state.quotePractice[dateISO];
+          save();
+        },
+        onChange: renderMomentTiles,
+      });
+    }
   }
 
   function renderQuoteDeckSection(q, entry) {
@@ -2635,6 +2660,15 @@
     const deckEntry = state.wordDeck[w.word];
     const deckHTML = isToday ? renderWordDeckSection(w, deckEntry) : '';
 
+    const practiceCount = state.wordPractice[dateISO] || 0;
+    const practiceHTML = isToday ? renderPracticeBlock({
+      target: w.word,
+      count: practiceCount,
+      placeholder: 'Type the word. Press enter after each.',
+      label: 'Practice writing',
+      longForm: false,
+    }) : '';
+
     openSheet(`
       <h2>Word of the day</h2>
       <p class="subtle">${subtitle}</p>
@@ -2647,13 +2681,26 @@
       <p class="word-block-label">In a sentence</p>
       <p class="word-example">${w.example}</p>
       ${deckHTML}
+      ${practiceHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
-    if (isToday) wireWordDeckSection(w);
+    if (isToday) {
+      wireWordDeckSection(w);
+      wirePractice({
+        target: w.word,
+        getCount: () => state.wordPractice[dateISO] || 0,
+        setCount: (n) => {
+          if (n > 0) state.wordPractice[dateISO] = n;
+          else delete state.wordPractice[dateISO];
+          save();
+        },
+        onChange: renderMomentTiles,
+      });
+    }
   }
 
   function renderWordDeckSection(w, entry) {
