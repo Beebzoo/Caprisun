@@ -815,19 +815,18 @@
   /* Moment tiles */
   .moment-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
   .moment-tile {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 16px 14px;
+    padding: 14px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     text-align: left;
-    min-height: 92px;
     transition: border-color 0.15s ease, background 0.15s ease;
   }
   .moment-tile:hover { border-color: var(--border-strong); }
@@ -887,6 +886,47 @@
     line-height: 1.55;
     margin: 0;
   }
+
+  /* Word sheet */
+  .word-headline {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 30px;
+    font-weight: 500;
+    margin: 6px 0 2px;
+    letter-spacing: -0.01em;
+  }
+  .word-meta {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+    font-style: italic;
+  }
+  .word-block-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: 0 0 6px;
+  }
+  .word-def {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.45;
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+  .word-origin, .word-example {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+  .word-example {
+    font-family: 'Fraunces', Georgia, serif;
+    color: var(--ink);
+  }
+  .word-example::before { content: "\201C"; color: var(--ink-faint); margin-right: 2px; }
+  .word-example::after  { content: "\201D"; color: var(--ink-faint); margin-left: 2px; }
 
   /* Quiz sheet */
   .quiz-question {
@@ -982,6 +1022,10 @@
           <span class="meyebrow">Quote of the day</span>
           <span class="mtitle" id="quote-preview">A line to sit with.</span>
         </button>
+        <button class="moment-tile" id="open-word">
+          <span class="meyebrow">Word of the day</span>
+          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
+        </button>
         <button class="moment-tile" id="open-quiz">
           <span class="meyebrow">Geography</span>
           <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
@@ -1058,6 +1102,34 @@
     { text: "A man who views the world the same at fifty as he did at twenty has wasted thirty years of his life.", author: "Muhammad Ali", year: "1975", source: "interview (often cited as philosophical)", meaning: "Change is growth. Holding the same shape for decades isn't constancy — it's stagnation." },
     { text: "One cannot step in the same river twice.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Reality is flux. The world you returned to isn't the one you left." },
     { text: "To be is to do.", author: "Jean-Paul Sartre", year: "1943", source: "paraphrase of Being and Nothingness", meaning: "You are not your intentions or self-image. You are the sum of what you actually do." },
+  ];
+
+  const WORDS = [
+    { word: "pusillanimity", pos: "noun", pron: "pew-sil-uh-NIM-ih-tee", definition: "Lack of courage; faintheartedness.", origin: "Latin pusillus (very small) + animus (mind, spirit).", example: "His pusillanimity in the face of the board's opposition surprised everyone who'd known him at university." },
+    { word: "defenestration", pos: "noun", pron: "dee-fen-uh-STRAY-shun", definition: "The act of throwing someone or something out of a window.", origin: "Latin de- (out of) + fenestra (window). Coined for the Defenestrations of Prague, 1618.", example: "The meeting devolved into rhetorical defenestration — one by one, his arguments were hurled out." },
+    { word: "sesquipedalian", pos: "adjective", pron: "ses-kwi-pi-DAY-lee-an", definition: "Given to using long words; (of a word) having many syllables.", origin: "Latin sesquipedalis — 'a foot and a half long.'", example: "His sesquipedalian style made the essay impenetrable to anyone without a thesaurus." },
+    { word: "quixotic", pos: "adjective", pron: "kwik-SOT-ik", definition: "Exceedingly idealistic; unrealistic and impractical.", origin: "From Don Quixote, Cervantes's 1605 novel.", example: "Her quixotic plan to reforest the coastline single-handedly was admired more than funded." },
+    { word: "obsequious", pos: "adjective", pron: "ob-SEE-kwee-us", definition: "Obedient or attentive to an excessive, servile degree.", origin: "Latin obsequiosus.", example: "The assistant's obsequious smile grew tiresome within minutes of meeting him." },
+    { word: "ephemeral", pos: "adjective", pron: "ih-FEM-er-al", definition: "Lasting for a very short time.", origin: "Greek ephēmeros — 'lasting a day.'", example: "Fame in the age of feeds is ephemeral — gone by Tuesday." },
+    { word: "perspicacious", pos: "adjective", pron: "per-spi-KAY-shus", definition: "Having a ready insight into and understanding of things.", origin: "Latin perspicax (sharp-sighted).", example: "Her perspicacious read of the room spared the project from a reckless pivot." },
+    { word: "truculent", pos: "adjective", pron: "TRUK-yoo-lent", definition: "Eager or quick to argue or fight; aggressively defiant.", origin: "Latin truculentus.", example: "He grew truculent after the third whisky, picking fights with old friends over nothing." },
+    { word: "magnanimous", pos: "adjective", pron: "mag-NAN-i-mus", definition: "Very generous or forgiving, especially toward a rival or less powerful person.", origin: "Latin magnus (great) + animus (soul).", example: "Her concession speech was magnanimous — no score-settling, no caveats." },
+    { word: "laconic", pos: "adjective", pron: "luh-KON-ik", definition: "Using very few words; terse.", origin: "From Laconia, the region of ancient Sparta, whose inhabitants were famous for brevity.", example: "His laconic reply — 'We'll see' — carried more weight than the hour of arguments before it." },
+    { word: "taciturn", pos: "adjective", pron: "TASS-i-turn", definition: "Reserved or uncommunicative in speech; saying little.", origin: "Latin taciturnus.", example: "The old carpenter was taciturn by default, but when he spoke it was worth leaning in." },
+    { word: "mellifluous", pos: "adjective", pron: "muh-LIF-loo-us", definition: "Sweet-sounding; flowing smoothly, as of a voice or music.", origin: "Latin mel (honey) + fluere (to flow).", example: "The narrator's mellifluous baritone made the dullest passage hypnotic." },
+    { word: "lugubrious", pos: "adjective", pron: "loo-GOO-bree-us", definition: "Looking or sounding sad and dismal.", origin: "Latin lugubris (mournful).", example: "He delivered the weather forecast with a lugubrious solemnity usually reserved for obituaries." },
+    { word: "supercilious", pos: "adjective", pron: "soo-per-SIL-ee-us", definition: "Behaving or looking as though one thinks one is superior.", origin: "Latin supercilium — literally 'eyebrow,' raised in disdain.", example: "Her supercilious glance at the waiter soured the entire dinner." },
+    { word: "nefarious", pos: "adjective", pron: "nuh-FAIR-ee-us", definition: "Wicked or criminal.", origin: "Latin nefarius, from nefas (crime, wrong).", example: "The plot wasn't especially nefarious — just badly thought through." },
+    { word: "ineffable", pos: "adjective", pron: "in-EFF-uh-bul", definition: "Too great or extreme to be expressed in words.", origin: "Latin ineffabilis.", example: "There was an ineffable calm in the monastery garden — beyond what any description could catch." },
+    { word: "equanimity", pos: "noun", pron: "ee-kwuh-NIM-i-tee", definition: "Mental calmness and composure, especially in a difficult situation.", origin: "Latin aequanimitas — 'evenness of mind.'", example: "She faced the diagnosis with an equanimity that unsettled her family more than the news itself." },
+    { word: "alacrity", pos: "noun", pron: "uh-LAK-ri-tee", definition: "Brisk and cheerful readiness.", origin: "Latin alacritas.", example: "He accepted the invitation with an alacrity that surprised even him." },
+    { word: "petrichor", pos: "noun", pron: "PET-ri-kor", definition: "The earthy, pleasant smell that follows rain falling on dry ground.", origin: "Coined in 1964 by Australian researchers, from Greek petra (stone) + ichor (the fluid of the gods).", example: "She opened the window just to catch the petrichor after the first autumn storm." },
+    { word: "schadenfreude", pos: "noun", pron: "SHAH-den-froy-duh", definition: "Pleasure derived from someone else's misfortune.", origin: "German Schaden (harm) + Freude (joy). Entered English in the 19th century.", example: "He tried to suppress the schadenfreude, but his rival's humiliating press conference made it impossible." },
+    { word: "serendipity", pos: "noun", pron: "ser-en-DIP-i-tee", definition: "The occurrence of events by chance in a happy or beneficial way.", origin: "Coined in 1754 by Horace Walpole, from the Persian tale 'The Three Princes of Serendip.'", example: "Meeting her publisher at that obscure café was pure serendipity — she'd only ducked in for coffee." },
+    { word: "obstreperous", pos: "adjective", pron: "ob-STREP-er-us", definition: "Noisy and difficult to control.", origin: "Latin obstreperus.", example: "The toddler grew obstreperous the moment the waiter produced a menu." },
+    { word: "recalcitrant", pos: "adjective", pron: "ri-KAL-si-trant", definition: "Having an obstinately uncooperative attitude.", origin: "Latin recalcitrare — 'to kick back,' from calx (heel).", example: "The software was recalcitrant about every update, refusing to launch without a full restart." },
+    { word: "pernicious", pos: "adjective", pron: "per-NISH-us", definition: "Having a harmful effect, especially in a gradual or subtle way.", origin: "Latin perniciosus.", example: "The most pernicious habits aren't the dramatic ones — they're the small daily compromises." },
+    { word: "sobriquet", pos: "noun", pron: "SO-bri-kay", definition: "A person's nickname.", origin: "French, 18th century.", example: "The sobriquet 'The Iron Chancellor' followed Bismarck long after his death." },
   ];
 
   const CAPITALS = [
@@ -1212,6 +1284,12 @@
   function pickQuoteForDate(date) {
     const seed = daySeed(date);
     return QUOTES[seed % QUOTES.length];
+  }
+
+  function pickWordForDate(date) {
+    // Offset so word and quote don't always rotate in lockstep.
+    const seed = daySeed(date) + 13;
+    return WORDS[seed % WORDS.length];
   }
 
   function pickQuizForDate(date) {
@@ -1985,6 +2063,26 @@
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
   }
 
+  function openWord() {
+    const w = pickWordForDate(new Date());
+    openSheet(`
+      <h2>Word of the day</h2>
+      <p class="subtle">One word. Small tool, sharp edge.</p>
+      <p class="word-headline">${w.word}</p>
+      <p class="word-meta">${w.pos} · /${w.pron}/</p>
+      <p class="word-block-label">Definition</p>
+      <p class="word-def">${w.definition}</p>
+      <p class="word-block-label">Origin</p>
+      <p class="word-origin">${w.origin}</p>
+      <p class="word-block-label">In a sentence</p>
+      <p class="word-example">${w.example}</p>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
   function openQuiz() {
     const todayISO = toISODate(new Date());
     const quiz = pickQuizForDate(new Date());
@@ -2054,6 +2152,10 @@
     const qp = document.getElementById('quote-preview');
     if (qp) qp.textContent = '"' + preview + '"';
 
+    const w = pickWordForDate(new Date());
+    const wp = document.getElementById('word-preview');
+    if (wp) wp.textContent = `${w.word} — ${w.definition.replace(/\.$/, '').slice(0, 54)}${w.definition.length > 55 ? '…' : '.'}`;
+
     const todayISO = toISODate(new Date());
     const prior = state.quizResults[todayISO];
     const quiz = pickQuizForDate(new Date());
@@ -2111,6 +2213,7 @@
   document.getElementById('open-settings').addEventListener('click', openSettings);
   document.getElementById('open-guide').addEventListener('click', openGuide);
   document.getElementById('open-quote').addEventListener('click', openQuote);
+  document.getElementById('open-word').addEventListener('click', openWord);
   document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('today-note-btn').addEventListener('click', () => {
     const iso = toISODate(new Date());
