@@ -1149,6 +1149,225 @@
     text-align: center;
   }
 
+  /* Capture (personal sentence / reflect) */
+  .capture-help {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin: 0 0 10px;
+  }
+  .capture-help em {
+    font-style: italic;
+    color: var(--ink);
+  }
+  .capture-input {
+    width: 100%;
+    min-height: 84px;
+    padding: 12px 14px;
+    font: inherit;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    resize: vertical;
+  }
+  .capture-input:focus { outline: none; border-color: var(--border-strong); }
+  .capture-warn {
+    font-size: 12px;
+    color: var(--terracotta);
+    margin: 8px 0 0;
+    font-style: italic;
+    min-height: 16px;
+  }
+
+  /* Deck status card */
+  .deck-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .deck-card .deck-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  .deck-card .deck-sentence {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink);
+    margin: 0 0 10px;
+  }
+  .deck-card .deck-sentence::before { content: "\201C"; color: var(--ink-faint); margin-right: 2px; }
+  .deck-card .deck-sentence::after  { content: "\201D"; color: var(--ink-faint); margin-left: 2px; }
+  .deck-wild-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .deck-wild {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: transparent;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .deck-wild.on {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .deck-wild.on::after { content: '✓'; }
+  .deck-wild-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .deck-wild-label.on { color: var(--ink); }
+
+  /* Review tile */
+  .moment-tile.review-due {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .moment-tile.review-due .meyebrow { color: rgba(245, 241, 232, 0.7); }
+  .moment-tile.review-due .mtitle { color: var(--bg); }
+  .moment-tile.review-empty {
+    border-style: dashed;
+    background: transparent;
+    color: var(--ink-soft);
+  }
+
+  /* Review sheet */
+  .review-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+  .review-progress-bar {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+  .review-progress-bar .seg {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+  .review-progress-bar .seg.on { background: var(--green-soft); }
+  .review-progress-bar .seg.current { background: var(--green-deep); }
+
+  .review-prompt {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.2;
+    margin: 4px 0 16px;
+    letter-spacing: -0.01em;
+  }
+  .review-subprompt {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+  }
+  .review-answer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .review-answer .def {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink);
+    margin: 0 0 10px;
+  }
+  .review-answer .meta {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin: 10px 0 4px;
+  }
+  .review-answer .personal {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0;
+    font-style: italic;
+  }
+
+  .rating-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .rating-btn {
+    padding: 14px 10px;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .rating-btn .sub {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .rating-btn:hover { border-color: var(--border-strong); }
+  .rating-btn.forgot { background: var(--terracotta); color: var(--bg); border-color: var(--terracotta); }
+  .rating-btn.nearly { background: var(--ochre); color: var(--ink); border-color: var(--ochre); }
+  .rating-btn.good   { background: var(--green-deep); color: var(--bg); border-color: var(--green-deep); }
+  .rating-btn.forgot .sub, .rating-btn.good .sub { color: rgba(245, 241, 232, 0.7); }
+
+  .review-complete {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .review-complete h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 8px;
+  }
+  .review-complete p {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin: 0;
+  }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -1206,6 +1425,10 @@
     <section id="moment-section">
       <p class="section-label"><span>A moment</span></p>
       <div class="moment-grid">
+        <button class="moment-tile" id="open-review" style="display:none">
+          <span class="meyebrow">Review</span>
+          <span class="mtitle" id="review-preview">Spaced repetition.</span>
+        </button>
         <button class="moment-tile" id="open-quote">
           <span class="meyebrow">Quote of the day</span>
           <span class="mtitle" id="quote-preview">A line to sit with.</span>
@@ -1394,19 +1617,24 @@
   // --- State ---------------------------------------------------------------
 
   const defaultState = () => ({
-    sessions: {},   // key: YYYY-MM-DD, value: { gym: minutes, yoga: ... }
-    weekColors: {}, // key: YYYY-MM-DD (Monday of the ISO week), value: color key
-    dayNotes: {},   // key: YYYY-MM-DD, value: note text
-    weekNotes: {},  // key: YYYY-MM-DD (Monday), value: note text
-    habits: {},     // key: YYYY-MM-DD, value: { teeth: bool, breakfast: bool, vitamins: bool, shower: bool }
-    sleep: {},      // key: YYYY-MM-DD, value: number (hours)
-    quizResults: {},// key: YYYY-MM-DD, value: { answer: string, correct: bool }
-    seenQuotes: {}, // key: YYYY-MM-DD, value: true (opened the quote sheet)
-    seenWords: {},  // key: YYYY-MM-DD, value: true
-    quotePractice: {}, // key: YYYY-MM-DD, value: number (repetitions, capped at 5)
-    wordPractice: {},  // key: YYYY-MM-DD, value: number
-    startDate: '2026-04-27', // first Monday the framework is live
+    sessions: {},
+    weekColors: {},
+    dayNotes: {},
+    weekNotes: {},
+    habits: {},
+    sleep: {},
+    quizResults: {},
+    seenQuotes: {},
+    seenWords: {},
+    // SRS decks — keyed by word / quote text
+    // Each entry: { stage, nextReview, lastReview, firstSeen, personalSentence/personalNote, usedInWild, history: [{date, rating}] }
+    wordDeck: {},
+    quoteDeck: {},
+    startDate: '2026-04-27',
   });
+
+  // Spaced repetition intervals (days). Stage 0 → review in 1 day, stage 5 → 30 days.
+  const SRS_INTERVALS = [1, 2, 4, 8, 16, 30];
 
   let state = load();
 
@@ -1472,6 +1700,52 @@
   function daySeed(date) {
     // YYYYMMDD as a single integer — stable, sortable, distinct per day.
     return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  }
+
+  function nextReviewISOFromStage(stage) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const days = SRS_INTERVALS[Math.min(Math.max(0, stage), SRS_INTERVALS.length - 1)];
+    d.setDate(d.getDate() + days);
+    return toISODate(d);
+  }
+
+  function applyRatingToEntry(entry, rating) {
+    const todayISO = toISODate(new Date());
+    entry.lastReview = todayISO;
+    entry.history = entry.history || [];
+    entry.history.push({ date: todayISO, rating });
+    if (rating === 'good') entry.stage = Math.min(SRS_INTERVALS.length - 1, (entry.stage || 0) + 1);
+    else if (rating === 'forgot') entry.stage = 0;
+    // 'nearly' → stage unchanged
+    entry.nextReview = nextReviewISOFromStage(entry.stage || 0);
+    return entry;
+  }
+
+  function createDeckEntry({ personalSentence, personalNote }) {
+    const todayISO = toISODate(new Date());
+    return {
+      stage: 0,
+      firstSeen: todayISO,
+      lastReview: null,
+      nextReview: nextReviewISOFromStage(0),
+      personalSentence: personalSentence || '',
+      personalNote: personalNote || '',
+      usedInWild: false,
+      history: [],
+    };
+  }
+
+  function dueDeckEntries(deck) {
+    const todayISO = toISODate(new Date());
+    return Object.entries(deck)
+      .filter(([_, e]) => e.nextReview && e.nextReview <= todayISO)
+      .sort((a, b) => (a[1].nextReview || '').localeCompare(b[1].nextReview || ''));
+  }
+
+  function stageLabel(stage) {
+    const s = Math.min(Math.max(0, stage || 0), SRS_INTERVALS.length - 1);
+    return `Stage ${s + 1} of ${SRS_INTERVALS.length}`;
   }
 
   function pickQuoteForDate(date) {
@@ -2262,15 +2536,8 @@
 
     if (isToday) { state.seenQuotes[dateISO] = true; save(); }
 
-    const practiceCount = state.quotePractice[dateISO] || 0;
-    const target = q.text;
-    const practiceHTML = isToday ? renderPracticeBlock({
-      target,
-      count: practiceCount,
-      placeholder: 'Type the quote. Press enter after each try.',
-      label: 'Practice writing',
-      longForm: target.length > 80,
-    }) : '';
+    const deckEntry = state.quoteDeck[q.text];
+    const deckHTML = isToday ? renderQuoteDeckSection(q, deckEntry) : '';
 
     openSheet(`
       <h2>Quote of the day</h2>
@@ -2279,23 +2546,81 @@
       <p class="quote-attrib"><strong>${q.author}</strong> · ${q.year} · ${q.source}</p>
       <p class="quote-meaning-label">What it means</p>
       <p class="quote-meaning">${q.meaning}</p>
-      ${practiceHTML}
+      ${deckHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
-    if (isToday) wirePractice({
-      target,
-      getCount: () => state.quotePractice[dateISO] || 0,
-      setCount: (n) => {
-        if (n > 0) state.quotePractice[dateISO] = n;
-        else delete state.quotePractice[dateISO];
+    if (isToday) wireQuoteDeckSection(q);
+  }
+
+  function renderQuoteDeckSection(q, entry) {
+    if (entry) {
+      const dueLabel = entry.nextReview >= toISODate(new Date())
+        ? `Next review ${formatShortDate(entry.nextReview)}`
+        : `Due today`;
+      return `
+        <div class="sheet-section">
+          <p class="sheet-section-label">In your deck · ${stageLabel(entry.stage)}</p>
+          <div class="deck-card">
+            <div class="deck-meta"><span>Your note</span><span>${dueLabel}</span></div>
+            <p class="deck-sentence">${(entry.personalNote || '(no note)').replace(/</g, '&lt;')}</p>
+            <div class="deck-wild-row">
+              <span class="deck-wild ${entry.usedInWild ? 'on' : ''}" id="q-wild"></span>
+              <span class="deck-wild-label ${entry.usedInWild ? 'on' : ''}" id="q-wild-label">I've put this idea to use this week</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return `
+      <div class="sheet-section">
+        <p class="sheet-section-label">Make it yours</p>
+        <p class="capture-help">Write one line about how this quote lands for you <em>right now</em> — something specific to your life this week. Personal connection is the glue.</p>
+        <textarea class="capture-input" id="q-note" placeholder="What does this bring up for you?"></textarea>
+        <p class="capture-warn" id="q-warn"></p>
+        <div class="sheet-actions" style="margin-top:8px">
+          <button class="btn btn-primary" id="q-add">Add to your deck</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function wireQuoteDeckSection(q) {
+    const wild = sheet.querySelector('#q-wild');
+    if (wild) {
+      const label = sheet.querySelector('#q-wild-label');
+      const toggle = () => {
+        const entry = state.quoteDeck[q.text];
+        if (!entry) return;
+        entry.usedInWild = !entry.usedInWild;
         save();
-      },
-      onChange: renderMomentTiles,
-    });
+        wild.classList.toggle('on', entry.usedInWild);
+        if (label) label.classList.toggle('on', entry.usedInWild);
+      };
+      wild.addEventListener('click', toggle);
+      if (label) label.addEventListener('click', toggle);
+    }
+    const addBtn = sheet.querySelector('#q-add');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const note = (sheet.querySelector('#q-note').value || '').trim();
+        const warn = sheet.querySelector('#q-warn');
+        if (note.length < 6) { warn.textContent = 'A line is fine — just write something true.'; return; }
+        state.quoteDeck[q.text] = createDeckEntry({ personalNote: note });
+        save();
+        renderMomentTiles();
+        closeSheet();
+        setTimeout(() => openQuote(), 120);
+      });
+    }
+  }
+
+  function formatShortDate(iso) {
+    const d = parseISO(iso);
+    return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(d);
   }
 
   function openWord(opts) {
@@ -2307,15 +2632,8 @@
 
     if (isToday) { state.seenWords[dateISO] = true; save(); }
 
-    const practiceCount = state.wordPractice[dateISO] || 0;
-    const target = w.word;
-    const practiceHTML = isToday ? renderPracticeBlock({
-      target,
-      count: practiceCount,
-      placeholder: 'Type the word. Press enter after each.',
-      label: 'Practice writing',
-      longForm: false,
-    }) : '';
+    const deckEntry = state.wordDeck[w.word];
+    const deckHTML = isToday ? renderWordDeckSection(w, deckEntry) : '';
 
     openSheet(`
       <h2>Word of the day</h2>
@@ -2328,23 +2646,82 @@
       <p class="word-origin">${w.origin}</p>
       <p class="word-block-label">In a sentence</p>
       <p class="word-example">${w.example}</p>
-      ${practiceHTML}
+      ${deckHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
-    if (isToday) wirePractice({
-      target,
-      getCount: () => state.wordPractice[dateISO] || 0,
-      setCount: (n) => {
-        if (n > 0) state.wordPractice[dateISO] = n;
-        else delete state.wordPractice[dateISO];
+    if (isToday) wireWordDeckSection(w);
+  }
+
+  function renderWordDeckSection(w, entry) {
+    if (entry) {
+      const dueLabel = entry.nextReview >= toISODate(new Date())
+        ? `Next review ${formatShortDate(entry.nextReview)}`
+        : `Due today`;
+      return `
+        <div class="sheet-section">
+          <p class="sheet-section-label">In your deck · ${stageLabel(entry.stage)}</p>
+          <div class="deck-card">
+            <div class="deck-meta"><span>Your sentence</span><span>${dueLabel}</span></div>
+            <p class="deck-sentence">${(entry.personalSentence || '(no sentence)').replace(/</g, '&lt;')}</p>
+            <div class="deck-wild-row">
+              <span class="deck-wild ${entry.usedInWild ? 'on' : ''}" id="w-wild"></span>
+              <span class="deck-wild-label ${entry.usedInWild ? 'on' : ''}" id="w-wild-label">I've used this word in the wild</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return `
+      <div class="sheet-section">
+        <p class="sheet-section-label">Make it yours</p>
+        <p class="capture-help">Write one sentence using <em>${w.word}</em> that's true about your own life this week. Personal connection is what makes words stick — passive reading fades fast, active production locks in.</p>
+        <textarea class="capture-input" id="w-sentence" placeholder="e.g. Roberta's thesis deadline has made her schedule quite ${w.word.toLowerCase()} this month."></textarea>
+        <p class="capture-warn" id="w-warn"></p>
+        <div class="sheet-actions" style="margin-top:8px">
+          <button class="btn btn-primary" id="w-add">Add to your deck</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function wireWordDeckSection(w) {
+    const wild = sheet.querySelector('#w-wild');
+    if (wild) {
+      const label = sheet.querySelector('#w-wild-label');
+      const toggle = () => {
+        const entry = state.wordDeck[w.word];
+        if (!entry) return;
+        entry.usedInWild = !entry.usedInWild;
         save();
-      },
-      onChange: renderMomentTiles,
-    });
+        wild.classList.toggle('on', entry.usedInWild);
+        if (label) label.classList.toggle('on', entry.usedInWild);
+      };
+      wild.addEventListener('click', toggle);
+      if (label) label.addEventListener('click', toggle);
+    }
+    const addBtn = sheet.querySelector('#w-add');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const sentence = (sheet.querySelector('#w-sentence').value || '').trim();
+        const warn = sheet.querySelector('#w-warn');
+        if (sentence.length < 6) { warn.textContent = 'A short sentence is fine — just one real line.'; return; }
+        const norm = sentence.toLowerCase();
+        const wRoot = w.word.toLowerCase().slice(0, Math.max(4, w.word.length - 3));
+        if (!norm.includes(wRoot)) {
+          warn.textContent = `Try to use the word "${w.word}" itself (any form is fine).`;
+          return;
+        }
+        state.wordDeck[w.word] = createDeckEntry({ personalSentence: sentence });
+        save();
+        renderMomentTiles();
+        closeSheet();
+        setTimeout(() => openWord(), 120);
+      });
+    }
   }
 
   function renderPracticeBlock({ target, count, placeholder, label, longForm }) {
@@ -2512,6 +2889,31 @@
     const wp = document.getElementById('word-preview');
     if (wp) wp.textContent = `${w.word} — ${w.definition.replace(/\.$/, '').slice(0, 54)}${w.definition.length > 55 ? '…' : '.'}`;
 
+    // Review tile — show only when items are due, or when deck is non-empty.
+    const reviewBtn = document.getElementById('open-review');
+    const reviewPreview = document.getElementById('review-preview');
+    if (reviewBtn && reviewPreview) {
+      const dueWords = dueDeckEntries(state.wordDeck).length;
+      const dueQuotes = dueDeckEntries(state.quoteDeck).length;
+      const totalDeck = Object.keys(state.wordDeck).length + Object.keys(state.quoteDeck).length;
+      reviewBtn.classList.remove('review-due', 'review-empty');
+      if (dueWords + dueQuotes > 0) {
+        reviewBtn.style.display = '';
+        reviewBtn.classList.add('review-due');
+        const parts = [];
+        if (dueWords) parts.push(`${dueWords} word${dueWords === 1 ? '' : 's'}`);
+        if (dueQuotes) parts.push(`${dueQuotes} quote${dueQuotes === 1 ? '' : 's'}`);
+        reviewPreview.textContent = `${parts.join(' · ')} due`;
+      } else if (totalDeck > 0) {
+        reviewBtn.style.display = '';
+        reviewBtn.classList.add('review-empty');
+        const next = [earliestUpcoming(state.wordDeck), earliestUpcoming(state.quoteDeck)].filter(Boolean).sort()[0];
+        reviewPreview.textContent = next ? `All caught up · next on ${formatShortDate(next)}` : 'All caught up.';
+      } else {
+        reviewBtn.style.display = 'none';
+      }
+    }
+
     const todayISO = toISODate(new Date());
     const prior = state.quizResults[todayISO];
     const quiz = pickQuizForDate(new Date());
@@ -2536,6 +2938,139 @@
     }
   }
 
+  // --- Review (spaced repetition) -----------------------------------------
+
+  function openReview() {
+    const dueWordPairs = dueDeckEntries(state.wordDeck);
+    const dueQuotePairs = dueDeckEntries(state.quoteDeck);
+
+    // Build unified queue: words first, then quotes.
+    const queue = [
+      ...dueWordPairs.map(([key, entry]) => ({ kind: 'word', key, entry })),
+      ...dueQuotePairs.map(([key, entry]) => ({ kind: 'quote', key, entry })),
+    ];
+
+    if (queue.length === 0) {
+      const nextWord = earliestUpcoming(state.wordDeck);
+      const nextQuote = earliestUpcoming(state.quoteDeck);
+      const next = [nextWord, nextQuote].filter(Boolean).sort()[0];
+      openSheet(`
+        <h2>Review</h2>
+        <p class="subtle">Spaced repetition keeps the good stuff from leaking out.</p>
+        <div class="review-complete">
+          <h3>All reviewed.</h3>
+          <p>${next ? `Next review on ${formatShortDate(next)}.` : 'Add a word or quote to your deck to begin.'}</p>
+        </div>
+        <div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Close</button></div>
+      `);
+      sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+      return;
+    }
+
+    let index = 0;
+    let revealed = false;
+
+    const render = () => {
+      const item = queue[index];
+      const segs = queue.map((_, i) => {
+        const cls = i < index ? 'on' : (i === index ? 'current' : '');
+        return `<span class="seg ${cls}"></span>`;
+      }).join('');
+
+      let body;
+      if (item.kind === 'word') {
+        const w = WORDS.find(x => x.word === item.key);
+        if (!w) { advance(); return; }
+        body = `
+          <p class="review-prompt">${w.word}</p>
+          <p class="review-subprompt">What does this mean? Think it through, then reveal.</p>
+          ${revealed ? `
+            <div class="review-answer">
+              <p class="def">${w.definition}</p>
+              <p class="meta">Your sentence</p>
+              <p class="personal">${(item.entry.personalSentence || '—').replace(/</g, '&lt;')}</p>
+            </div>
+          ` : `
+            <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show answer</button></div>
+          `}
+        `;
+      } else {
+        const q = QUOTES.find(x => x.text === item.key);
+        if (!q) { advance(); return; }
+        body = `
+          <p class="review-prompt" style="font-size:22px">"${q.text}"</p>
+          <p class="review-subprompt"><strong>${q.author}</strong> · ${q.year}. Does the idea still land?</p>
+          ${revealed ? `
+            <div class="review-answer">
+              <p class="def">${q.meaning}</p>
+              <p class="meta">Your note</p>
+              <p class="personal">${(item.entry.personalNote || '—').replace(/</g, '&lt;')}</p>
+            </div>
+          ` : `
+            <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show meaning</button></div>
+          `}
+        `;
+      }
+
+      openSheet(`
+        <h2>Review</h2>
+        <p class="review-progress"><span>${item.kind === 'word' ? 'Word' : 'Quote'}</span><span>${index + 1} of ${queue.length}</span></p>
+        <div class="review-progress-bar" style="grid-template-columns: repeat(${queue.length}, 1fr);">${segs}</div>
+        ${body}
+        ${revealed ? `
+          <div class="rating-row">
+            <button class="rating-btn forgot" data-rating="forgot">Forgot<span class="sub">back to 1 day</span></button>
+            <button class="rating-btn nearly" data-rating="nearly">Nearly<span class="sub">same interval</span></button>
+            <button class="rating-btn good"   data-rating="good">Got it<span class="sub">advance</span></button>
+          </div>
+        ` : ''}
+        <div class="sheet-actions" style="margin-top:18px">
+          <button class="btn btn-ghost" id="cancel">Pause</button>
+        </div>
+      `);
+
+      sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+      const revealBtn = sheet.querySelector('#reveal');
+      if (revealBtn) revealBtn.addEventListener('click', () => { revealed = true; render(); });
+      sheet.querySelectorAll('.rating-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rating = btn.dataset.rating;
+          const deck = item.kind === 'word' ? state.wordDeck : state.quoteDeck;
+          const entry = deck[item.key];
+          if (entry) applyRatingToEntry(entry, rating);
+          save();
+          advance();
+        });
+      });
+    };
+
+    const advance = () => {
+      index++;
+      revealed = false;
+      if (index >= queue.length) {
+        openSheet(`
+          <h2>Review</h2>
+          <div class="review-complete">
+            <h3>Done for today.</h3>
+            <p>The chain holds for the mind, too.</p>
+          </div>
+          <div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Close</button></div>
+        `);
+        sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+        renderMomentTiles();
+      } else {
+        render();
+      }
+    };
+
+    render();
+  }
+
+  function earliestUpcoming(deck) {
+    const dates = Object.values(deck).map(e => e.nextReview).filter(Boolean).sort();
+    return dates[0];
+  }
+
   // --- Archive -------------------------------------------------------------
 
   function openArchive(tab) {
@@ -2552,7 +3087,10 @@
       } else {
         listHTML = `<div class="archive-list">${quoteDays.map(iso => {
           const q = pickQuoteForDate(parseISO(iso));
-          const done = (state.quotePractice[iso] || 0) >= 5;
+          const deck = state.quoteDeck[q.text];
+          const badge = deck
+            ? `<span class="abadge">${stageLabel(deck.stage)}${deck.usedInWild ? ' · in the wild' : ''}</span>`
+            : '';
           const preview = q.text.length > 48 ? q.text.slice(0, 48).trim() + '…' : q.text;
           return `
             <button class="archive-item" data-iso="${iso}">
@@ -2560,7 +3098,7 @@
                 <span class="adate">${fmtDate.format(parseISO(iso))} · ${q.author}</span>
                 <span class="atext">"${preview}"</span>
               </span>
-              ${done ? '<span class="abadge">Memorized</span>' : ''}
+              ${badge}
             </button>
           `;
         }).join('')}</div>`;
@@ -2571,14 +3109,17 @@
       } else {
         listHTML = `<div class="archive-list">${wordDays.map(iso => {
           const w = pickWordForDate(parseISO(iso));
-          const done = (state.wordPractice[iso] || 0) >= 5;
+          const deck = state.wordDeck[w.word];
+          const badge = deck
+            ? `<span class="abadge">${stageLabel(deck.stage)}${deck.usedInWild ? ' · in the wild' : ''}</span>`
+            : '';
           return `
             <button class="archive-item" data-iso="${iso}">
               <span class="aleft">
                 <span class="adate">${fmtDate.format(parseISO(iso))} · ${w.pos}</span>
                 <span class="atext">${w.word} — ${w.definition.replace(/\.$/, '')}</span>
               </span>
-              ${done ? '<span class="abadge">Memorized</span>' : ''}
+              ${badge}
             </button>
           `;
         }).join('')}</div>`;
@@ -2653,6 +3194,7 @@
   document.getElementById('open-word').addEventListener('click', () => openWord());
   document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('open-archive').addEventListener('click', () => openArchive());
+  document.getElementById('open-review').addEventListener('click', openReview);
   document.getElementById('today-note-btn').addEventListener('click', () => {
     const iso = toISODate(new Date());
     openDay(iso);
