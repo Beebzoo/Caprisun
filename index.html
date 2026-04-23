@@ -4421,15 +4421,60 @@
     return picked;
   }
 
+  function answerShape(answer) {
+    const raw = (answer || '').trim();
+    if (!raw) return 'phrase';
+    // Strip trailing parenthetical detail and em-dash commentary for shape check
+    let main = raw.replace(/\s*\([^)]*\)/g, ' ').replace(/\s*—.*$/, '').trim();
+    if (!main) return 'phrase';
+    // Year (with optional era suffix)
+    if (/^\d{3,4}s?(\s*(BC|BCE|AD|CE))?$/i.test(main)) return 'year';
+    // Year with trailing text ("1989 and beyond")
+    if (/^\d{3,4}(\s|$)/.test(main)) return 'year';
+    // Pure number with optional unit
+    if (/^~?[-+]?\d+(\.\d+)?\s*[a-zA-Z%°·/]*$/.test(main)) return 'number';
+    if (/^~?\d[\d,\.]*\s*(million|billion|thousand|percent|%|°C|°F|m|km|kg|years|days)?$/i.test(main)) return 'number';
+    // Quote
+    if (raw.startsWith('"') || raw.startsWith('“') || raw.startsWith('‘')) return 'quote';
+    return 'phrase';
+  }
+
+  function answerWordCount(a) {
+    const stripped = (a || '').replace(/[()""''“”‘’]/g, '');
+    const m = stripped.match(/\S+/g);
+    return m ? m.length : 0;
+  }
+
+  function lengthBucket(n) {
+    if (n <= 2) return 'tiny';
+    if (n <= 5) return 'short';
+    if (n <= 12) return 'medium';
+    return 'long';
+  }
+
   function buildChoices(q, all) {
-    const pool = all.filter(o => o.category === q.category && o.id !== q.id);
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
+    const correctShape = answerShape(q.answer);
+    const correctLen = lengthBucket(answerWordCount(q.answer));
+    const sameCat = all.filter(o => o.category === q.category && o.id !== q.id);
+
+    const tier = (o) => {
+      const s = answerShape(o.answer);
+      const l = lengthBucket(answerWordCount(o.answer));
+      if (s === correctShape && l === correctLen) return 0;
+      if (s === correctShape) return 1;
+      if (l === correctLen) return 2;
+      return 3;
+    };
+
+    // Sort by tier, break ties randomly
+    const ranked = sameCat
+      .map(o => ({ o, t: tier(o), r: Math.random() }))
+      .sort((a, b) => a.t - b.t || a.r - b.r)
+      .map(x => x.o);
+
     const distractors = [];
     const seen = new Set([(q.answer || '').toLowerCase().trim()]);
-    for (const other of pool) {
+    for (const other of ranked) {
       const a = (other.answer || '').trim();
       const key = a.toLowerCase();
       if (!seen.has(key)) {
@@ -4438,6 +4483,25 @@
       }
       if (distractors.length === 3) break;
     }
+
+    // Final fallback: any category, same shape (rare — e.g. thin quote pool)
+    if (distractors.length < 3) {
+      const rest = all.filter(o => o.id !== q.id && answerShape(o.answer) === correctShape);
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j], rest[i]];
+      }
+      for (const other of rest) {
+        const a = (other.answer || '').trim();
+        const key = a.toLowerCase();
+        if (!seen.has(key)) {
+          distractors.push(a);
+          seen.add(key);
+        }
+        if (distractors.length === 3) break;
+      }
+    }
+
     const options = [...distractors, q.answer];
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
