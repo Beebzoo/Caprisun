@@ -1485,6 +1485,85 @@
     color: var(--ink-faint);
   }
 
+  /* Yes / No pill toggle (drinks, flowers) */
+  .yn-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .yn-choice {
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    text-align: center;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .yn-choice:hover { border-color: var(--border-strong); }
+  .yn-choice.on {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .drink-details {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  /* Flowers banner — shows on Wednesdays */
+  .flowers-banner {
+    margin-top: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .flowers-banner p {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+  .flowers-banner .actions { display: flex; gap: 8px; }
+  .flowers-banner .actions button {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--ink);
+  }
+  .flowers-banner .actions button:hover { border-color: var(--ink-soft); }
+  .flowers-banner .actions button.yes {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .flowers-banner.answered {
+    background: var(--surface-2);
+    border-style: solid;
+    border-color: var(--border);
+  }
+  .flowers-banner.answered p { color: var(--ink-soft); }
+  .flowers-banner .undo {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    padding: 4px 8px;
+    border: 0;
+    background: transparent;
+  }
+  .flowers-banner .undo:hover { color: var(--ink-soft); }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -1523,6 +1602,7 @@
         <span>this week</span>
       </div>
       <div id="seal-slot"></div>
+      <div id="flowers-slot"></div>
     </section>
 
     <section id="today-section">
@@ -1790,6 +1870,10 @@
     // Each entry: { stage, nextReview, lastReview, firstSeen, personalSentence/personalNote, usedInWild, history: [{date, rating}] }
     wordDeck: {},
     quoteDeck: {},
+    // Drinks log — key: YYYY-MM-DD → null | { drank: false } | { drank: true, until: 'HH:MM', count: N }
+    drinks: {},
+    // Wednesday flowers — key: YYYY-MM-DD (Wednesday date) → 'yes' | 'no'
+    flowers: {},
     startDate: '2026-04-27',
   });
 
@@ -1860,6 +1944,23 @@
   function daySeed(date) {
     // YYYYMMDD as a single integer — stable, sortable, distinct per day.
     return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  }
+
+  // Drinks "till how late" — encoded as offset-in-minutes from 18:00, range 0..660 (18:00 → 05:00 next day).
+  const DRINK_OFFSET_MAX = 11 * 60; // 05:00 next day
+  function offsetToTime(off) {
+    const clamped = Math.max(0, Math.min(DRINK_OFFSET_MAX, off));
+    const mins = (18 * 60 + clamped) % (24 * 60);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${pad(h)}:${pad(m)}`;
+  }
+  function timeToOffset(str) {
+    if (!str || typeof str !== 'string') return 5 * 60 + 30; // default 23:30
+    const [h, m] = str.split(':').map(Number);
+    let mins = (h || 0) * 60 + (m || 0);
+    if (mins < 18 * 60) mins += 24 * 60; // past midnight
+    return Math.max(0, Math.min(DRINK_OFFSET_MAX, mins - 18 * 60));
   }
 
   function nextReviewISOFromStage(stage) {
@@ -2132,6 +2233,57 @@
     }
   }
 
+  function renderFlowersPrompt() {
+    const slot = document.getElementById('flowers-slot');
+    if (!slot) return;
+    slot.innerHTML = '';
+    if (isPreStart()) return;
+    const today = new Date();
+    if (today.getDay() !== 3) return; // Wednesday
+
+    const iso = toISODate(today);
+    const answer = state.flowers[iso];
+
+    const banner = document.createElement('div');
+    banner.className = 'flowers-banner' + (answer ? ' answered' : '');
+
+    if (answer === 'yes') {
+      banner.innerHTML = `
+        <p>Flowers for Roberta · yes</p>
+        <button class="undo" data-action="undo">Change</button>
+      `;
+    } else if (answer === 'no') {
+      banner.innerHTML = `
+        <p>Flowers for Roberta · not today</p>
+        <button class="undo" data-action="undo">Change</button>
+      `;
+    } else {
+      banner.innerHTML = `
+        <p>Flowers for Roberta?</p>
+        <div class="actions">
+          <button data-val="no">Not today</button>
+          <button class="yes" data-val="yes">Yes</button>
+        </div>
+      `;
+    }
+
+    slot.appendChild(banner);
+
+    banner.querySelectorAll('[data-val]').forEach(b => {
+      b.addEventListener('click', () => {
+        state.flowers[iso] = b.dataset.val;
+        save();
+        renderFlowersPrompt();
+      });
+    });
+    const undoBtn = banner.querySelector('[data-action="undo"]');
+    if (undoBtn) undoBtn.addEventListener('click', () => {
+      delete state.flowers[iso];
+      save();
+      renderFlowersPrompt();
+    });
+  }
+
   function renderPreStart() {
     const pre = isPreStart();
     document.getElementById('today-section').style.display = pre ? 'none' : '';
@@ -2256,6 +2408,8 @@
     const habitCounts = weekHabits(weekDays);
     const sleep = weekSleep(weekDays);
     const totals = weekActivityTotals(weekDays);
+    const drinkNights = weekDays.filter(({ iso }) => state.drinks[iso]?.drank).length;
+    const drinkTotal = weekDays.reduce((s, { iso }) => s + (state.drinks[iso]?.count || 0), 0);
     const fmtH = (n) => Number.isInteger(n) ? String(n) : n.toFixed(1);
 
     const activityTiles = ACTIVITIES.map(a => {
@@ -2291,6 +2445,13 @@
       </div>
     `;
 
+    const drinksTile = drinkNights > 0 ? `
+      <div class="summary-tile wide">
+        <p class="slabel">Drinks</p>
+        <p class="svalue">${drinkNights} night${drinkNights === 1 ? '' : 's'}<small>${drinkTotal} total</small></p>
+      </div>
+    ` : '';
+
     const anyActivity = ACTIVITIES.some(a => (totals[a.key] || 0) > 0);
 
     return `
@@ -2298,6 +2459,7 @@
         ${anyActivity ? activityTiles : '<div class="summary-tile wide"><p class="slabel">Sessions</p><p class="svalue" style="color:var(--ink-faint)">—<small>none logged</small></p></div>'}
         ${habitTiles}
         ${sleepTile}
+        ${drinksTile}
       </div>
     `;
   }
@@ -2477,6 +2639,7 @@
     const habits = state.habits[dateISO] || {};
     const sleepHrs = state.sleep[dateISO] ?? 0;
     const note = state.dayNotes[dateISO] || '';
+    const drinkRec = state.drinks[dateISO] || null;
 
     const activityRows = ACTIVITIES.map(act => {
       const mins = sessions[act.key] || 0;
@@ -2547,6 +2710,38 @@
       </div>
 
       <div class="sheet-section">
+        <p class="sheet-section-label">Did we drink last night?</p>
+        <div class="yn-toggle">
+          <button class="yn-choice ${drinkRec && drinkRec.drank === false ? 'on' : ''}" data-drink="no">No</button>
+          <button class="yn-choice ${drinkRec && drinkRec.drank === true ? 'on' : ''}" data-drink="yes">Yes</button>
+        </div>
+        <div class="drink-details" id="drink-details" style="display:${drinkRec && drinkRec.drank ? 'grid' : 'none'}">
+          <div class="sleep-row">
+            <span>
+              <span class="slabel">Till how late</span>
+              <span class="ssub">half-hour steps</span>
+            </span>
+            <span class="mini-stepper">
+              <button id="until-dec" aria-label="Earlier">−</button>
+              <span class="mval"><span id="until-val">${offsetToTime(timeToOffset(drinkRec && drinkRec.until))}</span></span>
+              <button id="until-inc" aria-label="Later">+</button>
+            </span>
+          </div>
+          <div class="sleep-row">
+            <span>
+              <span class="slabel">Roughly how many</span>
+              <span class="ssub">beers or equivalents</span>
+            </span>
+            <span class="mini-stepper">
+              <button id="count-dec" aria-label="Fewer">−</button>
+              <span class="mval"><span id="count-val">${drinkRec && typeof drinkRec.count === 'number' ? drinkRec.count : 3}</span></span>
+              <button id="count-inc" aria-label="More">+</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-section">
         <p class="sheet-section-label">Note</p>
         <textarea class="note-area" id="day-note" placeholder="A line or two. How it went, how it felt.">${note.replace(/</g, '&lt;')}</textarea>
       </div>
@@ -2607,6 +2802,39 @@
     sheet.querySelector('#sleep-dec').addEventListener('click', () => stepSleep(-0.5));
     sheet.querySelector('#sleep-inc').addEventListener('click', () => stepSleep(0.5));
 
+    // Drinks working copy
+    let workingDrank = drinkRec ? drinkRec.drank : null; // null | true | false
+    let workingUntilOffset = timeToOffset(drinkRec && drinkRec.until);
+    let workingCount = drinkRec && typeof drinkRec.count === 'number' ? drinkRec.count : 3;
+    const drinkDetails = sheet.querySelector('#drink-details');
+    const untilValEl = sheet.querySelector('#until-val');
+    const countValEl = sheet.querySelector('#count-val');
+    sheet.querySelectorAll('.yn-choice[data-drink]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.drink;
+        workingDrank = (val === 'yes');
+        sheet.querySelectorAll('.yn-choice[data-drink]').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+        if (drinkDetails) drinkDetails.style.display = workingDrank ? 'grid' : 'none';
+      });
+    });
+    sheet.querySelector('#until-dec').addEventListener('click', () => {
+      workingUntilOffset = Math.max(0, workingUntilOffset - 30);
+      if (untilValEl) untilValEl.textContent = offsetToTime(workingUntilOffset);
+    });
+    sheet.querySelector('#until-inc').addEventListener('click', () => {
+      workingUntilOffset = Math.min(DRINK_OFFSET_MAX, workingUntilOffset + 30);
+      if (untilValEl) untilValEl.textContent = offsetToTime(workingUntilOffset);
+    });
+    sheet.querySelector('#count-dec').addEventListener('click', () => {
+      workingCount = Math.max(0, workingCount - 1);
+      if (countValEl) countValEl.textContent = workingCount;
+    });
+    sheet.querySelector('#count-inc').addEventListener('click', () => {
+      workingCount = Math.min(30, workingCount + 1);
+      if (countValEl) countValEl.textContent = workingCount;
+    });
+
     sheet.querySelector('#cancel').addEventListener('click', () => {
       closeSheet();
       if (onClose) setTimeout(onClose, 180);
@@ -2627,6 +2855,18 @@
 
       if (workingColor) state.dayColors[dateISO] = workingColor;
       else delete state.dayColors[dateISO];
+
+      if (workingDrank === true) {
+        state.drinks[dateISO] = {
+          drank: true,
+          until: offsetToTime(workingUntilOffset),
+          count: workingCount,
+        };
+      } else if (workingDrank === false) {
+        state.drinks[dateISO] = { drank: false };
+      } else {
+        delete state.drinks[dateISO];
+      }
 
       const noteVal = sheet.querySelector('#day-note').value;
       if (noteVal.trim()) state.dayNotes[dateISO] = noteVal;
@@ -3561,6 +3801,7 @@
   function renderAll() {
     renderHeader();
     renderChain();
+    renderFlowersPrompt();
     renderPreStart();
     renderTiles();
     renderTodayNoteBtn();
