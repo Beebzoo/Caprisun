@@ -103,6 +103,26 @@
     letter-spacing: 0.02em;
   }
 
+  .motivation {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin: 12px 0 0;
+    max-width: 32em;
+  }
+
+  .motivation .mot-author {
+    font-style: normal;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-left: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
   section { margin-bottom: 40px; }
 
   .section-label {
@@ -1489,6 +1509,7 @@
         </span>
       </h1>
       <div class="date" id="date"></div>
+      <p class="motivation" id="motivation"></p>
     </header>
 
     <section id="chain-section">
@@ -1639,6 +1660,44 @@
     { word: "recalcitrant", pos: "adjective", pron: "ri-KAL-si-trant", definition: "Having an obstinately uncooperative attitude.", origin: "Latin recalcitrare — 'to kick back,' from calx (heel).", example: "The software was recalcitrant about every update, refusing to launch without a full restart." },
     { word: "pernicious", pos: "adjective", pron: "per-NISH-us", definition: "Having a harmful effect, especially in a gradual or subtle way.", origin: "Latin perniciosus.", example: "The most pernicious habits aren't the dramatic ones — they're the small daily compromises." },
     { word: "sobriquet", pos: "noun", pron: "SO-bri-kay", definition: "A person's nickname.", origin: "French, 18th century.", example: "The sobriquet 'The Iron Chancellor' followed Bismarck long after his death." },
+  ];
+
+  const MOTIVATIONS = [
+    { text: "Showing up is the work." },
+    { text: "Never miss twice." },
+    { text: "Context beats willpower." },
+    { text: "Minimum viable beats zero." },
+    { text: "The chain is the whole game." },
+    { text: "Rest is part of training." },
+    { text: "Maintenance is a real training phase." },
+    { text: "The hardest lift is out of bed." },
+    { text: "Progress is quiet. Trust it." },
+    { text: "Small moves, daily. That's the whole thing." },
+    { text: "Action is the antidote to despair.", author: "Joan Baez" },
+    { text: "Discipline equals freedom.", author: "Jocko Willink" },
+    { text: "You fall to the level of your systems.", author: "James Clear" },
+    { text: "Do what you can, with what you have, where you are.", author: "Theodore Roosevelt" },
+    { text: "Comparison is the thief of joy.", author: "Theodore Roosevelt" },
+    { text: "Identity before outcome." },
+    { text: "Today trains tomorrow." },
+    { text: "Be strict with yourself, patient with the process." },
+    { text: "What you repeat, you become." },
+    { text: "Effort is the only thing you control." },
+    { text: "One session, then the next." },
+    { text: "Show up. The rest follows." },
+    { text: "Strong on the hard days." },
+    { text: "You don't need motivation. You need the next small action." },
+    { text: "The quiet Tuesday gym is where the work gets done." },
+    { text: "Keep the chain." },
+    { text: "Don't break the chain.", author: "Jerry Seinfeld" },
+    { text: "You are the sum of your days." },
+    { text: "Consistency is the mother of mastery." },
+    { text: "Do it tired. Do it anyway." },
+    { text: "Every day you show up, you become harder to break." },
+    { text: "The cave you fear to enter holds the treasure you seek.", author: "Joseph Campbell" },
+    { text: "Start before you're ready." },
+    { text: "One more rep." },
+    { text: "Amateur hour ends when you do it tired." },
   ];
 
   const CAPITALS = [
@@ -1860,6 +1919,11 @@
     return WORDS[seed % WORDS.length];
   }
 
+  function pickMotivationForDate(date) {
+    const seed = daySeed(date) + 5;
+    return MOTIVATIONS[seed % MOTIVATIONS.length];
+  }
+
   function pickQuizForDate(date) {
     const seed = daySeed(date);
     const idx = seed % CAPITALS.length;
@@ -1994,6 +2058,13 @@
     document.getElementById('greeting').textContent = greet;
     const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     document.getElementById('date').textContent = fmt.format(new Date());
+
+    const motEl = document.getElementById('motivation');
+    if (motEl) {
+      const m = pickMotivationForDate(new Date());
+      if (m.author) motEl.innerHTML = `${m.text}<span class="mot-author">${m.author}</span>`;
+      else motEl.textContent = m.text;
+    }
   }
 
   // --- Rendering: chain ----------------------------------------------------
