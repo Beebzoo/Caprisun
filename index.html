@@ -1660,11 +1660,21 @@
     <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
   </div>
 
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 (() => {
   'use strict';
 
   const STORAGE_KEY = 'caprisun.v0';
+
+  // --- Cloud sync config ---------------------------------------------------
+  const SUPABASE_URL = 'https://ejbmsfptfgkvkaitwjak.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_ttRo1JSqfBk4QJoTgndB7A_Rkj5Z7Mx';
+  const sb = (window.supabase && window.supabase.createClient)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      })
+    : null;
 
   const ACTIVITIES = [
     { key: 'gym',        name: 'Gym',        defaultAvg: 45 },
@@ -1893,8 +1903,181 @@
       return { ...defaultState(), ...JSON.parse(raw) };
     } catch { return defaultState(); }
   }
-  function save() {
+  function saveLocal() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+  function save() {
+    state._updatedAt = new Date().toISOString();
+    saveLocal();
+    schedulePush();
+  }
+
+  // --- Cloud sync ----------------------------------------------------------
+
+  let currentUser = null;
+  let syncStatus = sb ? 'signed-out' : 'disabled'; // signed-out | syncing | synced | offline | error | disabled
+  let lastSyncAt = null;
+  let pushTimer = null;
+
+  function setSyncStatus(s) {
+    syncStatus = s;
+    if (s === 'synced') lastSyncAt = new Date();
+    renderSyncSection();
+  }
+
+  function schedulePush() {
+    if (!sb || !currentUser) return;
+    clearTimeout(pushTimer);
+    setSyncStatus('syncing');
+    pushTimer = setTimeout(pushToCloud, 1000);
+  }
+
+  async function pushToCloud() {
+    if (!sb || !currentUser) return;
+    try {
+      const { error } = await sb.from('user_state').upsert({
+        user_id: currentUser.id,
+        state: state,
+        updated_at: state._updatedAt || new Date().toISOString(),
+      });
+      if (error) throw error;
+      setSyncStatus('synced');
+    } catch (err) {
+      console.warn('[caprisun] push failed:', err);
+      setSyncStatus('offline');
+    }
+  }
+
+  async function pullFromCloud() {
+    if (!sb || !currentUser) return;
+    try {
+      setSyncStatus('syncing');
+      const { data, error } = await sb.from('user_state')
+        .select('state, updated_at')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+      if (error) throw error;
+
+      const localAt = state._updatedAt || '';
+      if (data && data.state) {
+        const cloudAt = data.updated_at || '';
+        if (cloudAt > localAt) {
+          // Cloud wins — replace local
+          state = { ...defaultState(), ...data.state };
+          saveLocal();
+          renderAll();
+        } else if (localAt > cloudAt) {
+          // Local is newer — push
+          await pushToCloud();
+          return;
+        }
+      } else {
+        // No cloud yet — push whatever we have
+        await pushToCloud();
+        return;
+      }
+      setSyncStatus('synced');
+    } catch (err) {
+      console.warn('[caprisun] pull failed:', err);
+      setSyncStatus('offline');
+    }
+  }
+
+  function initAuth() {
+    if (!sb) return;
+    sb.auth.getSession().then(({ data }) => {
+      if (data?.session?.user && !currentUser) {
+        currentUser = data.session.user;
+        pullFromCloud();
+      }
+    });
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        const user = session?.user || null;
+        const changed = user?.id !== currentUser?.id;
+        currentUser = user;
+        if (changed && currentUser) pullFromCloud();
+        else renderSyncSection();
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        setSyncStatus('signed-out');
+      }
+    });
+  }
+
+  function timeAgo(d) {
+    if (!d) return '';
+    const s = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (s < 10) return 'just now';
+    if (s < 60) return `${s}s ago`;
+    const m = Math.floor(s / 60);
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    return d.toLocaleDateString();
+  }
+
+  function renderSyncSection() {
+    const body = document.getElementById('sync-section-body');
+    if (!body) return;
+    if (!sb) {
+      body.innerHTML = `<p class="subtle">Cloud sync is unavailable — the Supabase SDK didn't load.</p>`;
+      return;
+    }
+    if (!currentUser) {
+      body.innerHTML = `
+        <p class="subtle" style="margin:0 0 10px">Sign in to keep your data in sync across devices. We'll email you a one-time sign-in link — no password.</p>
+        <input id="sync-email" type="email" placeholder="you@example.com" autocomplete="email" style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font:inherit;color:var(--ink);font-family:'Fraunces',Georgia,serif;font-size:15px;" />
+        <p class="capture-warn" id="sync-warn"></p>
+        <div class="sheet-actions" style="margin-top:8px">
+          <button class="btn btn-primary" id="sync-send">Send sign-in link</button>
+        </div>
+      `;
+      const sendBtn = body.querySelector('#sync-send');
+      const warn = body.querySelector('#sync-warn');
+      const input = body.querySelector('#sync-email');
+      const send = async () => {
+        const email = (input.value || '').trim();
+        if (!email || !email.includes('@')) { warn.textContent = 'Enter a valid email.'; return; }
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Sending…';
+        warn.textContent = '';
+        try {
+          const { error } = await sb.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: window.location.origin + window.location.pathname },
+          });
+          if (error) throw error;
+          body.innerHTML = `
+            <p style="font-family:'Fraunces',Georgia,serif;font-size:16px;margin:0 0 6px">Link sent.</p>
+            <p class="subtle">Check <strong>${email}</strong> and click the link. The link opens Caprisun already signed in — close this tab or keep it open, either works.</p>
+          `;
+        } catch (err) {
+          warn.textContent = err.message || 'Could not send link.';
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Send sign-in link';
+        }
+      };
+      sendBtn.addEventListener('click', send);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+    } else {
+      const statusText = ({
+        syncing: 'Syncing…',
+        synced: lastSyncAt ? `Synced · ${timeAgo(lastSyncAt)}` : 'Synced',
+        offline: 'Offline — will retry on next change',
+        error: 'Sync error',
+      })[syncStatus] || 'Signed in';
+      body.innerHTML = `
+        <p class="subtle" style="margin:0 0 4px">Signed in as <strong>${(currentUser.email || '—').replace(/</g, '&lt;')}</strong></p>
+        <p class="subtle" style="margin:0 0 12px">${statusText}</p>
+        <div class="sheet-actions" style="margin-top:0">
+          <button class="btn btn-ghost" id="sync-signout">Sign out</button>
+        </div>
+      `;
+      body.querySelector('#sync-signout').addEventListener('click', async () => {
+        await sb.auth.signOut();
+      });
+    }
   }
 
   // --- Date helpers --------------------------------------------------------
@@ -2975,6 +3158,11 @@
       <p class="subtle">Small for now. More later, only if they earn their place.</p>
 
       <div class="sheet-section">
+        <p class="sheet-section-label">Sync</p>
+        <div id="sync-section-body"></div>
+      </div>
+
+      <div class="sheet-section">
         <p class="sheet-section-label">Start date</p>
         <input id="start-input" type="date" value="${state.startDate}" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font:inherit;color:var(--ink);font-family:'Fraunces',Georgia,serif;font-size:15px;" />
         <p class="subtle" style="margin-top:8px">The first Monday the framework is live. Days before this are hidden.</p>
@@ -2998,6 +3186,8 @@
         <button class="btn btn-danger-ghost" id="reset">Reset everything</button>
       </div>
     `);
+
+    renderSyncSection();
 
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
     sheet.querySelector('#save-settings').addEventListener('click', () => {
@@ -3827,6 +4017,7 @@
   });
 
   renderAll();
+  initAuth();
 })();
 </script>
 </body>
