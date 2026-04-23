@@ -1368,6 +1368,103 @@
     margin: 0;
   }
 
+  /* Day color picker (dots) */
+  .day-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .day-color-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--border);
+    border: 2px solid transparent;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease;
+  }
+  .day-color-dot:hover { transform: translateY(-1px); }
+  .day-color-dot.deep   { background: var(--green-deep); }
+  .day-color-dot.soft   { background: var(--green-soft); }
+  .day-color-dot.ochre  { background: var(--ochre); }
+  .day-color-dot.terra  { background: var(--terracotta); }
+  .day-color-dot.selected { border-color: var(--ink); }
+  .day-color-dot.clear {
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    color: var(--ink-faint);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+  }
+  .day-color-dot.clear:hover { border-color: var(--ink-soft); color: var(--ink-soft); }
+  .day-color-tag {
+    margin-left: auto;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  /* Week days strip */
+  .week-days-strip {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .week-day-tile {
+    aspect-ratio: 1 / 1.2;
+    border-radius: 6px;
+    background: var(--border);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 4px 0;
+    color: var(--ink-faint);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 0;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .week-day-tile:hover { transform: translateY(-1px); }
+  .week-day-tile.deep   { background: var(--green-deep); color: rgba(245, 241, 232, 0.8); }
+  .week-day-tile.soft   { background: var(--green-soft); color: rgba(245, 241, 232, 0.85); }
+  .week-day-tile.ochre  { background: var(--ochre); color: rgba(43, 43, 43, 0.7); }
+  .week-day-tile.terra  { background: var(--terracotta); color: rgba(245, 241, 232, 0.85); }
+  .week-day-tile.blank {
+    background: var(--surface-2);
+    color: var(--ink-faint);
+  }
+  .week-day-tile.future {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--ink-faint);
+  }
+  .week-day-tile.today {
+    outline: 1px solid var(--ink);
+    outline-offset: 1px;
+  }
+
+  .week-days-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -1623,6 +1720,7 @@
     weekNotes: {},
     habits: {},
     sleep: {},
+    dayColors: {}, // key: YYYY-MM-DD, value: 'deep' | 'soft' | 'ochre' | 'terra'
     quizResults: {},
     seenQuotes: {},
     seenWords: {},
@@ -1821,6 +1919,27 @@
       if (sessions.reading > 0) readCount++;
     }
     return { gymCount, yogaCount, medCount, readCount, anyMovement };
+  }
+
+  const COLOR_RANK = { deep: 4, soft: 3, ochre: 2, terra: 1 };
+
+  function colorFromAvg(avg) {
+    if (avg >= 3.5) return 'deep';
+    if (avg >= 2.5) return 'soft';
+    if (avg >= 1.5) return 'ochre';
+    return 'terra';
+  }
+
+  function weekDayColors(weekDays) {
+    return weekDays.map(({ iso }) => state.dayColors[iso] || null);
+  }
+
+  function suggestColorFromDays(weekDays) {
+    const colors = weekDayColors(weekDays).filter(Boolean);
+    if (colors.length === 0) return null;
+    const sum = colors.reduce((s, c) => s + (COLOR_RANK[c] || 0), 0);
+    const avg = sum / colors.length;
+    return { color: colorFromAvg(avg), coloredDays: colors.length, avg };
   }
 
   function weekHabits(weekDays) {
@@ -2119,12 +2238,34 @@
     const weekDays = sessionsForWeek(monday);
     const isCurrent = iso === toISODate(startOfWeek(new Date()));
     const existing = state.weekColors[iso];
-    const suggested = suggestColor(weekDays);
+
+    // Prefer day-color average when the user has coloured enough days.
+    const fromDays = suggestColorFromDays(weekDays);
+    const suggested = (fromDays && fromDays.coloredDays >= 3) ? fromDays.color : suggestColor(weekDays);
+
     const endOfRange = addDays(monday, 6);
     const rangeLabel = `${monthShort(monday)} ${monday.getDate()} – ${monthShort(endOfRange)} ${endOfRange.getDate()}`;
 
     const summary = weekSummary(weekDays);
     const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const dayInitials = ['M','T','W','T','F','S','S'];
+    const todayISO = toISODate(new Date());
+
+    const strip = weekDays.map(({ date, iso: dIso }, i) => {
+      const c = state.dayColors[dIso];
+      let cls = 'week-day-tile';
+      const isFuture = dIso > todayISO;
+      const isToday = dIso === todayISO;
+      if (c) cls += ` ${c}`;
+      else if (isFuture) cls += ' future';
+      else cls += ' blank';
+      if (isToday) cls += ' today';
+      return `
+        <button class="${cls}" data-date="${dIso}" aria-label="${dayNames[i]}">
+          ${dayInitials[i]}
+        </button>
+      `;
+    }).join('');
 
     const rows = weekDays.map(({ date, iso: dIso, sessions }, i) => {
       const parts = [];
@@ -2166,6 +2307,15 @@
       <p class="subtle">${rangeLabel}${subtitleExtra}</p>
 
       <div class="sheet-section">
+        <p class="sheet-section-label">Days</p>
+        <div class="week-days-strip">${strip}</div>
+        <div class="week-days-legend">
+          <span>${fromDays ? `${fromDays.coloredDays} of 7 coloured · avg ${COLOR_META[fromDays.color].label.toLowerCase()}` : 'Tap a day to colour it'}</span>
+          <span>Mon → Sun</span>
+        </div>
+      </div>
+
+      <div class="sheet-section">
         <p class="sheet-section-label">Summary</p>
         ${renderWeekSummary(weekDays)}
       </div>
@@ -2180,7 +2330,10 @@
       <div class="sheet-section">
         <p class="sheet-section-label">Color this week</p>
         <div class="color-grid">${colorOptions}</div>
-        ${!existing ? `<p class="subtle" style="margin-top:10px">Suggested: <strong>${COLOR_META[suggested].label}</strong> based on ${summary.gymCount} gym · ${summary.yogaCount} yoga · ${summary.medCount} meditation · ${summary.readCount} reading.</p>` : ''}
+        ${!existing ? `<p class="subtle" style="margin-top:10px">${fromDays && fromDays.coloredDays >= 3
+          ? `Suggested: <strong>${COLOR_META[suggested].label}</strong> — the average of your ${fromDays.coloredDays} coloured day${fromDays.coloredDays === 1 ? '' : 's'}.`
+          : `Suggested: <strong>${COLOR_META[suggested].label}</strong> based on ${summary.gymCount} gym · ${summary.yogaCount} yoga · ${summary.medCount} meditation · ${summary.readCount} reading.`
+        }</p>` : ''}
       </div>
 
       <div class="sheet-section">
@@ -2204,6 +2357,13 @@
       });
     });
     sheet.querySelectorAll('.session-row.tappable').forEach(el => {
+      el.addEventListener('click', () => {
+        const d = el.dataset.date;
+        closeSheet();
+        setTimeout(() => openDay(d, () => openWeekReview(monday)), 180);
+      });
+    });
+    sheet.querySelectorAll('.week-days-strip .week-day-tile').forEach(el => {
       el.addEventListener('click', () => {
         const d = el.dataset.date;
         closeSheet();
@@ -2271,9 +2431,24 @@
       </button>
     `).join('');
 
+    const initialColor = state.dayColors[dateISO] || '';
+    const colorTagText = initialColor ? (COLOR_META[initialColor]?.label || '') : 'Not yet coloured';
+    const colorDotsHTML = ['deep', 'soft', 'ochre', 'terra'].map(c => `
+      <button class="day-color-dot ${c} ${initialColor === c ? 'selected' : ''}" data-color="${c}" aria-label="${COLOR_META[c].label}"></button>
+    `).join('');
+
     openSheet(`
       <h2>${title}</h2>
       <p class="subtle">${fmt.format(date)}</p>
+
+      <div class="sheet-section">
+        <p class="sheet-section-label">How did today feel?</p>
+        <div class="day-color-row">
+          ${colorDotsHTML}
+          <button class="day-color-dot clear" data-color="" aria-label="Clear color">×</button>
+          <span class="day-color-tag" id="day-color-tag">${colorTagText}</span>
+        </div>
+      </div>
 
       <div class="sheet-section">
         <p class="sheet-section-label">Sessions</p>
@@ -2310,6 +2485,19 @@
         <button class="btn btn-primary" id="save">Save</button>
       </div>
     `);
+
+    // Day color working copy
+    let workingColor = initialColor;
+    const tagEl = sheet.querySelector('#day-color-tag');
+    sheet.querySelectorAll('.day-color-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const c = dot.dataset.color;
+        workingColor = c;
+        sheet.querySelectorAll('.day-color-dot').forEach(d => d.classList.remove('selected'));
+        if (c) dot.classList.add('selected');
+        if (tagEl) tagEl.textContent = c ? (COLOR_META[c]?.label || '') : 'Not yet coloured';
+      });
+    });
 
     // Sessions working copy
     const working = { ...sessions };
@@ -2365,6 +2553,9 @@
 
       if (workingSleep > 0) state.sleep[dateISO] = workingSleep;
       else delete state.sleep[dateISO];
+
+      if (workingColor) state.dayColors[dateISO] = workingColor;
+      else delete state.dayColors[dateISO];
 
       const noteVal = sheet.querySelector('#day-note').value;
       if (noteVal.trim()) state.dayNotes[dateISO] = noteVal;
