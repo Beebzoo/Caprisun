@@ -71,6 +71,30 @@
     font-size: 30px;
     line-height: 1.1;
     margin: 0 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .greet-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .icon-maple {
+    width: 22px;
+    height: 22px;
+    color: var(--terracotta);
+    transform: translateY(-2px);
+  }
+
+  .icon-mountain {
+    width: 24px;
+    height: 24px;
+    color: var(--green-soft);
+    transform: translateY(-1px);
   }
 
   .date {
@@ -1134,7 +1158,20 @@
 <body>
   <main class="app">
     <header>
-      <h1 class="greeting serif" id="greeting">Good morning.</h1>
+      <h1 class="greeting serif">
+        <span id="greeting">Good morning.</span>
+        <span class="greet-icons" aria-hidden="true">
+          <svg class="icon-maple" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 3 L57 19 L72 15 L65 30 L81 32 L71 42 L86 47 L73 53 L79 66 L62 61 L62 74 L56 67 L57 79 L50 73 L43 79 L44 67 L38 74 L38 61 L21 66 L27 53 L14 47 L29 42 L19 32 L35 30 L28 15 L43 19 Z"
+              fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
+          </svg>
+          <svg class="icon-mountain" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 21 L9 7 L13.5 14 L16 10.5 L22 21 Z" fill="currentColor" />
+            <path d="M8 10 L9 7 L10.1 9.2 L9.5 9.8 L8.4 9.8 Z" fill="#F5F1E8" />
+            <path d="M15.2 12 L16 10.5 L17 12 L16.5 12.3 L15.7 12.3 Z" fill="#F5F1E8" />
+          </svg>
+        </span>
+      </h1>
       <div class="date" id="date"></div>
     </header>
 
