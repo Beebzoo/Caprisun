@@ -1626,6 +1626,178 @@
   }
   .thoughts-see-all:hover { color: var(--ink-soft); }
 
+  /* Play card — entry into the quiz hub */
+  .play-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 20px 18px;
+    background: var(--green-deep);
+    border: 1px solid var(--green-deep);
+    border-radius: var(--radius-lg);
+    color: var(--bg);
+    text-align: left;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .play-card:hover { transform: translateY(-1px); background: #26403a; }
+  .play-card:active { transform: scale(0.99); }
+  .play-card .pmeyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(245, 241, 232, 0.7);
+  }
+  .play-card .ptitle {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .play-card .psub {
+    font-size: 13px;
+    color: rgba(245, 241, 232, 0.8);
+    margin-top: 2px;
+  }
+
+  /* Quiz — category picker */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .cat-chip {
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .cat-chip:hover { border-color: var(--border-strong); }
+  .cat-chip.on {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .cat-chip .ccount {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 2px;
+  }
+  .cat-chip.on .ccount { color: rgba(245, 241, 232, 0.7); }
+
+  /* Quiz — runner */
+  .quiz-cat-tag {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .quiz-q {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    line-height: 1.3;
+    margin: 4px 0 22px;
+    letter-spacing: -0.005em;
+  }
+  .quiz-a-reveal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+  }
+  .quiz-a-reveal .alabel {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: 0 0 6px;
+  }
+  .quiz-a-reveal .aans {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.4;
+    margin: 0;
+    color: var(--ink);
+  }
+  .quiz-a-reveal .anotes {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 8px 0 0;
+    line-height: 1.5;
+  }
+
+  /* Quiz — score */
+  .score-big {
+    text-align: center;
+    padding: 24px 0 14px;
+  }
+  .score-big .snum {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 64px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--green-deep);
+    letter-spacing: -0.02em;
+  }
+  .score-big .sout {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    color: var(--ink-faint);
+    margin-left: 6px;
+  }
+  .score-big .sline {
+    margin-top: 10px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .score-list {
+    display: grid;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .score-item {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    align-items: start;
+  }
+  .score-item .sdot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-top: 5px;
+  }
+  .score-item .sdot.good { background: var(--green-soft); }
+  .score-item .sdot.bad  { background: var(--terracotta); }
+  .score-item .sq {
+    font-family: 'Fraunces', Georgia, serif;
+    color: var(--ink);
+  }
+  .score-item .sa {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -1707,6 +1879,15 @@
     <section id="thoughts-section">
       <p class="section-label"><span>Thoughts</span></p>
       <div id="thoughts-body"></div>
+    </section>
+
+    <section id="play-section">
+      <p class="section-label"><span>Play</span></p>
+      <button class="play-card" id="open-quiz-hub">
+        <span class="pmeyebrow">Trivia round</span>
+        <span class="ptitle">10 questions</span>
+        <span class="psub" id="play-sub">How many can you get?</span>
+      </button>
     </section>
 
     <p class="footer serif">Keep the chain.</p>
@@ -1953,6 +2134,17 @@
     flowers: {},
     // Free-form thoughts — array of { id, createdAt (ISO), text, updatedAt? }
     thoughts: [],
+    // Trivia quiz — aggregate stats and per-question seen tracking
+    quizStats: {
+      gamesPlayed: 0,
+      questionsSeen: 0,
+      questionsCorrect: 0,
+      bestScore: 0,
+      lastScore: null,
+      lastPlayedAt: null,
+      byCategory: {}, // { [cat]: { seen, correct } }
+    },
+    quizSeen: {}, // { [questionId]: lastSeenISO }
     startDate: '2026-04-27',
   });
 
@@ -4182,6 +4374,299 @@
     });
   }
 
+  // --- Trivia quiz ---------------------------------------------------------
+
+  const QUIZ_CATEGORIES = [
+    { key: 'history',    label: 'History' },
+    { key: 'geography',  label: 'Geography' },
+    { key: 'science',    label: 'Science' },
+    { key: 'literature', label: 'Literature' },
+    { key: 'media',      label: 'Media' },
+    { key: 'art',        label: 'Art' },
+    { key: 'sports',     label: 'Sports' },
+    { key: 'language',   label: 'Language' },
+  ];
+  const QUIZ_BATCH_SIZE = 10;
+
+  let quizQuestions = null; // cached array after first fetch
+  let quizQuestionsLoading = null; // in-flight promise
+
+  function loadQuizQuestions() {
+    if (quizQuestions) return Promise.resolve(quizQuestions);
+    if (quizQuestionsLoading) return quizQuestionsLoading;
+    quizQuestionsLoading = fetch('quiz-questions.json')
+      .then(r => { if (!r.ok) throw new Error('Could not load questions'); return r.json(); })
+      .then(data => { quizQuestions = data; return data; })
+      .catch(err => { quizQuestionsLoading = null; throw err; });
+    return quizQuestionsLoading;
+  }
+
+  function pickBatch(all, category) {
+    const pool = category ? all.filter(q => q.category === category) : all.slice();
+    const seen = state.quizSeen || {};
+    // Sort by "last seen" ascending (unseen = '' = first)
+    pool.sort((a, b) => {
+      const sa = seen[a.id] || '';
+      const sb = seen[b.id] || '';
+      if (sa !== sb) return sa.localeCompare(sb);
+      return Math.random() - 0.5;
+    });
+    // Take the first N least-recently-seen, then shuffle the slice for order variety
+    const picked = pool.slice(0, QUIZ_BATCH_SIZE);
+    for (let i = picked.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [picked[i], picked[j]] = [picked[j], picked[i]];
+    }
+    return picked;
+  }
+
+  function renderPlayTile() {
+    const sub = document.getElementById('play-sub');
+    if (!sub) return;
+    const s = state.quizStats || {};
+    if (typeof s.lastScore === 'number' && s.lastPlayedAt) {
+      const best = s.bestScore || 0;
+      sub.textContent = `Last round ${s.lastScore}/10 · Best ${best}/10`;
+    } else {
+      sub.textContent = 'How many can you get?';
+    }
+  }
+
+  function categoryCounts() {
+    const out = {};
+    for (const c of QUIZ_CATEGORIES) out[c.key] = 0;
+    if (quizQuestions) {
+      for (const q of quizQuestions) {
+        if (out[q.category] !== undefined) out[q.category]++;
+      }
+    }
+    return out;
+  }
+
+  function openQuizHub() {
+    openSheet(`
+      <h2>Trivia</h2>
+      <p class="subtle">A round of 10. Pick a category or roll everything together.</p>
+      <div id="quiz-hub-body">
+        <p class="subtle">Loading questions…</p>
+      </div>
+    `);
+    loadQuizQuestions()
+      .then(renderQuizHubBody)
+      .catch(err => {
+        const body = document.getElementById('quiz-hub-body');
+        if (body) body.innerHTML = `<p class="subtle" style="color:var(--terracotta)">${(err && err.message) || 'Could not load questions.'}</p>
+          <div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Close</button></div>`;
+        const cancel = document.getElementById('quiz-hub-body')?.querySelector('#cancel');
+        if (cancel) cancel.addEventListener('click', closeSheet);
+      });
+  }
+
+  function renderQuizHubBody() {
+    const body = document.getElementById('quiz-hub-body');
+    if (!body) return;
+    const counts = categoryCounts();
+    const total = quizQuestions.length;
+    const s = state.quizStats || {};
+    const rate = s.questionsSeen > 0 ? Math.round((s.questionsCorrect / s.questionsSeen) * 100) : null;
+
+    let selected = null; // null = all
+
+    const renderChips = () => {
+      return `
+        <button class="cat-chip ${selected === null ? 'on' : ''}" data-cat="">
+          All<span class="ccount">${total} questions</span>
+        </button>
+        ${QUIZ_CATEGORIES.map(c => `
+          <button class="cat-chip ${selected === c.key ? 'on' : ''}" data-cat="${c.key}">
+            ${c.label}<span class="ccount">${counts[c.key]} questions</span>
+          </button>
+        `).join('')}
+      `;
+    };
+
+    body.innerHTML = `
+      <div class="summary-grid" style="margin-bottom:18px">
+        <div class="summary-tile">
+          <p class="slabel">Games played</p>
+          <p class="svalue">${s.gamesPlayed || 0}</p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Best round</p>
+          <p class="svalue">${s.bestScore || 0}<small>/ 10</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Lifetime correct</p>
+          <p class="svalue">${rate !== null ? rate + '%' : '—'}<small>${s.questionsCorrect || 0} of ${s.questionsSeen || 0}</small></p>
+        </div>
+      </div>
+
+      <p class="sheet-section-label">Category</p>
+      <div class="cat-grid" id="cat-grid">${renderChips()}</div>
+
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+        <button class="btn btn-primary" id="start">Play 10</button>
+      </div>
+    `;
+
+    const grid = body.querySelector('#cat-grid');
+    grid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      const cat = chip.dataset.cat || null;
+      selected = cat;
+      grid.innerHTML = renderChips();
+    });
+
+    body.querySelector('#cancel').addEventListener('click', closeSheet);
+    body.querySelector('#start').addEventListener('click', () => {
+      const batch = pickBatch(quizQuestions, selected);
+      if (batch.length === 0) {
+        alert('No questions available for that selection.');
+        return;
+      }
+      startQuiz(batch, selected);
+    });
+  }
+
+  function startQuiz(batch, categoryKey) {
+    let index = 0;
+    let revealed = false;
+    const results = []; // { question, userCorrect }
+
+    const render = () => {
+      const q = batch[index];
+      const segs = batch.map((_, i) => {
+        const cls = i < index ? 'on' : (i === index ? 'current' : '');
+        return `<span class="seg ${cls}"></span>`;
+      }).join('');
+      const catLabel = (QUIZ_CATEGORIES.find(c => c.key === q.category) || {}).label || q.category;
+
+      openSheet(`
+        <h2>Trivia</h2>
+        <p class="review-progress"><span>Round of ${batch.length}</span><span>${index + 1} of ${batch.length}</span></p>
+        <div class="review-progress-bar" style="grid-template-columns: repeat(${batch.length}, 1fr);">${segs}</div>
+
+        <span class="quiz-cat-tag">${catLabel}</span>
+        <p class="quiz-q">${q.question.replace(/</g, '&lt;')}</p>
+
+        ${revealed ? `
+          <div class="quiz-a-reveal">
+            <p class="alabel">Answer</p>
+            <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
+            ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+          </div>
+          <div class="rating-row" style="grid-template-columns: 1fr 1fr">
+            <button class="rating-btn forgot" data-got="no">Didn't know</button>
+            <button class="rating-btn good"   data-got="yes">Got it</button>
+          </div>
+        ` : `
+          <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show answer</button></div>
+        `}
+
+        <div class="sheet-actions" style="margin-top:18px">
+          <button class="btn btn-ghost" id="quit">Quit</button>
+        </div>
+      `);
+
+      sheet.querySelector('#quit').addEventListener('click', () => {
+        if (!confirm('Quit the round? Your progress will be lost.')) return;
+        closeSheet();
+      });
+      const revealBtn = sheet.querySelector('#reveal');
+      if (revealBtn) revealBtn.addEventListener('click', () => { revealed = true; render(); });
+      sheet.querySelectorAll('[data-got]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const gotIt = btn.dataset.got === 'yes';
+          results.push({ question: q, correct: gotIt });
+          // Mark seen
+          if (!state.quizSeen) state.quizSeen = {};
+          state.quizSeen[q.id] = new Date().toISOString();
+          advance();
+        });
+      });
+    };
+
+    const advance = () => {
+      index++;
+      revealed = false;
+      if (index >= batch.length) {
+        finishQuiz(results, categoryKey);
+      } else {
+        render();
+      }
+    };
+
+    render();
+  }
+
+  function finishQuiz(results, categoryKey) {
+    const correct = results.filter(r => r.correct).length;
+    const total = results.length;
+
+    // Update stats
+    const s = state.quizStats || {
+      gamesPlayed: 0, questionsSeen: 0, questionsCorrect: 0, bestScore: 0,
+      lastScore: null, lastPlayedAt: null, byCategory: {},
+    };
+    s.gamesPlayed = (s.gamesPlayed || 0) + 1;
+    s.questionsSeen = (s.questionsSeen || 0) + total;
+    s.questionsCorrect = (s.questionsCorrect || 0) + correct;
+    s.bestScore = Math.max(s.bestScore || 0, correct);
+    s.lastScore = correct;
+    s.lastPlayedAt = new Date().toISOString();
+    s.byCategory = s.byCategory || {};
+    for (const r of results) {
+      const k = r.question.category;
+      const bucket = s.byCategory[k] || { seen: 0, correct: 0 };
+      bucket.seen++;
+      if (r.correct) bucket.correct++;
+      s.byCategory[k] = bucket;
+    }
+    state.quizStats = s;
+    save();
+    renderPlayTile();
+
+    const message =
+      correct === 10 ? 'Flawless round.' :
+      correct >= 8  ? 'Very sharp.' :
+      correct >= 6  ? 'Respectable.' :
+      correct >= 4  ? 'Room to grow.' :
+      correct >= 1  ? 'Rough round — try another.' :
+                      'Blank slate. Try another.';
+
+    const items = results.map(r => `
+      <div class="score-item">
+        <span class="sdot ${r.correct ? 'good' : 'bad'}"></span>
+        <div>
+          <p class="sq" style="margin:0">${r.question.question.replace(/</g, '&lt;')}</p>
+          <p class="sa">${r.question.answer.replace(/</g, '&lt;')}</p>
+        </div>
+      </div>
+    `).join('');
+
+    openSheet(`
+      <h2>Round complete</h2>
+      <div class="score-big">
+        <span class="snum">${correct}</span><span class="sout">/ 10</span>
+        <p class="sline">${message}</p>
+      </div>
+      <p class="sheet-section-label" style="margin-top:16px">Review</p>
+      <div class="score-list">${items}</div>
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="close">Close</button>
+        <button class="btn btn-primary" id="again">Play again</button>
+      </div>
+    `);
+    sheet.querySelector('#close').addEventListener('click', closeSheet);
+    sheet.querySelector('#again').addEventListener('click', () => {
+      const batch = pickBatch(quizQuestions, categoryKey);
+      if (batch.length === 0) { closeSheet(); return; }
+      startQuiz(batch, categoryKey);
+    });
+  }
+
   // --- Boot ----------------------------------------------------------------
 
   function renderAll() {
@@ -4193,6 +4678,7 @@
     renderTodayNoteBtn();
     renderMomentTiles();
     renderThoughts();
+    renderPlayTile();
   }
 
   document.getElementById('open-year').addEventListener('click', openYearView);
@@ -4202,6 +4688,7 @@
   document.getElementById('open-quote').addEventListener('click', () => openQuote());
   document.getElementById('open-word').addEventListener('click', () => openWord());
   document.getElementById('open-quiz').addEventListener('click', openQuiz);
+  document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
   document.getElementById('open-archive').addEventListener('click', () => openArchive());
   document.getElementById('open-review').addEventListener('click', openReview);
   document.getElementById('today-note-btn').addEventListener('click', () => {
