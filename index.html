@@ -974,6 +974,157 @@
   }
   .quiz-result strong { color: var(--ink); font-weight: 500; }
 
+  /* Practice block */
+  .practice-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+  .practice-count { color: var(--ink-soft); letter-spacing: 0.08em; }
+  .practice-input {
+    width: 100%;
+    padding: 12px 14px;
+    font: inherit;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .practice-input:focus { outline: none; border-color: var(--border-strong); }
+  .practice-hint {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin: 8px 0 0;
+    font-style: italic;
+  }
+  .practice-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    margin: 10px 0 0;
+  }
+  .practice-bar span {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+  .practice-bar span.on { background: var(--green-soft); }
+  .practice-complete {
+    margin-top: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: var(--green-deep);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .practice-complete .check-circle {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--green-deep);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .practice-complete .label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+  .practice-complete .reset {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    color: var(--bg);
+  }
+  .practice-complete .reset:hover { opacity: 1; }
+
+  /* Archive */
+  .archive-list {
+    display: grid;
+    gap: 6px;
+  }
+  .archive-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .archive-item:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .archive-item .aleft {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .archive-item .adate {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+  }
+  .archive-item .atext {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .archive-item .abadge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green-soft);
+    flex-shrink: 0;
+  }
+  .archive-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .archive-tab {
+    padding: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .archive-tab.active {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .archive-empty {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-style: italic;
+    padding: 20px 2px;
+    text-align: center;
+  }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -1036,6 +1187,7 @@
     <p class="footer serif">Keep the chain.</p>
     <div class="footer-actions">
       <button id="open-guide">Guide</button>
+      <button id="open-archive">Archive</button>
       <button id="open-settings">Settings</button>
       <button id="open-year-2">History</button>
     </div>
@@ -1212,6 +1364,10 @@
     habits: {},     // key: YYYY-MM-DD, value: { teeth: bool, breakfast: bool, vitamins: bool, shower: bool }
     sleep: {},      // key: YYYY-MM-DD, value: number (hours)
     quizResults: {},// key: YYYY-MM-DD, value: { answer: string, correct: bool }
+    seenQuotes: {}, // key: YYYY-MM-DD, value: true (opened the quote sheet)
+    seenWords: {},  // key: YYYY-MM-DD, value: true
+    quotePractice: {}, // key: YYYY-MM-DD, value: number (repetitions, capped at 5)
+    wordPractice: {},  // key: YYYY-MM-DD, value: number
     startDate: '2026-04-27', // first Monday the framework is live
   });
 
@@ -2047,27 +2203,86 @@
 
   // --- Moment: quote & quiz ------------------------------------------------
 
-  function openQuote() {
-    const q = pickQuoteForDate(new Date());
+  // Normalize strings for practice matching: collapse whitespace, lowercase,
+  // strip most punctuation so small differences don't block the drill.
+  function normalizePractice(s) {
+    return (s || '')
+      .toLowerCase()
+      .replace(/[""''‘’“”]/g, '')
+      .replace(/[.,;:!?—\-–()\[\]{}"']/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function openQuote(opts) {
+    const isToday = !opts || !opts.dateISO;
+    const dateISO = isToday ? toISODate(new Date()) : opts.dateISO;
+    const q = pickQuoteForDate(parseISO(dateISO));
+    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const subtitle = isToday
+      ? 'A line from the canon. Sit with it if it earns it.'
+      : fmt.format(parseISO(dateISO));
+
+    if (isToday) { state.seenQuotes[dateISO] = true; save(); }
+
+    const practiceCount = state.quotePractice[dateISO] || 0;
+    const target = q.text;
+    const practiceHTML = isToday ? renderPracticeBlock({
+      target,
+      count: practiceCount,
+      placeholder: 'Type the quote. Press enter after each try.',
+      label: 'Practice writing',
+      longForm: target.length > 80,
+    }) : '';
+
     openSheet(`
       <h2>Quote of the day</h2>
-      <p class="subtle">A line from the canon. Sit with it if it earns it.</p>
+      <p class="subtle">${subtitle}</p>
       <p class="quote-body">"${q.text}"</p>
       <p class="quote-attrib"><strong>${q.author}</strong> · ${q.year} · ${q.source}</p>
       <p class="quote-meaning-label">What it means</p>
       <p class="quote-meaning">${q.meaning}</p>
+      ${practiceHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+
+    if (isToday) wirePractice({
+      target,
+      getCount: () => state.quotePractice[dateISO] || 0,
+      setCount: (n) => {
+        if (n > 0) state.quotePractice[dateISO] = n;
+        else delete state.quotePractice[dateISO];
+        save();
+      },
+      onChange: renderMomentTiles,
+    });
   }
 
-  function openWord() {
-    const w = pickWordForDate(new Date());
+  function openWord(opts) {
+    const isToday = !opts || !opts.dateISO;
+    const dateISO = isToday ? toISODate(new Date()) : opts.dateISO;
+    const w = pickWordForDate(parseISO(dateISO));
+    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const subtitle = isToday ? 'One word. Small tool, sharp edge.' : fmt.format(parseISO(dateISO));
+
+    if (isToday) { state.seenWords[dateISO] = true; save(); }
+
+    const practiceCount = state.wordPractice[dateISO] || 0;
+    const target = w.word;
+    const practiceHTML = isToday ? renderPracticeBlock({
+      target,
+      count: practiceCount,
+      placeholder: 'Type the word. Press enter after each.',
+      label: 'Practice writing',
+      longForm: false,
+    }) : '';
+
     openSheet(`
       <h2>Word of the day</h2>
-      <p class="subtle">One word. Small tool, sharp edge.</p>
+      <p class="subtle">${subtitle}</p>
       <p class="word-headline">${w.word}</p>
       <p class="word-meta">${w.pos} · /${w.pron}/</p>
       <p class="word-block-label">Definition</p>
@@ -2076,11 +2291,115 @@
       <p class="word-origin">${w.origin}</p>
       <p class="word-block-label">In a sentence</p>
       <p class="word-example">${w.example}</p>
+      ${practiceHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+
+    if (isToday) wirePractice({
+      target,
+      getCount: () => state.wordPractice[dateISO] || 0,
+      setCount: (n) => {
+        if (n > 0) state.wordPractice[dateISO] = n;
+        else delete state.wordPractice[dateISO];
+        save();
+      },
+      onChange: renderMomentTiles,
+    });
+  }
+
+  function renderPracticeBlock({ target, count, placeholder, label, longForm }) {
+    const segs = new Array(5).fill(0).map((_, i) => `<span class="${i < count ? 'on' : ''}"></span>`).join('');
+    if (count >= 5) {
+      return `
+        <div class="sheet-section">
+          <p class="practice-label"><span>${label}</span><span class="practice-count">5 / 5</span></p>
+          <div class="practice-bar">${segs}</div>
+          <div class="practice-complete">
+            <span class="check-circle">✓</span>
+            <span class="label">Complete. Well done.</span>
+            <button class="reset" id="practice-reset">Reset</button>
+          </div>
+        </div>
+      `;
+    }
+    const inputTag = longForm
+      ? `<textarea class="practice-input" id="practice-input" rows="3" placeholder="${placeholder}"></textarea>`
+      : `<input class="practice-input" id="practice-input" placeholder="${placeholder}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">`;
+    return `
+      <div class="sheet-section">
+        <p class="practice-label"><span>${label}</span><span class="practice-count">${count} / 5</span></p>
+        ${inputTag}
+        <div class="practice-bar">${segs}</div>
+        <p class="practice-hint">Write it out five times to commit it to memory.</p>
+      </div>
+    `;
+  }
+
+  function wirePractice({ target, getCount, setCount, onChange }) {
+    const normalizedTarget = normalizePractice(target);
+    const input = sheet.querySelector('#practice-input');
+    const countEl = sheet.querySelector('.practice-count');
+    const bar = sheet.querySelector('.practice-bar');
+    const resetBtn = sheet.querySelector('#practice-reset');
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        setCount(0);
+        if (onChange) onChange();
+        // Refresh this sheet by reopening the current path — simplest:
+        closeSheet();
+      });
+    }
+    if (!input) return;
+
+    const submit = () => {
+      const val = normalizePractice(input.value);
+      if (!val) return;
+      if (val === normalizedTarget) {
+        const next = Math.min(5, getCount() + 1);
+        setCount(next);
+        input.value = '';
+        // Update bar + count inline
+        if (countEl) countEl.textContent = `${next} / 5`;
+        if (bar) {
+          [...bar.children].forEach((seg, i) => seg.classList.toggle('on', i < next));
+        }
+        if (next >= 5) {
+          // Swap the input area for the "complete" card
+          const section = input.closest('.sheet-section');
+          section.innerHTML = `
+            <p class="practice-label"><span>Practice writing</span><span class="practice-count">5 / 5</span></p>
+            <div class="practice-bar">${new Array(5).fill('<span class="on"></span>').join('')}</div>
+            <div class="practice-complete">
+              <span class="check-circle">✓</span>
+              <span class="label">Complete. Well done.</span>
+              <button class="reset" id="practice-reset">Reset</button>
+            </div>
+          `;
+          section.querySelector('#practice-reset').addEventListener('click', () => {
+            setCount(0);
+            if (onChange) onChange();
+            closeSheet();
+          });
+        }
+        if (onChange) onChange();
+      } else {
+        // Light feedback: brief border flash
+        input.style.borderColor = 'var(--terracotta)';
+        setTimeout(() => { input.style.borderColor = ''; }, 400);
+      }
+    };
+
+    input.addEventListener('keydown', (e) => {
+      // Enter submits; for textarea we require Ctrl/Cmd+Enter? Let plain Enter work.
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submit();
+      }
+    });
   }
 
   function openQuiz() {
@@ -2180,6 +2499,87 @@
     }
   }
 
+  // --- Archive -------------------------------------------------------------
+
+  function openArchive(tab) {
+    const active = tab === 'words' ? 'words' : 'quotes';
+    const quoteDays = Object.keys(state.seenQuotes).sort().reverse();
+    const wordDays = Object.keys(state.seenWords).sort().reverse();
+
+    const fmtDate = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    let listHTML;
+    if (active === 'quotes') {
+      if (quoteDays.length === 0) {
+        listHTML = `<p class="archive-empty">Nothing here yet. Open a quote of the day to start your archive.</p>`;
+      } else {
+        listHTML = `<div class="archive-list">${quoteDays.map(iso => {
+          const q = pickQuoteForDate(parseISO(iso));
+          const done = (state.quotePractice[iso] || 0) >= 5;
+          const preview = q.text.length > 48 ? q.text.slice(0, 48).trim() + '…' : q.text;
+          return `
+            <button class="archive-item" data-iso="${iso}">
+              <span class="aleft">
+                <span class="adate">${fmtDate.format(parseISO(iso))} · ${q.author}</span>
+                <span class="atext">"${preview}"</span>
+              </span>
+              ${done ? '<span class="abadge">Memorized</span>' : ''}
+            </button>
+          `;
+        }).join('')}</div>`;
+      }
+    } else {
+      if (wordDays.length === 0) {
+        listHTML = `<p class="archive-empty">Nothing here yet. Open a word of the day to start your archive.</p>`;
+      } else {
+        listHTML = `<div class="archive-list">${wordDays.map(iso => {
+          const w = pickWordForDate(parseISO(iso));
+          const done = (state.wordPractice[iso] || 0) >= 5;
+          return `
+            <button class="archive-item" data-iso="${iso}">
+              <span class="aleft">
+                <span class="adate">${fmtDate.format(parseISO(iso))} · ${w.pos}</span>
+                <span class="atext">${w.word} — ${w.definition.replace(/\.$/, '')}</span>
+              </span>
+              ${done ? '<span class="abadge">Memorized</span>' : ''}
+            </button>
+          `;
+        }).join('')}</div>`;
+      }
+    }
+
+    openSheet(`
+      <h2>Archive</h2>
+      <p class="subtle">Every quote and word you've opened.</p>
+      <div class="archive-tabs">
+        <button class="archive-tab ${active === 'quotes' ? 'active' : ''}" data-tab="quotes">Quotes <small>(${quoteDays.length})</small></button>
+        <button class="archive-tab ${active === 'words' ? 'active' : ''}" data-tab="words">Words <small>(${wordDays.length})</small></button>
+      </div>
+      ${listHTML}
+      <div class="sheet-actions" style="margin-top:22px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelectorAll('.archive-tab').forEach(el => {
+      el.addEventListener('click', () => {
+        closeSheet();
+        setTimeout(() => openArchive(el.dataset.tab), 180);
+      });
+    });
+    sheet.querySelectorAll('.archive-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const iso = el.dataset.iso;
+        closeSheet();
+        setTimeout(() => {
+          if (active === 'quotes') openQuote({ dateISO: iso });
+          else openWord({ dateISO: iso });
+        }, 180);
+      });
+    });
+  }
+
   // --- Today note button ---------------------------------------------------
 
   function renderTodayNoteBtn() {
@@ -2212,9 +2612,10 @@
   document.getElementById('open-year-2').addEventListener('click', openYearView);
   document.getElementById('open-settings').addEventListener('click', openSettings);
   document.getElementById('open-guide').addEventListener('click', openGuide);
-  document.getElementById('open-quote').addEventListener('click', openQuote);
-  document.getElementById('open-word').addEventListener('click', openWord);
+  document.getElementById('open-quote').addEventListener('click', () => openQuote());
+  document.getElementById('open-word').addEventListener('click', () => openWord());
   document.getElementById('open-quiz').addEventListener('click', openQuiz);
+  document.getElementById('open-archive').addEventListener('click', () => openArchive());
   document.getElementById('today-note-btn').addEventListener('click', () => {
     const iso = toISODate(new Date());
     openDay(iso);
