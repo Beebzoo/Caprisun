@@ -709,6 +709,109 @@
     line-height: 1.5;
   }
 
+  /* Habit chips */
+  .habit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .habit-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .habit-chip:hover { border-color: var(--border-strong); }
+  .habit-chip .tick {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: transparent;
+    flex-shrink: 0;
+  }
+  .habit-chip.on {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .habit-chip.on .tick {
+    background: var(--bg);
+    border-color: var(--bg);
+    color: var(--green-deep);
+  }
+  .habit-chip.on .tick::after { content: '✓'; }
+
+  /* Sleep row */
+  .sleep-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .sleep-row .slabel {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+  .sleep-row .ssub {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Week summary */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .summary-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .summary-tile .slabel {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin: 0 0 4px;
+  }
+  .summary-tile .svalue {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+  .summary-tile .svalue small {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-left: 4px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+  .summary-tile.wide { grid-column: 1 / -1; }
+  .summary-tile.wide .svalue { font-size: 15px; }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -787,6 +890,13 @@
     0: ['reading'],
   };
 
+  const HABITS = [
+    { key: 'teeth',     name: 'Teeth + mouthwash' },
+    { key: 'breakfast', name: 'Breakfast' },
+    { key: 'vitamins',  name: 'Vitamins' },
+    { key: 'shower',    name: 'Shower' },
+  ];
+
   const COLOR_META = {
     deep:  { label: 'Dark green',  desc: 'Ideal week'       },
     soft:  { label: 'Light green', desc: 'Strong week'      },
@@ -801,6 +911,8 @@
     weekColors: {}, // key: YYYY-MM-DD (Monday of the ISO week), value: color key
     dayNotes: {},   // key: YYYY-MM-DD, value: note text
     weekNotes: {},  // key: YYYY-MM-DD (Monday), value: note text
+    habits: {},     // key: YYYY-MM-DD, value: { teeth: bool, breakfast: bool, vitamins: bool, shower: bool }
+    sleep: {},      // key: YYYY-MM-DD, value: number (hours)
     startDate: '2026-04-27', // first Monday the framework is live
   });
 
@@ -900,6 +1012,36 @@
       if (sessions.reading > 0) readCount++;
     }
     return { gymCount, yogaCount, medCount, readCount, anyMovement };
+  }
+
+  function weekHabits(weekDays) {
+    const counts = {};
+    for (const h of HABITS) counts[h.key] = 0;
+    for (const { iso } of weekDays) {
+      const h = state.habits[iso] || {};
+      for (const k of Object.keys(counts)) if (h[k]) counts[k]++;
+    }
+    return counts;
+  }
+
+  function weekSleep(weekDays) {
+    const hrs = [];
+    for (const { iso } of weekDays) {
+      const s = state.sleep[iso];
+      if (typeof s === 'number' && s > 0) hrs.push(s);
+    }
+    if (hrs.length === 0) return null;
+    const total = hrs.reduce((a, b) => a + b, 0);
+    return { avg: total / hrs.length, total, days: hrs.length };
+  }
+
+  function weekActivityTotals(weekDays) {
+    const totals = {};
+    for (const a of ACTIVITIES) totals[a.key] = 0;
+    for (const { sessions } of weekDays) {
+      for (const a of ACTIVITIES) if (sessions[a.key]) totals[a.key] += sessions[a.key];
+    }
+    return totals;
   }
 
   function suggestColor(weekDays) {
@@ -1111,6 +1253,56 @@
     });
   }
 
+  function renderWeekSummary(weekDays) {
+    const habitCounts = weekHabits(weekDays);
+    const sleep = weekSleep(weekDays);
+    const totals = weekActivityTotals(weekDays);
+    const fmtH = (n) => Number.isInteger(n) ? String(n) : n.toFixed(1);
+
+    const activityTiles = ACTIVITIES.map(a => {
+      const mins = totals[a.key] || 0;
+      if (mins === 0) return '';
+      return `
+        <div class="summary-tile">
+          <p class="slabel">${a.name}</p>
+          <p class="svalue">${mins}<small>min total</small></p>
+        </div>
+      `;
+    }).join('');
+
+    const habitTiles = HABITS.map(h => {
+      const c = habitCounts[h.key] || 0;
+      return `
+        <div class="summary-tile">
+          <p class="slabel">${h.name}</p>
+          <p class="svalue">${c}<small>/ 7 days</small></p>
+        </div>
+      `;
+    }).join('');
+
+    const sleepTile = sleep ? `
+      <div class="summary-tile wide">
+        <p class="slabel">Sleep</p>
+        <p class="svalue">${fmtH(sleep.avg)} h avg <small>over ${sleep.days} day${sleep.days === 1 ? '' : 's'}</small></p>
+      </div>
+    ` : `
+      <div class="summary-tile wide">
+        <p class="slabel">Sleep</p>
+        <p class="svalue" style="color:var(--ink-faint)">—<small>no sleep logged</small></p>
+      </div>
+    `;
+
+    const anyActivity = ACTIVITIES.some(a => (totals[a.key] || 0) > 0);
+
+    return `
+      <div class="summary-grid">
+        ${anyActivity ? activityTiles : '<div class="summary-tile wide"><p class="slabel">Sessions</p><p class="svalue" style="color:var(--ink-faint)">—<small>none logged</small></p></div>'}
+        ${habitTiles}
+        ${sleepTile}
+      </div>
+    `;
+  }
+
   // --- Week review sheet ---------------------------------------------------
 
   function openWeekReview(monday) {
@@ -1163,6 +1355,11 @@
     openSheet(`
       <h2>${title}</h2>
       <p class="subtle">${rangeLabel}${subtitleExtra}</p>
+
+      <div class="sheet-section">
+        <p class="sheet-section-label">Summary</p>
+        ${renderWeekSummary(weekDays)}
+      </div>
 
       <div class="sheet-section">
         <p class="sheet-section-label">Sessions</p>
@@ -1237,6 +1434,8 @@
     const title = dayNames[date.getDay()];
     const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
     const sessions = state.sessions[dateISO] || {};
+    const habits = state.habits[dateISO] || {};
+    const sleepHrs = state.sleep[dateISO] ?? 0;
     const note = state.dayNotes[dateISO] || '';
 
     const activityRows = ACTIVITIES.map(act => {
@@ -1256,24 +1455,54 @@
       `;
     }).join('');
 
+    const habitChips = HABITS.map(h => `
+      <button class="habit-chip ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
+        <span class="tick"></span>
+        <span>${h.name}</span>
+      </button>
+    `).join('');
+
     openSheet(`
       <h2>${title}</h2>
       <p class="subtle">${fmt.format(date)}</p>
+
       <div class="sheet-section">
         <p class="sheet-section-label">Sessions</p>
         <div class="day-activities">${activityRows}</div>
       </div>
+
+      <div class="sheet-section">
+        <p class="sheet-section-label">Habits</p>
+        <div class="habit-grid">${habitChips}</div>
+      </div>
+
+      <div class="sheet-section">
+        <p class="sheet-section-label">Sleep</p>
+        <div class="sleep-row">
+          <span>
+            <span class="slabel">Last night</span>
+            <span class="ssub">Tap − / + by half-hours</span>
+          </span>
+          <span class="mini-stepper">
+            <button id="sleep-dec" aria-label="Less sleep">−</button>
+            <span class="mval"><span id="sleep-val">${sleepHrs}</span><small>h</small></span>
+            <button id="sleep-inc" aria-label="More sleep">+</button>
+          </span>
+        </div>
+      </div>
+
       <div class="sheet-section">
         <p class="sheet-section-label">Note</p>
         <textarea class="note-area" id="day-note" placeholder="A line or two. How it went, how it felt.">${note.replace(/</g, '&lt;')}</textarea>
       </div>
+
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Cancel</button>
         <button class="btn btn-primary" id="save">Save</button>
       </div>
     `);
 
-    // Local working copy
+    // Sessions working copy
     const working = { ...sessions };
     sheet.querySelectorAll('.day-activity-row').forEach(row => {
       const key = row.dataset.key;
@@ -1288,6 +1517,28 @@
       });
     });
 
+    // Habits working copy
+    const workingHabits = { ...habits };
+    sheet.querySelectorAll('.habit-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const k = chip.dataset.habit;
+        workingHabits[k] = !workingHabits[k];
+        chip.classList.toggle('on', !!workingHabits[k]);
+      });
+    });
+
+    // Sleep stepper
+    let workingSleep = sleepHrs;
+    const sleepValEl = sheet.querySelector('#sleep-val');
+    const fmtSleep = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+    sleepValEl.textContent = fmtSleep(workingSleep);
+    const stepSleep = (delta) => {
+      workingSleep = Math.max(0, Math.min(14, Math.round((workingSleep + delta) * 2) / 2));
+      sleepValEl.textContent = fmtSleep(workingSleep);
+    };
+    sheet.querySelector('#sleep-dec').addEventListener('click', () => stepSleep(-0.5));
+    sheet.querySelector('#sleep-inc').addEventListener('click', () => stepSleep(0.5));
+
     sheet.querySelector('#cancel').addEventListener('click', () => {
       closeSheet();
       if (onClose) setTimeout(onClose, 180);
@@ -1297,6 +1548,14 @@
       for (const [k, v] of Object.entries(working)) if (v > 0) clean[k] = v;
       if (Object.keys(clean).length) state.sessions[dateISO] = clean;
       else delete state.sessions[dateISO];
+
+      const cleanHabits = {};
+      for (const [k, v] of Object.entries(workingHabits)) if (v) cleanHabits[k] = true;
+      if (Object.keys(cleanHabits).length) state.habits[dateISO] = cleanHabits;
+      else delete state.habits[dateISO];
+
+      if (workingSleep > 0) state.sleep[dateISO] = workingSleep;
+      else delete state.sleep[dateISO];
 
       const noteVal = sheet.querySelector('#day-note').value;
       if (noteVal.trim()) state.dayNotes[dateISO] = noteVal;
