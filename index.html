@@ -1568,6 +1568,64 @@
   }
   .flowers-banner .undo:hover { color: var(--ink-soft); }
 
+  /* Thoughts — free-form journal entries on the home page */
+  .thoughts-list {
+    display: grid;
+    gap: 8px;
+  }
+  .thought-item {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .thought-item:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .thought-item .tdate {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+  }
+  .thought-item .ttext {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.45;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+  }
+  .thought-new-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+    font-size: 13px;
+    text-align: center;
+    background: transparent;
+    font-family: 'Fraunces', Georgia, serif;
+  }
+  .thought-new-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .thoughts-see-all {
+    display: block;
+    margin: 12px auto 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    background: transparent;
+  }
+  .thoughts-see-all:hover { color: var(--ink-soft); }
+
   /* Desktop polish — slightly roomier */
   @media (min-width: 720px) {
     .app { padding-top: 64px; }
@@ -1644,6 +1702,11 @@
           <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
         </button>
       </div>
+    </section>
+
+    <section id="thoughts-section">
+      <p class="section-label"><span>Thoughts</span></p>
+      <div id="thoughts-body"></div>
     </section>
 
     <p class="footer serif">Keep the chain.</p>
@@ -1888,6 +1951,8 @@
     drinks: {},
     // Wednesday flowers — key: YYYY-MM-DD (Wednesday date) → 'yes' | 'no'
     flowers: {},
+    // Free-form thoughts — array of { id, createdAt (ISO), text, updatedAt? }
+    thoughts: [],
     startDate: '2026-04-27',
   });
 
@@ -3990,6 +4055,133 @@
     }
   }
 
+  // --- Thoughts ------------------------------------------------------------
+
+  function sortedThoughts() {
+    return (state.thoughts || []).slice()
+      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  }
+
+  function formatThoughtDate(iso) {
+    const d = new Date(iso);
+    return new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+      .format(d).toUpperCase();
+  }
+
+  function renderThoughts() {
+    const body = document.getElementById('thoughts-body');
+    if (!body) return;
+    const list = sortedThoughts();
+    const shown = list.slice(0, 3);
+
+    if (list.length === 0) {
+      body.innerHTML = `<button class="thought-new-btn" id="thought-new">A thought to keep…</button>`;
+    } else {
+      const items = shown.map(t => `
+        <button class="thought-item" data-id="${t.id}">
+          <span class="tdate">${formatThoughtDate(t.createdAt)}</span>
+          <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+        </button>
+      `).join('');
+      const seeAll = list.length > 3
+        ? `<button class="thoughts-see-all" id="thoughts-see-all">See all ${list.length}</button>`
+        : '';
+      body.innerHTML = `
+        <div class="thoughts-list">${items}</div>
+        <button class="thought-new-btn" id="thought-new">+ New thought</button>
+        ${seeAll}
+      `;
+    }
+
+    const newBtn = body.querySelector('#thought-new');
+    if (newBtn) newBtn.addEventListener('click', () => openThought(null));
+    body.querySelectorAll('.thought-item').forEach(el => {
+      el.addEventListener('click', () => openThought(el.dataset.id));
+    });
+    const seeBtn = body.querySelector('#thoughts-see-all');
+    if (seeBtn) seeBtn.addEventListener('click', openThoughtsList);
+  }
+
+  function openThought(id) {
+    const existing = id ? (state.thoughts || []).find(t => t.id === id) : null;
+    const text = existing?.text || '';
+    const dateStr = existing
+      ? new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(existing.createdAt))
+      : 'Today';
+
+    openSheet(`
+      <h2>${existing ? 'Thought' : 'New thought'}</h2>
+      <p class="subtle">${dateStr}</p>
+      <textarea class="note-area" id="thought-text" style="min-height:200px" placeholder="What's on your mind? Not tied to today, not tied to the week — just a thought to keep.">${text.replace(/</g, '&lt;')}</textarea>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Cancel</button>
+        <button class="btn btn-primary" id="save">Save</button>
+      </div>
+      ${existing ? `<div class="sheet-actions"><button class="btn btn-danger-ghost" id="delete">Delete</button></div>` : ''}
+    `);
+
+    const ta = sheet.querySelector('#thought-text');
+    setTimeout(() => ta?.focus(), 80);
+
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelector('#save').addEventListener('click', () => {
+      const val = (ta.value || '').trim();
+      if (!val) { closeSheet(); return; }
+      if (!state.thoughts) state.thoughts = [];
+      if (existing) {
+        existing.text = val;
+        existing.updatedAt = new Date().toISOString();
+      } else {
+        const newId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        state.thoughts.push({
+          id: newId,
+          createdAt: new Date().toISOString(),
+          text: val,
+        });
+      }
+      save();
+      renderThoughts();
+      closeSheet();
+    });
+    const del = sheet.querySelector('#delete');
+    if (del) del.addEventListener('click', () => {
+      if (!confirm('Delete this thought?')) return;
+      state.thoughts = (state.thoughts || []).filter(t => t.id !== id);
+      save();
+      renderThoughts();
+      closeSheet();
+    });
+  }
+
+  function openThoughtsList() {
+    const list = sortedThoughts();
+    const items = list.map(t => `
+      <button class="thought-item" data-id="${t.id}">
+        <span class="tdate">${formatThoughtDate(t.createdAt)}</span>
+        <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+      </button>
+    `).join('');
+
+    openSheet(`
+      <h2>Thoughts</h2>
+      <p class="subtle">Everything you've kept.</p>
+      <div class="thoughts-list">${items || '<p class="archive-empty">Nothing yet.</p>'}</div>
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelectorAll('.thought-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const thoughtId = el.dataset.id;
+        closeSheet();
+        setTimeout(() => openThought(thoughtId), 180);
+      });
+    });
+  }
+
   // --- Boot ----------------------------------------------------------------
 
   function renderAll() {
@@ -4000,6 +4192,7 @@
     renderTiles();
     renderTodayNoteBtn();
     renderMomentTiles();
+    renderThoughts();
   }
 
   document.getElementById('open-year').addEventListener('click', openYearView);
