@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Caprisun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F5F1E8;
+    --surface: #FBF8F0;
+    --border: #E2DBC9;
+    --ink: #2B2B2B;
+    --ink-soft: #6B6358;
+    --ink-faint: #A69E90;
+
+    --green-deep: #2D4A3E;
+    --green-soft: #6B8F71;
+    --ochre: #C9A35B;
+    --terracotta: #B86C5A;
+
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+  }
+
+  .serif {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  header {
+    margin-bottom: 40px;
+  }
+
+  .greeting {
+    font-size: 28px;
+    line-height: 1.15;
+    margin: 0 0 6px;
+  }
+
+  .date {
+    color: var(--ink-soft);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  section {
+    margin-bottom: 44px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+    font-weight: 500;
+  }
+
+  /* The chain */
+  .chain {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+
+  .week {
+    aspect-ratio: 1 / 1.15;
+    border-radius: 6px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .week.deep   { background: var(--green-deep); }
+  .week.soft   { background: var(--green-soft); }
+  .week.ochre  { background: var(--ochre); }
+  .week.terra  { background: var(--terracotta); }
+
+  .week.current {
+    background: transparent;
+    border: 1px dashed var(--green-deep);
+  }
+
+  .chain-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+  }
+
+  /* Today — log tiles */
+  .tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+  }
+
+  .tile:hover {
+    border-color: var(--ink-faint);
+  }
+
+  .tile .name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 4px;
+  }
+
+  .tile .avg {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .tile.logged {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+
+  .tile.logged .avg { color: rgba(245, 241, 232, 0.75); }
+
+  .tile .check {
+    display: none;
+    margin-top: 8px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .tile.logged .check { display: block; }
+
+  /* Footer note — intentional minimalism reminder, delete later */
+  .footnote {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-top: 56px;
+    text-align: center;
+    font-style: italic;
+    font-family: 'Fraunces', Georgia, serif;
+  }
+</style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1 class="greeting serif">Good morning.</h1>
+      <div class="date" id="date"></div>
+    </header>
+
+    <section>
+      <p class="section-label">The chain</p>
+      <div class="chain" id="chain">
+        <div class="week deep"></div>
+        <div class="week soft"></div>
+        <div class="week deep"></div>
+        <div class="week ochre"></div>
+        <div class="week soft"></div>
+        <div class="week deep"></div>
+        <div class="week soft"></div>
+        <div class="week current"></div>
+      </div>
+      <div class="chain-legend">
+        <span>8 weeks ago</span>
+        <span>this week</span>
+      </div>
+    </section>
+
+    <section>
+      <p class="section-label">Today</p>
+      <div class="tiles">
+        <button class="tile" data-name="Gym">
+          <p class="name">Gym</p>
+          <p class="avg">Avg 45 min</p>
+          <p class="check">Logged</p>
+        </button>
+        <button class="tile" data-name="Yoga">
+          <p class="name">Yoga</p>
+          <p class="avg">Avg 30 min</p>
+          <p class="check">Logged</p>
+        </button>
+        <button class="tile" data-name="Meditation">
+          <p class="name">Meditation</p>
+          <p class="avg">Avg 10 min</p>
+          <p class="check">Logged</p>
+        </button>
+        <button class="tile" data-name="Reading">
+          <p class="name">Reading</p>
+          <p class="avg">Avg 22 min</p>
+          <p class="check">Logged</p>
+        </button>
+      </div>
+    </section>
+
+    <p class="footnote">Keep the chain.</p>
+  </main>
+
+  <script>
+    const today = new Date();
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
+    document.getElementById('date').textContent = fmt.format(today);
+
+    document.querySelectorAll('.tile').forEach((tile) => {
+      tile.addEventListener('click', () => tile.classList.toggle('logged'));
+    });
+  </script>
+</body>
+</html>
