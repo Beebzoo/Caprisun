@@ -1950,6 +1950,435 @@
   .plan-ex-remove { color: var(--terracotta); border-color: var(--border); }
   .plan-ex-remove:hover { border-color: var(--terracotta); }
 
+  /* Stats */
+  .stats-sub {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin: -6px 0 10px;
+  }
+  .stats-summary { margin-bottom: 16px; }
+
+  .stats-chain-hero {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 5px;
+  }
+  .stats-chain-week {
+    aspect-ratio: 1 / 1.3;
+    border-radius: 6px;
+    background: var(--border);
+    border: none;
+    padding: 0;
+    transition: transform 0.15s ease;
+    cursor: pointer;
+  }
+  .stats-chain-week:hover:not(:disabled) { transform: translateY(-1px); }
+  .stats-chain-week.deep   { background: var(--green-deep); }
+  .stats-chain-week.soft   { background: var(--green-soft); }
+  .stats-chain-week.ochre  { background: var(--ochre); }
+  .stats-chain-week.terra  { background: var(--terracotta); }
+  .stats-chain-week.blank  { background: var(--surface-2); }
+  .stats-chain-week.current {
+    background: transparent;
+    border: 1px dashed var(--green-deep);
+  }
+  .stats-chain-week.pre-start {
+    background: transparent;
+    border: 1px dotted var(--border-strong);
+    cursor: default;
+  }
+  .stats-chain-legend { margin-top: 8px; }
+
+  .year-heatmap-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 0 2px;
+  }
+  .year-heatmap-svg { width: 100%; min-width: 520px; height: auto; display: block; }
+  .yh-cell {
+    fill: var(--surface-2);
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+  }
+  .yh-cell:hover { opacity: 0.8; }
+  .yh-cell.deep   { fill: var(--green-deep); }
+  .yh-cell.soft   { fill: var(--green-soft); }
+  .yh-cell.ochre  { fill: var(--ochre); }
+  .yh-cell.terra  { fill: var(--terracotta); }
+  .yh-cell.blank  { fill: var(--surface-2); }
+  .yh-cell.current {
+    fill: transparent;
+    stroke: var(--green-deep);
+    stroke-dasharray: 2 2;
+    stroke-width: 1;
+  }
+  .yh-cell.pre {
+    fill: transparent;
+    stroke: var(--border);
+    stroke-width: 0.5;
+    cursor: default;
+  }
+  .yh-month {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .mood-mix-wrap {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: 8px 0;
+  }
+  @media (max-width: 380px) {
+    .mood-mix-wrap { grid-template-columns: 1fr; justify-items: center; }
+  }
+  .mood-donut {
+    width: 160px;
+    height: 160px;
+    display: block;
+  }
+  .mood-donut .donut-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 34px;
+    fill: var(--ink);
+    font-weight: 500;
+  }
+  .mood-donut .donut-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .mood-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .mood-legend-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .mood-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .mood-legend-label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+  }
+  .mood-legend-count { color: var(--ink-soft); font-size: 13px; }
+  .mood-legend-count small {
+    color: var(--ink-faint);
+    margin-left: 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  .day-heatmap-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 0 2px;
+  }
+  .day-heatmap { width: 100%; min-width: 240px; max-width: 360px; height: auto; display: block; }
+  .dh-cell {
+    fill: var(--surface-2);
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+  }
+  .dh-cell[data-iso]:hover { opacity: 0.75; }
+  .dh-cell.dh-blank  { fill: var(--surface-2); }
+  .dh-cell.dh-deep   { fill: var(--green-deep); }
+  .dh-cell.dh-soft   { fill: var(--green-soft); }
+  .dh-cell.dh-ochre  { fill: var(--ochre); }
+  .dh-cell.dh-terra  { fill: var(--terracotta); }
+  .dh-cell.dh-future {
+    fill: transparent;
+    stroke: var(--border);
+    stroke-width: 0.5;
+    cursor: default;
+  }
+  .dh-cell.dh-pre {
+    fill: transparent;
+    stroke: var(--border);
+    stroke-width: 0.5;
+    cursor: default;
+  }
+  .dh-row-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 8px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .act-summary-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .act-total {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .act-total-sub {
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .act-rows { display: grid; gap: 8px; }
+  .act-row {
+    display: grid;
+    grid-template-columns: 84px 1fr 64px;
+    gap: 10px;
+    align-items: center;
+  }
+  .act-label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .act-bar-wrap {
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .act-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    min-width: 2px;
+  }
+  .act-val {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    text-align: right;
+  }
+  .act-val small {
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-left: 2px;
+    text-transform: uppercase;
+  }
+
+  .act-legend {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+  .act-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .act-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .weekly-bars-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 6px 0 2px;
+  }
+  .weekly-bars {
+    width: 100%;
+    min-width: 280px;
+    max-width: 480px;
+    height: auto;
+    display: block;
+  }
+  .wb-axis {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .wb-empty {
+    fill: var(--surface-2);
+  }
+  .wb-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Habits */
+  .habit-list { display: grid; gap: 14px; }
+  .habit-row {
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .habit-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .habit-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .habit-rate {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .habit-rate small {
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-left: 6px;
+    letter-spacing: 0.06em;
+  }
+  .habit-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+  }
+  .habit-sq {
+    flex: 1;
+    aspect-ratio: 1 / 1;
+    border-radius: 2px;
+    max-width: 10px;
+  }
+  .habit-sq.habit-on    { background: var(--green-deep); }
+  .habit-sq.habit-off   { background: var(--surface-2); }
+  .habit-sq.habit-blank {
+    background: transparent;
+    border: 1px dashed var(--border);
+  }
+
+  /* Sleep */
+  .sleep-chart {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    display: block;
+  }
+  .sleep-bar { fill: var(--green-soft); }
+  .sleep-bar.sleep-good { fill: var(--green-deep); }
+  .sleep-bar.sleep-ok   { fill: var(--green-soft); }
+  .sleep-bar.sleep-low  { fill: var(--ochre); }
+  .sleep-empty { fill: var(--border); }
+  .sleep-axis { stroke: var(--border); stroke-width: 1; }
+  .sleep-target {
+    stroke: var(--ink-faint);
+    stroke-width: 0.75;
+    stroke-dasharray: 3 3;
+  }
+  .sleep-target-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Trivia bars */
+  .act-bar.act-quiz { background: var(--green-deep); }
+
+  /* Drinks */
+  .drink-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+    padding: 8px 0 2px;
+  }
+  .drink-cell {
+    flex: 1;
+    aspect-ratio: 1 / 1;
+    border-radius: 2px;
+    max-width: 10px;
+  }
+  .drink-cell.drink-on { background: var(--terracotta); }
+  .drink-cell.drink-dry {
+    background: transparent;
+    border: 1px solid var(--green-soft);
+  }
+  .drink-cell.drink-none {
+    background: var(--surface-2);
+    opacity: 0.6;
+  }
+
+  /* Deck stages */
+  .deck-block {
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+  }
+  .deck-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .deck-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .deck-total {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .deck-stages { display: grid; gap: 5px; }
+  .deck-stage-row {
+    display: grid;
+    grid-template-columns: 64px 1fr 32px;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .deck-stage-label {
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .deck-stage-bar {
+    height: 8px;
+    border-radius: 999px;
+    min-width: 0;
+    transition: width 0.3s ease;
+  }
+  .deck-stage-count {
+    text-align: right;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -2149,6 +2578,11 @@
         <span class="ptitle">Dumbbell library</span>
         <span class="psub">Browse, learn, build a plan.</span>
       </button>
+      <button class="play-card" id="open-stats" style="margin-top:10px">
+        <span class="pmeyebrow">Stats</span>
+        <span class="ptitle">Your chain in numbers</span>
+        <span class="psub">Weeks sealed, streaks, mood mix.</span>
+      </button>
     </section>
 
     <p class="footer serif">Keep the chain.</p>
@@ -2157,6 +2591,7 @@
       <button id="open-recent">Recent</button>
       <button id="open-archive">Archive</button>
       <button id="open-workouts-2">Workouts</button>
+      <button id="open-stats-2">Stats</button>
       <button id="open-settings">Settings</button>
       <button id="open-year-2">History</button>
     </div>
@@ -5989,6 +6424,818 @@
     }
   }
 
+  // --- Stats ---------------------------------------------------------------
+
+  const MOOD_COLORS = [
+    { key: 'deep',  label: 'Deep',       blurb: 'Clear, on plan',    cssVar: '--green-deep' },
+    { key: 'soft',  label: 'Soft',       blurb: 'Gentle, alright',    cssVar: '--green-soft' },
+    { key: 'ochre', label: 'Ochre',      blurb: 'Mixed, in-between',  cssVar: '--ochre' },
+    { key: 'terra', label: 'Terracotta', blurb: 'Heavy, off',         cssVar: '--terracotta' },
+  ];
+
+  function computeChainSummary() {
+    // Consider all weeks from startMonday up to (but not including) the current week,
+    // since the current week can't be sealed until Sunday.
+    const startMonday = getStartMonday();
+    const thisMonday = startOfWeek(new Date());
+    const weeksSinceStart = Math.max(0, Math.floor((thisMonday - startMonday) / (7 * 86400000)));
+
+    let sealed = 0;
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let runStreak = 0;
+    let allSealedIsos = [];
+
+    // Walk oldest → newest so we can track longest streak correctly.
+    for (let i = 0; i < weeksSinceStart; i++) {
+      const m = addDays(startMonday, i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      if (color) {
+        sealed += 1;
+        runStreak += 1;
+        if (runStreak > longestStreak) longestStreak = runStreak;
+        allSealedIsos.push(iso);
+      } else {
+        runStreak = 0;
+      }
+    }
+    // Current streak: count back from the most-recent completed week.
+    for (let i = weeksSinceStart - 1; i >= 0; i--) {
+      const m = addDays(startMonday, i * 7);
+      const iso = toISODate(m);
+      if (state.weekColors[iso]) currentStreak += 1;
+      else break;
+    }
+
+    return { sealed, weeksSinceStart, currentStreak, longestStreak };
+  }
+
+  function computeMoodMix(scope) {
+    // scope = 'weeks' | 'days'
+    const source = scope === 'days' ? state.dayColors : state.weekColors;
+    const mix = { deep: 0, soft: 0, ochre: 0, terra: 0 };
+    for (const iso in source) {
+      const c = source[iso];
+      if (mix[c] !== undefined) mix[c] += 1;
+    }
+    return mix;
+  }
+
+  function computeSessionTotals(days) {
+    // Totals per activity over the last `days` days (including today).
+    const today = new Date();
+    const totals = {};
+    for (const a of ACTIVITIES) totals[a.key] = 0;
+    let grandTotal = 0;
+    let daysWithSession = 0;
+    for (let i = 0; i < days; i++) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const sess = state.sessions[iso];
+      if (!sess) continue;
+      let any = false;
+      for (const a of ACTIVITIES) {
+        const v = sess[a.key] || 0;
+        if (v > 0) { totals[a.key] += v; grandTotal += v; any = true; }
+      }
+      if (any) daysWithSession += 1;
+    }
+    return { totals, grandTotal, daysWithSession, days };
+  }
+
+  function computeWeeklySessions(weeks) {
+    // Returns array oldest-first of { monday, byActivity, total }.
+    const thisMonday = startOfWeek(new Date());
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+    const result = [];
+    for (let i = 0; i < weeks; i++) {
+      const monday = addDays(firstMonday, i * 7);
+      const byActivity = {};
+      for (const a of ACTIVITIES) byActivity[a.key] = 0;
+      for (let d = 0; d < 7; d++) {
+        const day = addDays(monday, d);
+        const iso = toISODate(day);
+        const sess = state.sessions[iso];
+        if (!sess) continue;
+        for (const a of ACTIVITIES) {
+          if (sess[a.key]) byActivity[a.key] += sess[a.key];
+        }
+      }
+      const total = Object.values(byActivity).reduce((x, y) => x + y, 0);
+      result.push({ monday, byActivity, total });
+    }
+    return result;
+  }
+
+  const ACTIVITY_ACCENTS = {
+    gym:        '--green-deep',
+    yoga:       '--green-soft',
+    meditation: '--ochre',
+    reading:    '--terracotta',
+  };
+
+  function renderSummaryTiles(sum) {
+    const rate = sum.weeksSinceStart > 0
+      ? Math.round((sum.sealed / sum.weeksSinceStart) * 100)
+      : null;
+    return `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Weeks sealed</p>
+          <p class="svalue">${sum.sealed}<small>/ ${sum.weeksSinceStart}</small></p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Current streak</p>
+          <p class="svalue">${sum.currentStreak}<small>wk${sum.currentStreak === 1 ? '' : 's'}</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Longest streak · seal rate</p>
+          <p class="svalue">${sum.longestStreak}<small>wk${sum.longestStreak === 1 ? '' : 's'}</small> · ${rate !== null ? rate + '%' : '—'}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderChainHero() {
+    // Last 12 weeks (or fewer if pre-start), bigger tiles, tappable.
+    const thisMonday = startOfWeek(new Date());
+    const startMonday = getStartMonday();
+    const pre = isPreStart();
+    const rightMost = pre ? startMonday : thisMonday;
+    const count = 12;
+    const blocks = [];
+    for (let i = count - 1; i >= 0; i--) {
+      const m = addDays(rightMost, -i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      const isCurrent = i === 0;
+      const beforeStart = m < startMonday;
+      let cls = 'stats-chain-week';
+      if (beforeStart) cls += ' pre-start';
+      else if (isCurrent) cls += ' current';
+      else if (color) cls += ' ' + color;
+      else cls += ' blank';
+      blocks.push(`<button class="${cls}" data-iso="${iso}" ${beforeStart ? 'disabled' : ''} aria-label="Week of ${monthShort(m)} ${m.getDate()}"></button>`);
+    }
+    const firstShown = addDays(rightMost, -(count - 1) * 7);
+    return `
+      <div class="stats-chain-hero">
+        ${blocks.join('')}
+      </div>
+      <div class="chain-legend stats-chain-legend">
+        <span>${monthShort(firstShown)} ${firstShown.getDate()}</span>
+        <span>${pre ? 'first week' : 'this week'}</span>
+      </div>
+    `;
+  }
+
+  function renderYearHeatmap() {
+    const thisMonday = startOfWeek(new Date());
+    const weeks = 52;
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+    const startMonday = getStartMonday();
+
+    const cellW = 12, cellH = 14, gap = 3;
+    const svgW = weeks * (cellW + gap) - gap;
+    const svgH = cellH;
+
+    const cells = [];
+    const monthLabels = [];
+    let lastMonthMarked = -1;
+    for (let i = 0; i < weeks; i++) {
+      const m = addDays(firstMonday, i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      const isCurrent = i === weeks - 1;
+      const beforeStart = m < startMonday;
+      let cls = 'yh-cell';
+      if (beforeStart) cls += ' pre';
+      else if (isCurrent) cls += ' current';
+      else if (color) cls += ' ' + color;
+      else cls += ' blank';
+      const x = i * (cellW + gap);
+      cells.push(`<rect class="${cls}" x="${x}" y="0" width="${cellW}" height="${cellH}" rx="2" data-iso="${iso}"/>`);
+      const monthIdx = m.getMonth();
+      if (monthIdx !== lastMonthMarked && m.getDate() <= 7) {
+        monthLabels.push(`<text class="yh-month" x="${x}" y="${svgH + 12}">${monthShort(m)}</text>`);
+        lastMonthMarked = monthIdx;
+      }
+    }
+    return `
+      <svg class="year-heatmap-svg" viewBox="0 0 ${svgW} ${svgH + 16}" preserveAspectRatio="xMidYMid meet">
+        ${cells.join('')}
+        ${monthLabels.join('')}
+      </svg>
+    `;
+  }
+
+  function renderMoodDonut(mix, totalLabel) {
+    const total = (mix.deep + mix.soft + mix.ochre + mix.terra) || 0;
+    const R = 70, SW = 22, CIRC = 2 * Math.PI * R;
+    let offset = 0;
+    const segs = MOOD_COLORS.map(c => {
+      const count = mix[c.key] || 0;
+      if (count === 0) return '';
+      const pct = count / (total || 1);
+      const length = pct * CIRC;
+      const gapPx = total === count ? 0 : 2;
+      const dasharray = `${Math.max(0, length - gapPx)} ${CIRC}`;
+      const seg = `<circle cx="100" cy="100" r="${R}" fill="none"
+          stroke="var(${c.cssVar})" stroke-width="${SW}"
+          stroke-dasharray="${dasharray}" stroke-dashoffset="${-offset}"/>`;
+      offset += length;
+      return seg;
+    }).join('');
+    const centerNum = total;
+    return `
+      <svg class="mood-donut" viewBox="0 0 200 200" aria-label="Mood mix">
+        <circle cx="100" cy="100" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="${SW}"/>
+        <g transform="rotate(-90 100 100)">${segs}</g>
+        <text x="100" y="96" text-anchor="middle" class="donut-value">${centerNum}</text>
+        <text x="100" y="116" text-anchor="middle" class="donut-label">${totalLabel || 'sealed'}</text>
+      </svg>
+    `;
+  }
+
+  function renderMoodLegend(mix) {
+    const total = (mix.deep + mix.soft + mix.ochre + mix.terra) || 0;
+    return `<ul class="mood-legend">
+      ${MOOD_COLORS.map(c => {
+        const count = mix[c.key] || 0;
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        return `
+          <li class="mood-legend-row">
+            <span class="mood-dot" style="background: var(${c.cssVar})"></span>
+            <span class="mood-legend-label">${c.label}</span>
+            <span class="mood-legend-count">${count} <small>${pct}%</small></span>
+          </li>
+        `;
+      }).join('')}
+    </ul>`;
+  }
+
+  function renderDayHeatmap() {
+    // 13 weeks ending today, columns = weeks, rows = Mon..Sun.
+    const weeks = 13;
+    const today = new Date();
+    const thisMonday = startOfWeek(today);
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+    const startMonday = getStartMonday();
+
+    const cellW = 12, cellH = 12, gap = 3;
+    const svgW = weeks * (cellW + gap) - gap;
+    const svgH = 7 * (cellH + gap) - gap;
+    const leftPad = 16;
+
+    const cells = [];
+    for (let w = 0; w < weeks; w++) {
+      for (let d = 0; d < 7; d++) {
+        const day = addDays(firstMonday, w * 7 + d);
+        const iso = toISODate(day);
+        const future = day > today;
+        const beforeStart = day < startMonday;
+        const color = state.dayColors[iso];
+        let cls = 'dh-cell';
+        if (future) cls += ' dh-future';
+        else if (beforeStart) cls += ' dh-pre';
+        else if (color) cls += ' dh-' + color;
+        else cls += ' dh-blank';
+        const x = w * (cellW + gap);
+        const y = d * (cellH + gap);
+        const interactive = !future && !beforeStart;
+        cells.push(`<rect class="${cls}" x="${x}" y="${y}" width="${cellW}" height="${cellH}" rx="2" ${interactive ? `data-iso="${iso}"` : ''}/>`);
+      }
+    }
+    const dayLabels = ['M', '', 'W', '', 'F', '', ''].map((l, i) => {
+      if (!l) return '';
+      const y = i * (cellH + gap) + cellH - 2;
+      return `<text class="dh-row-label" x="-4" y="${y}" text-anchor="end">${l}</text>`;
+    }).join('');
+
+    return `
+      <svg class="day-heatmap" viewBox="-${leftPad} 0 ${svgW + leftPad} ${svgH}" preserveAspectRatio="xMidYMid meet">
+        ${dayLabels}
+        ${cells.join('')}
+      </svg>
+    `;
+  }
+
+  function renderActivityTotals(stats) {
+    const totals = stats.totals;
+    const max = Math.max(...Object.values(totals), 1);
+    const rows = ACTIVITIES.map(a => {
+      const v = totals[a.key] || 0;
+      const pct = (v / max) * 100;
+      return `
+        <div class="act-row">
+          <span class="act-label">${a.name}</span>
+          <div class="act-bar-wrap">
+            <div class="act-bar" style="width: ${pct}%; background: var(${ACTIVITY_ACCENTS[a.key]});"></div>
+          </div>
+          <span class="act-val">${v}<small>min</small></span>
+        </div>
+      `;
+    }).join('');
+
+    const hrs = Math.floor(stats.grandTotal / 60);
+    const mins = stats.grandTotal % 60;
+    const totalLabel = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+
+    return `
+      <div class="act-summary-head">
+        <p class="act-total">${totalLabel}</p>
+        <p class="act-total-sub">total over ${stats.daysWithSession} active day${stats.daysWithSession === 1 ? '' : 's'}</p>
+      </div>
+      <div class="act-rows">${rows}</div>
+    `;
+  }
+
+  function renderWeeklyTrend(weeksData) {
+    if (weeksData.length === 0) return '';
+    const max = Math.max(...weeksData.map(w => w.total), 1);
+    const chartH = 140;
+    const barW = 18, gap = 6;
+    const svgW = weeksData.length * (barW + gap) - gap;
+    const svgH = chartH + 22;
+
+    let lastMonthMarked = -1;
+    const bars = weeksData.map((w, i) => {
+      const x = i * (barW + gap);
+      let y = chartH;
+      const segs = ACTIVITIES.map(a => {
+        const v = w.byActivity[a.key] || 0;
+        if (v === 0) return '';
+        const h = (v / max) * chartH;
+        y -= h;
+        return `<rect class="wb-seg" x="${x}" y="${y}" width="${barW}" height="${h}" fill="var(${ACTIVITY_ACCENTS[a.key]})" rx="1"/>`;
+      }).join('');
+      let label = '';
+      const monthIdx = w.monday.getMonth();
+      if (monthIdx !== lastMonthMarked && w.monday.getDate() <= 7) {
+        label = `<text class="wb-label" x="${x + barW / 2}" y="${chartH + 14}" text-anchor="middle">${monthShort(w.monday)}</text>`;
+        lastMonthMarked = monthIdx;
+      }
+      const emptyBase = w.total === 0
+        ? `<rect class="wb-empty" x="${x}" y="${chartH - 2}" width="${barW}" height="2" rx="1"/>`
+        : '';
+      return emptyBase + segs + label;
+    }).join('');
+
+    return `
+      <svg class="weekly-bars" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet">
+        <line class="wb-axis" x1="0" y1="${chartH + 0.5}" x2="${svgW}" y2="${chartH + 0.5}"/>
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderActivityLegend() {
+    return `<ul class="act-legend">
+      ${ACTIVITIES.map(a => `
+        <li class="act-legend-row">
+          <span class="act-legend-dot" style="background: var(${ACTIVITY_ACCENTS[a.key]})"></span>
+          <span>${a.name}</span>
+        </li>
+      `).join('')}
+    </ul>`;
+  }
+
+  // --- Batch 6 helpers -----------------------------------------------------
+
+  function computeHabitStats(days) {
+    const today = new Date();
+    return HABITS.map(h => {
+      let done = 0, total = 0;
+      const daily = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = addDays(today, -i);
+        const iso = toISODate(d);
+        const rec = state.habits[iso];
+        if (rec && rec[h.key] !== undefined) {
+          total += 1;
+          if (rec[h.key]) {
+            done += 1;
+            daily.push('on');
+          } else {
+            daily.push('off');
+          }
+        } else {
+          daily.push('blank');
+        }
+      }
+      const rate = total > 0 ? Math.round((done / total) * 100) : null;
+      return { key: h.key, name: h.name, done, total, rate, daily };
+    });
+  }
+
+  function computeSleepStats(days) {
+    const today = new Date();
+    const series = [];
+    let sum = 0, count = 0;
+    for (let i = days - 1; i >= 0; i--) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const hrs = state.sleep[iso];
+      if (typeof hrs === 'number' && hrs > 0) {
+        series.push({ iso, hours: hrs });
+        sum += hrs;
+        count += 1;
+      } else {
+        series.push({ iso, hours: null });
+      }
+    }
+    return { series, avg: count > 0 ? sum / count : 0, count, days };
+  }
+
+  function computeQuizStats() {
+    const s = state.quizStats || {};
+    const byCat = s.byCategory || {};
+    const rows = QUIZ_CATEGORIES.map(c => {
+      const r = byCat[c.key] || {};
+      const seen = r.seen || 0;
+      const correct = r.correct || 0;
+      const rate = seen > 0 ? Math.round((correct / seen) * 100) : null;
+      return { key: c.key, label: c.label, seen, correct, rate };
+    });
+    return {
+      games: s.gamesPlayed || 0,
+      seen: s.questionsSeen || 0,
+      correct: s.questionsCorrect || 0,
+      best: s.bestScore || 0,
+      rows,
+    };
+  }
+
+  function computeDrinkStats(days) {
+    const today = new Date();
+    let drinkDays = 0, drinkCount = 0, dryDays = 0, tracked = 0;
+    const daily = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const rec = state.drinks[iso];
+      if (rec) {
+        tracked += 1;
+        if (rec.drank) {
+          drinkDays += 1;
+          drinkCount += rec.count || 0;
+          daily.push({ iso, drank: true, count: rec.count || 0 });
+        } else {
+          dryDays += 1;
+          daily.push({ iso, drank: false, count: 0 });
+        }
+      } else {
+        daily.push({ iso, drank: null, count: 0 });
+      }
+    }
+    // Dry streak: consecutive days ending today with rec && !rec.drank.
+    let dryStreak = 0;
+    for (let i = 0; i < days; i++) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const rec = state.drinks[iso];
+      if (rec && rec.drank === false) dryStreak += 1;
+      else break;
+    }
+    return { daily, drinkDays, dryDays, drinkCount, tracked, dryStreak, days };
+  }
+
+  function computeWorkoutStats() {
+    const plans = Object.values(state.workoutPlans || {});
+    let moves = 0;
+    const muscles = new Set();
+    for (const p of plans) {
+      moves += (p.exercises || []).length;
+      if (!exercisesCache) continue;
+      for (const entry of (p.exercises || [])) {
+        const ex = exercisesCache.find(e => e.id === entry.id);
+        if (!ex) continue;
+        for (const m of ex.primary) muscles.add(m);
+        for (const m of ex.secondary) muscles.add(m);
+      }
+    }
+    return { plansCount: plans.length, moves, muscles: [...muscles] };
+  }
+
+  function computeDeckStats() {
+    const stageCount = (deck) => {
+      const c = new Array(SRS_INTERVALS.length).fill(0);
+      for (const entry of Object.values(deck || {})) {
+        const s = Math.min(Math.max(0, entry.stage || 0), c.length - 1);
+        c[s] += 1;
+      }
+      return c;
+    };
+    const wordArr = Object.values(state.wordDeck || {});
+    const quoteArr = Object.values(state.quoteDeck || {});
+    return {
+      word:  { total: wordArr.length,  stages: stageCount(state.wordDeck) },
+      quote: { total: quoteArr.length, stages: stageCount(state.quoteDeck) },
+    };
+  }
+
+  // --- Batch 6 renderers ---------------------------------------------------
+
+  function renderHabitSection(stats) {
+    const rows = stats.map(h => {
+      const squares = h.daily.map(state => {
+        return `<span class="habit-sq habit-${state}"></span>`;
+      }).join('');
+      const rateStr = h.rate !== null ? `${h.rate}%` : '—';
+      return `
+        <div class="habit-row">
+          <div class="habit-head">
+            <span class="habit-name">${h.name}</span>
+            <span class="habit-rate">${rateStr} <small>${h.done}/${h.total}</small></span>
+          </div>
+          <div class="habit-strip">${squares}</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="habit-list">${rows}</div>`;
+  }
+
+  function renderSleepChart(stats) {
+    const { series, avg } = stats;
+    if (series.length === 0) return '<p class="archive-empty">No sleep logged yet.</p>';
+    const chartH = 120;
+    const barW = 10, gap = 2;
+    const svgW = series.length * (barW + gap) - gap;
+    const svgH = chartH + 20;
+    const max = 12; // y-axis ceiling in hours
+    const target = 8;
+    const targetY = chartH - (target / max) * chartH;
+
+    const bars = series.map((p, i) => {
+      const x = i * (barW + gap);
+      if (p.hours === null) {
+        return `<rect class="sleep-empty" x="${x}" y="${chartH - 1}" width="${barW}" height="1"/>`;
+      }
+      const h = Math.min(p.hours, max) / max * chartH;
+      const y = chartH - h;
+      let cls = 'sleep-bar';
+      if (p.hours >= 7.5) cls += ' sleep-good';
+      else if (p.hours >= 6) cls += ' sleep-ok';
+      else cls += ' sleep-low';
+      return `<rect class="${cls}" x="${x}" y="${y}" width="${barW}" height="${h}" rx="1"/>`;
+    }).join('');
+
+    return `
+      <svg class="sleep-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet">
+        <line class="sleep-target" x1="0" y1="${targetY}" x2="${svgW}" y2="${targetY}"/>
+        <line class="sleep-axis" x1="0" y1="${chartH + 0.5}" x2="${svgW}" y2="${chartH + 0.5}"/>
+        ${bars}
+        <text class="sleep-target-label" x="${svgW}" y="${targetY - 3}" text-anchor="end">8h target</text>
+      </svg>
+      <p class="stats-sub" style="margin-top:6px">Average: ${avg.toFixed(1)}h across ${stats.count} logged night${stats.count === 1 ? '' : 's'}.</p>
+    `;
+  }
+
+  function renderQuizSection(stats) {
+    const overall = stats.seen > 0 ? Math.round((stats.correct / stats.seen) * 100) : null;
+    const tiles = `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Games</p>
+          <p class="svalue">${stats.games}</p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Best round</p>
+          <p class="svalue">${stats.best}<small>/10</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Lifetime accuracy</p>
+          <p class="svalue">${overall !== null ? overall + '%' : '—'}<small>${stats.correct}/${stats.seen}</small></p>
+        </div>
+      </div>
+    `;
+    const hasSeen = stats.rows.some(r => r.seen > 0);
+    const rows = !hasSeen
+      ? `<p class="archive-empty">Play a round to start this chart.</p>`
+      : stats.rows.map(r => {
+          const rateW = r.rate !== null ? r.rate : 0;
+          return `
+            <div class="act-row">
+              <span class="act-label">${r.label}</span>
+              <div class="act-bar-wrap">
+                <div class="act-bar act-quiz" style="width: ${rateW}%;"></div>
+              </div>
+              <span class="act-val">${r.rate !== null ? r.rate + '%' : '—'}<small>${r.correct}/${r.seen}</small></span>
+            </div>
+          `;
+        }).join('');
+    return tiles + `<div class="act-rows" style="margin-top:12px">${rows}</div>`;
+  }
+
+  function renderDrinkSection(stats) {
+    const dailyBars = stats.daily.map((d, i) => {
+      let cls = 'drink-cell drink-none';
+      if (d.drank === true) cls = 'drink-cell drink-on';
+      else if (d.drank === false) cls = 'drink-cell drink-dry';
+      return `<span class="${cls}" title="${d.iso}"></span>`;
+    }).join('');
+    return `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Dry streak</p>
+          <p class="svalue">${stats.dryStreak}<small>day${stats.dryStreak === 1 ? '' : 's'}</small></p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Drink days · 30d</p>
+          <p class="svalue">${stats.drinkDays}<small>of ${stats.tracked}</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Drinks · 30d</p>
+          <p class="svalue">${stats.drinkCount}</p>
+        </div>
+      </div>
+      <div class="drink-strip">${dailyBars}</div>
+      <p class="stats-sub" style="margin-top:6px">Each mark is a day. Filled = drank, outlined = dry, blank = untracked.</p>
+    `;
+  }
+
+  function renderWorkoutStatsSection(stats) {
+    const coverageCount = stats.muscles.length;
+    const totalMuscles = MUSCLE_ORDER.length;
+    const musclePills = MUSCLE_ORDER
+      .filter(m => stats.muscles.includes(m))
+      .map(m => `<span class="works-chip works-chip-primary">${MUSCLE_LABEL[m]}</span>`)
+      .join('');
+    const missing = MUSCLE_ORDER
+      .filter(m => !stats.muscles.includes(m))
+      .map(m => `<span class="works-chip">${MUSCLE_LABEL[m]}</span>`)
+      .join('');
+    return `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Plans</p>
+          <p class="svalue">${stats.plansCount}</p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Moves in plans</p>
+          <p class="svalue">${stats.moves}</p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Muscle coverage</p>
+          <p class="svalue">${coverageCount}<small>/ ${totalMuscles}</small></p>
+        </div>
+      </div>
+      ${stats.plansCount === 0
+        ? '<p class="archive-empty">Build a plan in Workouts to populate this.</p>'
+        : `
+          <p class="sheet-section-label" style="margin-top:14px">Covered</p>
+          <div class="works-chips">${musclePills || '<span class="stats-sub">Nothing yet.</span>'}</div>
+          <p class="sheet-section-label" style="margin-top:14px">Missing</p>
+          <div class="works-chips">${missing || '<span class="stats-sub">All muscles covered.</span>'}</div>
+        `}
+    `;
+  }
+
+  function renderDeckSection(stats) {
+    const renderDeck = (label, data) => {
+      const total = data.total;
+      if (total === 0) {
+        return `
+          <div class="deck-block">
+            <div class="deck-head">
+              <span class="deck-name">${label}</span>
+              <span class="deck-total">—</span>
+            </div>
+            <p class="stats-sub">Nothing in this deck yet.</p>
+          </div>
+        `;
+      }
+      const bars = data.stages.map((count, i) => {
+        const pct = Math.round((count / total) * 100);
+        return `
+          <div class="deck-stage-row">
+            <span class="deck-stage-label">Stage ${i + 1}</span>
+            <div class="act-bar-wrap">
+              <div class="deck-stage-bar" style="width:${count > 0 ? Math.max(pct, 2) : 0}%; background: var(${i >= 4 ? '--green-deep' : i >= 2 ? '--green-soft' : '--ochre'});"></div>
+            </div>
+            <span class="deck-stage-count">${count}</span>
+          </div>
+        `;
+      }).join('');
+      return `
+        <div class="deck-block">
+          <div class="deck-head">
+            <span class="deck-name">${label}</span>
+            <span class="deck-total">${total} card${total === 1 ? '' : 's'}</span>
+          </div>
+          <div class="deck-stages">${bars}</div>
+        </div>
+      `;
+    };
+    return renderDeck('Word deck', stats.word) + renderDeck('Quote deck', stats.quote);
+  }
+
+  function openStats() {
+    openSheet(`
+      <h2>Stats</h2>
+      <p class="subtle">The chain, laid out in numbers.</p>
+      <div id="stats-body"></div>
+    `);
+    // Load exercises so workout muscle-coverage can render; if it fails, stats still works.
+    loadExercises().catch(() => {}).finally(renderStatsBody);
+  }
+
+  function renderStatsBody() {
+    const body = document.getElementById('stats-body');
+    if (!body) return;
+    const sum = computeChainSummary();
+    const weekMix = computeMoodMix('weeks');
+    const dayMix = computeMoodMix('days');
+    const sess30 = computeSessionTotals(30);
+    const weekly = computeWeeklySessions(12);
+    const weeklyAvg = weekly.length > 0
+      ? Math.round(weekly.reduce((s, w) => s + w.total, 0) / weekly.length)
+      : 0;
+
+    body.innerHTML = `
+      ${renderSummaryTiles(sum)}
+
+      <p class="sheet-section-label">The chain · last 12 weeks</p>
+      ${renderChainHero()}
+
+      <p class="sheet-section-label" style="margin-top:22px">The year</p>
+      <p class="stats-sub">52 weeks, tap to review.</p>
+      <div class="year-heatmap-wrap">${renderYearHeatmap()}</div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Mood mix · weeks</p>
+      <p class="stats-sub">How the sealed weeks broke down.</p>
+      <div class="mood-mix-wrap">
+        ${renderMoodDonut(weekMix, 'sealed')}
+        ${renderMoodLegend(weekMix)}
+      </div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Every day · last 13 weeks</p>
+      <p class="stats-sub">Each square is a day, colored by how it felt.</p>
+      <div class="day-heatmap-wrap">${renderDayHeatmap()}</div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Mood mix · days</p>
+      <p class="stats-sub">All colored days, across the whole chain.</p>
+      <div class="mood-mix-wrap">
+        ${renderMoodDonut(dayMix, 'colored')}
+        ${renderMoodLegend(dayMix)}
+      </div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Sessions · last 30 days</p>
+      ${renderActivityTotals(sess30)}
+
+      <p class="sheet-section-label" style="margin-top:22px">Weekly trend · last 12 weeks</p>
+      <p class="stats-sub">Total minutes per week. Average: ${weeklyAvg} min.</p>
+      ${renderActivityLegend()}
+      <div class="weekly-bars-wrap">${renderWeeklyTrend(weekly)}</div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Habits · last 30 days</p>
+      <p class="stats-sub">Each square is a day · filled = done, faint = missed, blank = untracked.</p>
+      ${renderHabitSection(computeHabitStats(30))}
+
+      <p class="sheet-section-label" style="margin-top:22px">Sleep · last 30 nights</p>
+      ${renderSleepChart(computeSleepStats(30))}
+
+      <p class="sheet-section-label" style="margin-top:22px">Trivia</p>
+      ${renderQuizSection(computeQuizStats())}
+
+      <p class="sheet-section-label" style="margin-top:22px">Drinks · last 30 days</p>
+      ${renderDrinkSection(computeDrinkStats(30))}
+
+      <p class="sheet-section-label" style="margin-top:22px">Workouts</p>
+      ${renderWorkoutStatsSection(computeWorkoutStats())}
+
+      <p class="sheet-section-label" style="margin-top:22px">Learning decks</p>
+      <p class="stats-sub">SRS stage = how well a card has stuck. Stage 6 = mature.</p>
+      ${renderDeckSection(computeDeckStats())}
+
+      <div class="sheet-actions" style="margin-top:22px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `;
+
+    const openWeekByIso = (iso) => {
+      const [y, mo, d] = iso.split('-').map(Number);
+      closeSheet();
+      setTimeout(() => openWeekReview(new Date(y, mo - 1, d)), 200);
+    };
+    body.querySelectorAll('.stats-chain-week:not(.pre-start)').forEach(el => {
+      el.addEventListener('click', () => openWeekByIso(el.dataset.iso));
+    });
+    body.querySelectorAll('.yh-cell:not(.pre)').forEach(el => {
+      el.addEventListener('click', () => openWeekByIso(el.dataset.iso));
+    });
+    body.querySelectorAll('.dh-cell[data-iso]').forEach(el => {
+      el.addEventListener('click', () => {
+        const iso = el.dataset.iso;
+        closeSheet();
+        setTimeout(() => openDay(iso), 200);
+      });
+    });
+
+    body.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
   // --- Boot ----------------------------------------------------------------
 
   function renderAll() {
@@ -6013,6 +7260,8 @@
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
   document.getElementById('open-workouts').addEventListener('click', openWorkouts);
   document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
+  document.getElementById('open-stats').addEventListener('click', openStats);
+  document.getElementById('open-stats-2').addEventListener('click', openStats);
   document.getElementById('open-archive').addEventListener('click', () => openArchive());
   document.getElementById('open-recent').addEventListener('click', openRecent);
   document.getElementById('open-review').addEventListener('click', openReview);
