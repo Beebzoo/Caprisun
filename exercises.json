@@ -1,0 +1,521 @@
+[
+  {
+    "id": "db-bench-press",
+    "name": "Dumbbell bench press",
+    "category": "chest",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["chest"],
+    "secondary": ["front-delts", "triceps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Lie flat on the bench, a dumbbell in each hand above your chest, palms forward.",
+      "Lower under control until your elbows sit at ~45° to your torso.",
+      "Press back up; stop just short of lockout. Don't clang the dumbbells at the top."
+    ],
+    "what": "The foundational dumbbell chest builder. Longer range of motion than a barbell and forces each side to stabilise independently.",
+    "tips": "Feet planted, slight lower-back arch. 2s down, 1s up."
+  },
+  {
+    "id": "db-incline-bench-press",
+    "name": "Incline dumbbell press",
+    "category": "chest",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["chest", "front-delts"],
+    "secondary": ["triceps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Set the bench to ~30°. Sit back with a dumbbell in each hand at shoulder height.",
+      "Press the dumbbells up and slightly in, palms forward.",
+      "Lower under control until your upper arms match the bench angle.",
+      "Press back up without flaring the elbows out."
+    ],
+    "what": "Shifts emphasis onto the upper chest and front delts. The 30° angle is the sweet spot — any steeper and it becomes a shoulder press.",
+    "tips": "Keep the dumbbells on slightly angled tracks, not a straight vertical line."
+  },
+  {
+    "id": "db-fly",
+    "name": "Dumbbell fly",
+    "category": "chest",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["chest"],
+    "secondary": ["front-delts"],
+    "difficulty": "intermediate",
+    "howTo": [
+      "Lie flat on the bench, dumbbells pressed above your chest, palms facing each other.",
+      "With a soft bend in the elbows, open your arms out to the sides in a wide arc.",
+      "Stop when your upper arms are level with the bench — you should feel a stretch across the chest.",
+      "Squeeze the chest to bring the dumbbells back together over your chest."
+    ],
+    "what": "An isolation move for the chest that hits it through a long stretch. Use lighter weights than you think.",
+    "tips": "Hug-a-tree motion. If your elbows straighten, the weight is too heavy."
+  },
+  {
+    "id": "db-pullover",
+    "name": "Dumbbell pullover",
+    "category": "chest",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["chest", "lats"],
+    "secondary": ["triceps", "core"],
+    "difficulty": "intermediate",
+    "howTo": [
+      "Lie across or along the bench, holding one dumbbell with both hands above your chest.",
+      "Keeping the elbows slightly bent, lower the dumbbell back over your head in an arc.",
+      "Stop when you feel a deep stretch through the chest and lats.",
+      "Pull back to the start by driving the elbows down toward the hips."
+    ],
+    "what": "An old-school move that works the chest and lats at the same time through a huge stretch.",
+    "tips": "Ribs down, core braced. Don't let the lower back arch off the bench."
+  },
+  {
+    "id": "db-floor-press",
+    "name": "Dumbbell floor press",
+    "category": "chest",
+    "equipment": ["dumbbells"],
+    "primary": ["chest", "triceps"],
+    "secondary": ["front-delts"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Lie on your back on the floor, knees bent, dumbbells at your shoulders.",
+      "Press the dumbbells up until arms are nearly straight.",
+      "Lower until your upper arms touch the floor, pause for a beat.",
+      "Press back up."
+    ],
+    "what": "The floor stops the elbows early, which makes it easier on the shoulders and shifts more work onto the triceps.",
+    "tips": "Good substitute when no bench is available."
+  },
+  {
+    "id": "db-bent-over-row",
+    "name": "Bent-over row",
+    "category": "back",
+    "equipment": ["dumbbells"],
+    "primary": ["upper-back", "lats"],
+    "secondary": ["rear-delts", "biceps", "lower-back"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand with feet hip-width, a dumbbell in each hand.",
+      "Hinge at the hips until your torso is ~45° above parallel, back flat.",
+      "Row the dumbbells toward your hips, elbows driving back, not out.",
+      "Lower under control, keeping the torso still."
+    ],
+    "what": "The bread-and-butter back builder. Hits the mid-back, lats and rear delts all in one.",
+    "tips": "Don't jerk the torso up to help — if you have to, lighten the load."
+  },
+  {
+    "id": "db-single-arm-row",
+    "name": "Single-arm row",
+    "category": "back",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["lats", "upper-back"],
+    "secondary": ["rear-delts", "biceps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Place one knee and hand on the bench, the opposite foot on the floor, back flat.",
+      "Hold a dumbbell in the free hand, arm hanging straight down.",
+      "Row the dumbbell up to the side of your ribs, elbow close to the body.",
+      "Lower all the way down for a stretch. Repeat, then switch sides."
+    ],
+    "what": "Braced-on-the-bench version lets you focus on one side at a time and move more weight safely.",
+    "tips": "Don't rotate the torso to lift heavier — keep the shoulders square."
+  },
+  {
+    "id": "db-chest-supported-row",
+    "name": "Chest-supported row",
+    "category": "back",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["upper-back", "rear-delts"],
+    "secondary": ["lats", "biceps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Set the bench to ~30–45°. Lie face-down, chest on the pad, a dumbbell in each hand.",
+      "Let the arms hang straight down.",
+      "Row the dumbbells up, squeezing your shoulder blades together.",
+      "Lower under control back to the stretch."
+    ],
+    "what": "The bench takes the lower back out of it, so you can hammer the upper back without cheating.",
+    "tips": "Think of the hands as hooks — pull with the elbows, not the biceps."
+  },
+  {
+    "id": "db-renegade-row",
+    "name": "Renegade row",
+    "category": "back",
+    "equipment": ["dumbbells"],
+    "primary": ["lats", "core"],
+    "secondary": ["upper-back", "obliques", "triceps"],
+    "difficulty": "advanced",
+    "howTo": [
+      "Get into a push-up position with hands gripping two dumbbells, feet wide for balance.",
+      "Brace the core and row one dumbbell up to your hip, keeping the hips square.",
+      "Lower it back down with control.",
+      "Alternate sides, one row per side."
+    ],
+    "what": "A row and an anti-rotation plank in one. Brutal on the core if you do it strictly.",
+    "tips": "Hexagonal dumbbells are safer — round ones roll. Feet wider = easier."
+  },
+  {
+    "id": "db-shoulder-press",
+    "name": "Standing shoulder press",
+    "category": "shoulders",
+    "equipment": ["dumbbells"],
+    "primary": ["front-delts", "side-delts"],
+    "secondary": ["triceps", "traps", "core"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, dumbbells at shoulder height, palms forward, elbows under the wrists.",
+      "Brace the core and press the dumbbells straight up until arms are nearly locked.",
+      "Lower under control back to the shoulders."
+    ],
+    "what": "The pure, standing overhead press. Core braces hard to stop you leaning back.",
+    "tips": "Glutes squeezed, ribs down. If the lower back arches, the weight is too heavy."
+  },
+  {
+    "id": "db-seated-shoulder-press",
+    "name": "Seated shoulder press",
+    "category": "shoulders",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["front-delts", "side-delts"],
+    "secondary": ["triceps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Set the bench upright. Sit with dumbbells at shoulder height, back against the pad.",
+      "Press the dumbbells up overhead, stopping just short of lockout.",
+      "Lower back to shoulder height under control."
+    ],
+    "what": "The seated version takes the core out of it so you can focus purely on the shoulders and push more weight.",
+    "tips": "Back flat against the pad — don't arch off it at the top."
+  },
+  {
+    "id": "db-arnold-press",
+    "name": "Arnold press",
+    "category": "shoulders",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["front-delts", "side-delts"],
+    "secondary": ["triceps"],
+    "difficulty": "intermediate",
+    "howTo": [
+      "Sit upright with dumbbells at shoulder height, palms facing you (like the top of a curl).",
+      "As you press up, rotate the palms to face forward.",
+      "Finish with arms nearly locked, palms out.",
+      "Reverse the rotation on the way down."
+    ],
+    "what": "Presses through a longer range of motion and hits the front and side delts more evenly than a straight press.",
+    "tips": "Smooth rotation, don't snap the wrists. Lighter than a standard press."
+  },
+  {
+    "id": "db-lateral-raise",
+    "name": "Lateral raise",
+    "category": "shoulders",
+    "equipment": ["dumbbells"],
+    "primary": ["side-delts"],
+    "secondary": ["traps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, dumbbells at your sides, a slight bend in the elbows.",
+      "Raise the arms out to the sides in a wide arc, leading with the elbows.",
+      "Stop when the upper arms are at shoulder height.",
+      "Lower under control — no dropping."
+    ],
+    "what": "The side-delt isolator. Gives the shoulders their width. Go lighter than your ego suggests.",
+    "tips": "Pinky slightly higher than thumb at the top — like pouring from a jug."
+  },
+  {
+    "id": "db-front-raise",
+    "name": "Front raise",
+    "category": "shoulders",
+    "equipment": ["dumbbells"],
+    "primary": ["front-delts"],
+    "secondary": ["chest"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, dumbbells in front of the thighs, palms facing down.",
+      "Raise one or both arms straight out in front of you to shoulder height.",
+      "Lower under control back to the thighs."
+    ],
+    "what": "Isolates the front delts. Often skipped because pressing already hits them — use sparingly.",
+    "tips": "No swinging. If you can't control the descent, it's too heavy."
+  },
+  {
+    "id": "db-rear-delt-fly",
+    "name": "Rear-delt fly",
+    "category": "shoulders",
+    "equipment": ["dumbbells"],
+    "primary": ["rear-delts"],
+    "secondary": ["upper-back", "traps"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Hinge at the hips until your torso is nearly parallel to the floor, back flat.",
+      "Let the dumbbells hang below you, palms facing in, slight elbow bend.",
+      "Raise the arms out to the sides in a wide arc, squeezing the shoulder blades together.",
+      "Lower under control."
+    ],
+    "what": "The rear delts get ignored and it shows — this one hits them directly and improves posture.",
+    "tips": "Think wide, not high. Lead with the pinkies, not the thumbs."
+  },
+  {
+    "id": "db-shrug",
+    "name": "Dumbbell shrug",
+    "category": "back",
+    "equipment": ["dumbbells"],
+    "primary": ["traps"],
+    "secondary": ["upper-back"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, a dumbbell in each hand at your sides.",
+      "Shrug the shoulders straight up toward the ears.",
+      "Hold for a beat at the top.",
+      "Lower slowly back down."
+    ],
+    "what": "Direct trap work. Boring but effective for building that yoke above the shoulders.",
+    "tips": "No rolling the shoulders — straight up and down."
+  },
+  {
+    "id": "db-bicep-curl",
+    "name": "Bicep curl",
+    "category": "arms",
+    "equipment": ["dumbbells"],
+    "primary": ["biceps"],
+    "secondary": ["forearms"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, dumbbells at your sides, palms facing forward.",
+      "Curl the dumbbells up toward the shoulders, elbows pinned to the ribs.",
+      "Squeeze at the top.",
+      "Lower all the way back down — full stretch."
+    ],
+    "what": "The classic. Nothing fancy, but does the job if you keep strict form.",
+    "tips": "No swinging the torso. Elbows don't drift forward."
+  },
+  {
+    "id": "db-hammer-curl",
+    "name": "Hammer curl",
+    "category": "arms",
+    "equipment": ["dumbbells"],
+    "primary": ["biceps", "forearms"],
+    "secondary": [],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, dumbbells at your sides, palms facing in (neutral grip, like holding a hammer).",
+      "Curl the dumbbells up keeping the palms facing each other.",
+      "Squeeze and lower under control."
+    ],
+    "what": "Targets the brachialis (the muscle under the biceps) and the forearms. Builds thicker-looking arms.",
+    "tips": "No wrist rotation. Strict and slow on the lower."
+  },
+  {
+    "id": "db-incline-curl",
+    "name": "Incline curl",
+    "category": "arms",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["biceps"],
+    "secondary": ["forearms"],
+    "difficulty": "intermediate",
+    "howTo": [
+      "Set the bench to ~45°. Sit back, dumbbells hanging straight down at your sides, palms forward.",
+      "Curl the dumbbells up without letting the elbows drift forward.",
+      "Squeeze at the top, lower to a full stretch below."
+    ],
+    "what": "The incline stretches the biceps at the bottom — brutal for the long head.",
+    "tips": "Don't swing the elbows forward to help. Lighter than you'd think."
+  },
+  {
+    "id": "db-concentration-curl",
+    "name": "Concentration curl",
+    "category": "arms",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["biceps"],
+    "secondary": [],
+    "difficulty": "beginner",
+    "howTo": [
+      "Sit on the bench, legs wide. Hold a dumbbell in one hand, elbow braced against the inner thigh.",
+      "Curl the dumbbell up toward the shoulder, squeezing hard at the top.",
+      "Lower under control to a full stretch. Switch sides."
+    ],
+    "what": "Arnold's favourite. The braced elbow removes all the cheating and gives a deep bicep squeeze.",
+    "tips": "Slow, strict, one side at a time. Quality over weight."
+  },
+  {
+    "id": "db-overhead-tricep-extension",
+    "name": "Overhead tricep extension",
+    "category": "arms",
+    "equipment": ["dumbbells"],
+    "primary": ["triceps"],
+    "secondary": [],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand or sit tall. Hold one dumbbell with both hands above your head, arms straight.",
+      "Keeping the elbows close to the head, lower the dumbbell behind you.",
+      "Stop when your forearms are parallel to the floor.",
+      "Extend back to the top by squeezing the triceps."
+    ],
+    "what": "The overhead position stretches the long head of the triceps — the bit that gives the arm its size from behind.",
+    "tips": "Elbows point up, not out. Ribs down — don't arch the back."
+  },
+  {
+    "id": "db-skullcrusher",
+    "name": "Skullcrusher",
+    "category": "arms",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["triceps"],
+    "secondary": [],
+    "difficulty": "intermediate",
+    "howTo": [
+      "Lie flat on the bench, dumbbells held above the chest with straight arms, palms facing each other.",
+      "Keeping the upper arms still, bend the elbows to lower the dumbbells toward the sides of the head.",
+      "Extend back to straight arms by squeezing the triceps."
+    ],
+    "what": "Direct tricep work that also hits the long head through a solid stretch. Named for obvious reasons.",
+    "tips": "Elbows don't flare out. Light weight until the groove feels right."
+  },
+  {
+    "id": "db-tricep-kickback",
+    "name": "Tricep kickback",
+    "category": "arms",
+    "equipment": ["dumbbells"],
+    "primary": ["triceps"],
+    "secondary": [],
+    "difficulty": "beginner",
+    "howTo": [
+      "Hinge at the hips, a dumbbell in one hand, back flat.",
+      "Tuck the upper arm against your ribs, forearm hanging down.",
+      "Extend the elbow back until the arm is straight, squeezing the tricep.",
+      "Return under control. Switch sides after the set."
+    ],
+    "what": "Finishing move for the triceps. Works them in a fully shortened position where most presses don't.",
+    "tips": "Upper arm stays still — only the forearm moves."
+  },
+  {
+    "id": "db-goblet-squat",
+    "name": "Goblet squat",
+    "category": "legs",
+    "equipment": ["dumbbells"],
+    "primary": ["quads", "glutes"],
+    "secondary": ["core", "hamstrings"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Hold one dumbbell vertically at your chest, cupped under the top plate.",
+      "Feet shoulder-width, toes slightly out.",
+      "Squat down with the chest up until the elbows touch the knees.",
+      "Drive through the mid-foot to stand back up."
+    ],
+    "what": "The easiest way into heavy squatting. The front-loaded weight forces an upright torso and a deep, clean squat.",
+    "tips": "Elbows inside the knees at the bottom. Knees track over the toes."
+  },
+  {
+    "id": "db-bulgarian-split-squat",
+    "name": "Bulgarian split squat",
+    "category": "legs",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["quads", "glutes"],
+    "secondary": ["hamstrings", "core"],
+    "difficulty": "intermediate",
+    "howTo": [
+      "Stand a couple of feet in front of the bench, facing away. Place the top of one foot on the bench behind you.",
+      "Hold a dumbbell in each hand at your sides.",
+      "Lower the back knee toward the floor, keeping the front shin near vertical.",
+      "Drive through the front heel to stand back up. Switch legs after the set."
+    ],
+    "what": "One of the best single-leg builders. Punishes the quads and glutes and exposes any weakness between the two sides.",
+    "tips": "Front foot far enough forward that the knee doesn't crash over the toes."
+  },
+  {
+    "id": "db-romanian-deadlift",
+    "name": "Romanian deadlift",
+    "category": "legs",
+    "equipment": ["dumbbells"],
+    "primary": ["hamstrings", "glutes"],
+    "secondary": ["lower-back", "upper-back"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, dumbbells in front of the thighs, palms facing you.",
+      "With a soft bend in the knees, hinge at the hips and slide the dumbbells down the fronts of the legs.",
+      "Stop when you feel a deep stretch in the hamstrings — torso roughly parallel, back flat.",
+      "Drive the hips forward to stand back up, squeezing the glutes at the top."
+    ],
+    "what": "The best dumbbell hamstring builder. Teaches the hip hinge, which underpins everything else.",
+    "tips": "Hips back, not down. Back flat, not rounded. Dumbbells stay close to the legs."
+  },
+  {
+    "id": "db-walking-lunge",
+    "name": "Walking lunge",
+    "category": "legs",
+    "equipment": ["dumbbells"],
+    "primary": ["quads", "glutes"],
+    "secondary": ["hamstrings", "core", "calves"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Hold a dumbbell in each hand at your sides. Stand tall with feet together.",
+      "Step forward with one leg and lower until the back knee nearly touches the floor.",
+      "Drive through the front heel to come up and bring the back leg through into the next step.",
+      "Alternate legs as you walk."
+    ],
+    "what": "Builds the legs and gets the heart going. Also ruthless for balance and coordination.",
+    "tips": "Big steps — short ones turn it into a quad-only move and stress the knee."
+  },
+  {
+    "id": "db-step-up",
+    "name": "Step-up",
+    "category": "legs",
+    "equipment": ["dumbbells", "bench"],
+    "primary": ["quads", "glutes"],
+    "secondary": ["hamstrings", "core"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand in front of the bench, a dumbbell in each hand.",
+      "Place one foot flat on the bench. Drive through that heel to step up until both feet are on the bench.",
+      "Step back down with the same leg you started with, under control.",
+      "Finish all reps on one side, then switch."
+    ],
+    "what": "Single-leg quad and glute builder. The step-down is where the real work happens.",
+    "tips": "Don't push off the floor with the trailing foot — the lead leg does all the work."
+  },
+  {
+    "id": "db-calf-raise",
+    "name": "Calf raise",
+    "category": "legs",
+    "equipment": ["dumbbells"],
+    "primary": ["calves"],
+    "secondary": [],
+    "difficulty": "beginner",
+    "howTo": [
+      "Stand tall, a dumbbell in each hand at your sides.",
+      "Rise up onto the balls of the feet as high as you can.",
+      "Pause for a beat at the top.",
+      "Lower slowly to a full stretch at the bottom."
+    ],
+    "what": "Direct calf work. Needs a lot of reps and a full stretch at the bottom to actually do anything.",
+    "tips": "Stand on the edge of a step for more range if you can. Slow eccentric."
+  },
+  {
+    "id": "db-russian-twist",
+    "name": "Russian twist",
+    "category": "core",
+    "equipment": ["dumbbells"],
+    "primary": ["obliques", "core"],
+    "secondary": [],
+    "difficulty": "beginner",
+    "howTo": [
+      "Sit on the floor, knees bent, heels down or lifted for more challenge.",
+      "Hold one dumbbell at your chest. Lean back until you feel the core switch on.",
+      "Rotate the torso to tap the dumbbell on the floor to one side.",
+      "Come back through centre and tap the other side. That's one rep."
+    ],
+    "what": "Hits the obliques with rotation — movement most core work skips.",
+    "tips": "Turn from the ribs, not just the arms. Keep the chest up."
+  },
+  {
+    "id": "db-weighted-situp",
+    "name": "Weighted sit-up",
+    "category": "core",
+    "equipment": ["dumbbells"],
+    "primary": ["core"],
+    "secondary": ["obliques"],
+    "difficulty": "beginner",
+    "howTo": [
+      "Lie on your back, knees bent, feet flat on the floor.",
+      "Hold one dumbbell against your chest with both hands.",
+      "Sit all the way up by curling through the spine.",
+      "Lower under control back to the floor."
+    ],
+    "what": "Adds load to the basic sit-up so the abs actually get a stimulus to grow.",
+    "tips": "Don't yank the head. Slow on the way down — that's where the work is."
+  }
+]
