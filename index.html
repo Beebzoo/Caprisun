@@ -2228,6 +2228,157 @@
     text-transform: uppercase;
   }
 
+  /* Habits */
+  .habit-list { display: grid; gap: 14px; }
+  .habit-row {
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .habit-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .habit-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .habit-rate {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .habit-rate small {
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-left: 6px;
+    letter-spacing: 0.06em;
+  }
+  .habit-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+  }
+  .habit-sq {
+    flex: 1;
+    aspect-ratio: 1 / 1;
+    border-radius: 2px;
+    max-width: 10px;
+  }
+  .habit-sq.habit-on    { background: var(--green-deep); }
+  .habit-sq.habit-off   { background: var(--surface-2); }
+  .habit-sq.habit-blank {
+    background: transparent;
+    border: 1px dashed var(--border);
+  }
+
+  /* Sleep */
+  .sleep-chart {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    display: block;
+  }
+  .sleep-bar { fill: var(--green-soft); }
+  .sleep-bar.sleep-good { fill: var(--green-deep); }
+  .sleep-bar.sleep-ok   { fill: var(--green-soft); }
+  .sleep-bar.sleep-low  { fill: var(--ochre); }
+  .sleep-empty { fill: var(--border); }
+  .sleep-axis { stroke: var(--border); stroke-width: 1; }
+  .sleep-target {
+    stroke: var(--ink-faint);
+    stroke-width: 0.75;
+    stroke-dasharray: 3 3;
+  }
+  .sleep-target-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Trivia bars */
+  .act-bar.act-quiz { background: var(--green-deep); }
+
+  /* Drinks */
+  .drink-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+    padding: 8px 0 2px;
+  }
+  .drink-cell {
+    flex: 1;
+    aspect-ratio: 1 / 1;
+    border-radius: 2px;
+    max-width: 10px;
+  }
+  .drink-cell.drink-on { background: var(--terracotta); }
+  .drink-cell.drink-dry {
+    background: transparent;
+    border: 1px solid var(--green-soft);
+  }
+  .drink-cell.drink-none {
+    background: var(--surface-2);
+    opacity: 0.6;
+  }
+
+  /* Deck stages */
+  .deck-block {
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+  }
+  .deck-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .deck-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .deck-total {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .deck-stages { display: grid; gap: 5px; }
+  .deck-stage-row {
+    display: grid;
+    grid-template-columns: 64px 1fr 32px;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .deck-stage-label {
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .deck-stage-bar {
+    height: 8px;
+    border-radius: 999px;
+    min-width: 0;
+    transition: width 0.3s ease;
+  }
+  .deck-stage-count {
+    text-align: right;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -6650,13 +6801,344 @@
     </ul>`;
   }
 
+  // --- Batch 6 helpers -----------------------------------------------------
+
+  function computeHabitStats(days) {
+    const today = new Date();
+    return HABITS.map(h => {
+      let done = 0, total = 0;
+      const daily = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = addDays(today, -i);
+        const iso = toISODate(d);
+        const rec = state.habits[iso];
+        if (rec && rec[h.key] !== undefined) {
+          total += 1;
+          if (rec[h.key]) {
+            done += 1;
+            daily.push('on');
+          } else {
+            daily.push('off');
+          }
+        } else {
+          daily.push('blank');
+        }
+      }
+      const rate = total > 0 ? Math.round((done / total) * 100) : null;
+      return { key: h.key, name: h.name, done, total, rate, daily };
+    });
+  }
+
+  function computeSleepStats(days) {
+    const today = new Date();
+    const series = [];
+    let sum = 0, count = 0;
+    for (let i = days - 1; i >= 0; i--) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const hrs = state.sleep[iso];
+      if (typeof hrs === 'number' && hrs > 0) {
+        series.push({ iso, hours: hrs });
+        sum += hrs;
+        count += 1;
+      } else {
+        series.push({ iso, hours: null });
+      }
+    }
+    return { series, avg: count > 0 ? sum / count : 0, count, days };
+  }
+
+  function computeQuizStats() {
+    const s = state.quizStats || {};
+    const byCat = s.byCategory || {};
+    const rows = QUIZ_CATEGORIES.map(c => {
+      const r = byCat[c.key] || {};
+      const seen = r.seen || 0;
+      const correct = r.correct || 0;
+      const rate = seen > 0 ? Math.round((correct / seen) * 100) : null;
+      return { key: c.key, label: c.label, seen, correct, rate };
+    });
+    return {
+      games: s.gamesPlayed || 0,
+      seen: s.questionsSeen || 0,
+      correct: s.questionsCorrect || 0,
+      best: s.bestScore || 0,
+      rows,
+    };
+  }
+
+  function computeDrinkStats(days) {
+    const today = new Date();
+    let drinkDays = 0, drinkCount = 0, dryDays = 0, tracked = 0;
+    const daily = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const rec = state.drinks[iso];
+      if (rec) {
+        tracked += 1;
+        if (rec.drank) {
+          drinkDays += 1;
+          drinkCount += rec.count || 0;
+          daily.push({ iso, drank: true, count: rec.count || 0 });
+        } else {
+          dryDays += 1;
+          daily.push({ iso, drank: false, count: 0 });
+        }
+      } else {
+        daily.push({ iso, drank: null, count: 0 });
+      }
+    }
+    // Dry streak: consecutive days ending today with rec && !rec.drank.
+    let dryStreak = 0;
+    for (let i = 0; i < days; i++) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const rec = state.drinks[iso];
+      if (rec && rec.drank === false) dryStreak += 1;
+      else break;
+    }
+    return { daily, drinkDays, dryDays, drinkCount, tracked, dryStreak, days };
+  }
+
+  function computeWorkoutStats() {
+    const plans = Object.values(state.workoutPlans || {});
+    let moves = 0;
+    const muscles = new Set();
+    for (const p of plans) {
+      moves += (p.exercises || []).length;
+      if (!exercisesCache) continue;
+      for (const entry of (p.exercises || [])) {
+        const ex = exercisesCache.find(e => e.id === entry.id);
+        if (!ex) continue;
+        for (const m of ex.primary) muscles.add(m);
+        for (const m of ex.secondary) muscles.add(m);
+      }
+    }
+    return { plansCount: plans.length, moves, muscles: [...muscles] };
+  }
+
+  function computeDeckStats() {
+    const stageCount = (deck) => {
+      const c = new Array(SRS_INTERVALS.length).fill(0);
+      for (const entry of Object.values(deck || {})) {
+        const s = Math.min(Math.max(0, entry.stage || 0), c.length - 1);
+        c[s] += 1;
+      }
+      return c;
+    };
+    const wordArr = Object.values(state.wordDeck || {});
+    const quoteArr = Object.values(state.quoteDeck || {});
+    return {
+      word:  { total: wordArr.length,  stages: stageCount(state.wordDeck) },
+      quote: { total: quoteArr.length, stages: stageCount(state.quoteDeck) },
+    };
+  }
+
+  // --- Batch 6 renderers ---------------------------------------------------
+
+  function renderHabitSection(stats) {
+    const rows = stats.map(h => {
+      const squares = h.daily.map(state => {
+        return `<span class="habit-sq habit-${state}"></span>`;
+      }).join('');
+      const rateStr = h.rate !== null ? `${h.rate}%` : '—';
+      return `
+        <div class="habit-row">
+          <div class="habit-head">
+            <span class="habit-name">${h.name}</span>
+            <span class="habit-rate">${rateStr} <small>${h.done}/${h.total}</small></span>
+          </div>
+          <div class="habit-strip">${squares}</div>
+        </div>
+      `;
+    }).join('');
+    return `<div class="habit-list">${rows}</div>`;
+  }
+
+  function renderSleepChart(stats) {
+    const { series, avg } = stats;
+    if (series.length === 0) return '<p class="archive-empty">No sleep logged yet.</p>';
+    const chartH = 120;
+    const barW = 10, gap = 2;
+    const svgW = series.length * (barW + gap) - gap;
+    const svgH = chartH + 20;
+    const max = 12; // y-axis ceiling in hours
+    const target = 8;
+    const targetY = chartH - (target / max) * chartH;
+
+    const bars = series.map((p, i) => {
+      const x = i * (barW + gap);
+      if (p.hours === null) {
+        return `<rect class="sleep-empty" x="${x}" y="${chartH - 1}" width="${barW}" height="1"/>`;
+      }
+      const h = Math.min(p.hours, max) / max * chartH;
+      const y = chartH - h;
+      let cls = 'sleep-bar';
+      if (p.hours >= 7.5) cls += ' sleep-good';
+      else if (p.hours >= 6) cls += ' sleep-ok';
+      else cls += ' sleep-low';
+      return `<rect class="${cls}" x="${x}" y="${y}" width="${barW}" height="${h}" rx="1"/>`;
+    }).join('');
+
+    return `
+      <svg class="sleep-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet">
+        <line class="sleep-target" x1="0" y1="${targetY}" x2="${svgW}" y2="${targetY}"/>
+        <line class="sleep-axis" x1="0" y1="${chartH + 0.5}" x2="${svgW}" y2="${chartH + 0.5}"/>
+        ${bars}
+        <text class="sleep-target-label" x="${svgW}" y="${targetY - 3}" text-anchor="end">8h target</text>
+      </svg>
+      <p class="stats-sub" style="margin-top:6px">Average: ${avg.toFixed(1)}h across ${stats.count} logged night${stats.count === 1 ? '' : 's'}.</p>
+    `;
+  }
+
+  function renderQuizSection(stats) {
+    const overall = stats.seen > 0 ? Math.round((stats.correct / stats.seen) * 100) : null;
+    const tiles = `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Games</p>
+          <p class="svalue">${stats.games}</p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Best round</p>
+          <p class="svalue">${stats.best}<small>/10</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Lifetime accuracy</p>
+          <p class="svalue">${overall !== null ? overall + '%' : '—'}<small>${stats.correct}/${stats.seen}</small></p>
+        </div>
+      </div>
+    `;
+    const hasSeen = stats.rows.some(r => r.seen > 0);
+    const rows = !hasSeen
+      ? `<p class="archive-empty">Play a round to start this chart.</p>`
+      : stats.rows.map(r => {
+          const rateW = r.rate !== null ? r.rate : 0;
+          return `
+            <div class="act-row">
+              <span class="act-label">${r.label}</span>
+              <div class="act-bar-wrap">
+                <div class="act-bar act-quiz" style="width: ${rateW}%;"></div>
+              </div>
+              <span class="act-val">${r.rate !== null ? r.rate + '%' : '—'}<small>${r.correct}/${r.seen}</small></span>
+            </div>
+          `;
+        }).join('');
+    return tiles + `<div class="act-rows" style="margin-top:12px">${rows}</div>`;
+  }
+
+  function renderDrinkSection(stats) {
+    const dailyBars = stats.daily.map((d, i) => {
+      let cls = 'drink-cell drink-none';
+      if (d.drank === true) cls = 'drink-cell drink-on';
+      else if (d.drank === false) cls = 'drink-cell drink-dry';
+      return `<span class="${cls}" title="${d.iso}"></span>`;
+    }).join('');
+    return `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Dry streak</p>
+          <p class="svalue">${stats.dryStreak}<small>day${stats.dryStreak === 1 ? '' : 's'}</small></p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Drink days · 30d</p>
+          <p class="svalue">${stats.drinkDays}<small>of ${stats.tracked}</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Drinks · 30d</p>
+          <p class="svalue">${stats.drinkCount}</p>
+        </div>
+      </div>
+      <div class="drink-strip">${dailyBars}</div>
+      <p class="stats-sub" style="margin-top:6px">Each mark is a day. Filled = drank, outlined = dry, blank = untracked.</p>
+    `;
+  }
+
+  function renderWorkoutStatsSection(stats) {
+    const coverageCount = stats.muscles.length;
+    const totalMuscles = MUSCLE_ORDER.length;
+    const musclePills = MUSCLE_ORDER
+      .filter(m => stats.muscles.includes(m))
+      .map(m => `<span class="works-chip works-chip-primary">${MUSCLE_LABEL[m]}</span>`)
+      .join('');
+    const missing = MUSCLE_ORDER
+      .filter(m => !stats.muscles.includes(m))
+      .map(m => `<span class="works-chip">${MUSCLE_LABEL[m]}</span>`)
+      .join('');
+    return `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Plans</p>
+          <p class="svalue">${stats.plansCount}</p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Moves in plans</p>
+          <p class="svalue">${stats.moves}</p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Muscle coverage</p>
+          <p class="svalue">${coverageCount}<small>/ ${totalMuscles}</small></p>
+        </div>
+      </div>
+      ${stats.plansCount === 0
+        ? '<p class="archive-empty">Build a plan in Workouts to populate this.</p>'
+        : `
+          <p class="sheet-section-label" style="margin-top:14px">Covered</p>
+          <div class="works-chips">${musclePills || '<span class="stats-sub">Nothing yet.</span>'}</div>
+          <p class="sheet-section-label" style="margin-top:14px">Missing</p>
+          <div class="works-chips">${missing || '<span class="stats-sub">All muscles covered.</span>'}</div>
+        `}
+    `;
+  }
+
+  function renderDeckSection(stats) {
+    const renderDeck = (label, data) => {
+      const total = data.total;
+      if (total === 0) {
+        return `
+          <div class="deck-block">
+            <div class="deck-head">
+              <span class="deck-name">${label}</span>
+              <span class="deck-total">—</span>
+            </div>
+            <p class="stats-sub">Nothing in this deck yet.</p>
+          </div>
+        `;
+      }
+      const bars = data.stages.map((count, i) => {
+        const pct = Math.round((count / total) * 100);
+        return `
+          <div class="deck-stage-row">
+            <span class="deck-stage-label">Stage ${i + 1}</span>
+            <div class="act-bar-wrap">
+              <div class="deck-stage-bar" style="width:${count > 0 ? Math.max(pct, 2) : 0}%; background: var(${i >= 4 ? '--green-deep' : i >= 2 ? '--green-soft' : '--ochre'});"></div>
+            </div>
+            <span class="deck-stage-count">${count}</span>
+          </div>
+        `;
+      }).join('');
+      return `
+        <div class="deck-block">
+          <div class="deck-head">
+            <span class="deck-name">${label}</span>
+            <span class="deck-total">${total} card${total === 1 ? '' : 's'}</span>
+          </div>
+          <div class="deck-stages">${bars}</div>
+        </div>
+      `;
+    };
+    return renderDeck('Word deck', stats.word) + renderDeck('Quote deck', stats.quote);
+  }
+
   function openStats() {
     openSheet(`
       <h2>Stats</h2>
       <p class="subtle">The chain, laid out in numbers.</p>
       <div id="stats-body"></div>
     `);
-    renderStatsBody();
+    // Load exercises so workout muscle-coverage can render; if it fails, stats still works.
+    loadExercises().catch(() => {}).finally(renderStatsBody);
   }
 
   function renderStatsBody() {
@@ -6706,6 +7188,26 @@
       <p class="stats-sub">Total minutes per week. Average: ${weeklyAvg} min.</p>
       ${renderActivityLegend()}
       <div class="weekly-bars-wrap">${renderWeeklyTrend(weekly)}</div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Habits · last 30 days</p>
+      <p class="stats-sub">Each square is a day · filled = done, faint = missed, blank = untracked.</p>
+      ${renderHabitSection(computeHabitStats(30))}
+
+      <p class="sheet-section-label" style="margin-top:22px">Sleep · last 30 nights</p>
+      ${renderSleepChart(computeSleepStats(30))}
+
+      <p class="sheet-section-label" style="margin-top:22px">Trivia</p>
+      ${renderQuizSection(computeQuizStats())}
+
+      <p class="sheet-section-label" style="margin-top:22px">Drinks · last 30 days</p>
+      ${renderDrinkSection(computeDrinkStats(30))}
+
+      <p class="sheet-section-label" style="margin-top:22px">Workouts</p>
+      ${renderWorkoutStatsSection(computeWorkoutStats())}
+
+      <p class="sheet-section-label" style="margin-top:22px">Learning decks</p>
+      <p class="stats-sub">SRS stage = how well a card has stuck. Stage 6 = mature.</p>
+      ${renderDeckSection(computeDeckStats())}
 
       <div class="sheet-actions" style="margin-top:22px">
         <button class="btn btn-ghost" id="cancel">Close</button>
