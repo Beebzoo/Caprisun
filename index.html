@@ -1722,6 +1722,74 @@
   }
   .cat-chip.on .ccount { color: rgba(245, 241, 232, 0.7); }
 
+  /* Workouts */
+  .muscle-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-right: 6px;
+  }
+  .ex-diff {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--ink-soft);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+  .ex-diff-beginner { color: var(--green-deep); border-color: var(--green-soft); }
+  .ex-diff-intermediate { color: var(--ochre); border-color: var(--ochre); }
+  .ex-diff-advanced { color: var(--terracotta); border-color: var(--terracotta); }
+  .ex-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .works-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .works-chip {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--ink-soft);
+  }
+  .works-chip-primary {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .howto-steps {
+    margin: 4px 0 0;
+    padding-left: 20px;
+  }
+  .howto-steps li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .howto-steps li:last-child { margin-bottom: 0; }
+  .ex-what, .ex-tips {
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 4px 0 0;
+  }
+  .ex-tips { color: var(--ink-soft); font-size: 14px; }
+  .workout-item .atext { white-space: normal; }
+  .workout-item .adate { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 4px; }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -1916,6 +1984,11 @@
         <span class="ptitle">10 questions</span>
         <span class="psub" id="play-sub">How many can you get?</span>
       </button>
+      <button class="play-card" id="open-workouts" style="margin-top:10px">
+        <span class="pmeyebrow">Workouts</span>
+        <span class="ptitle">Dumbbell library</span>
+        <span class="psub">Browse, learn, build a plan.</span>
+      </button>
     </section>
 
     <p class="footer serif">Keep the chain.</p>
@@ -1923,6 +1996,7 @@
       <button id="open-guide">Guide</button>
       <button id="open-recent">Recent</button>
       <button id="open-archive">Archive</button>
+      <button id="open-workouts-2">Workouts</button>
       <button id="open-settings">Settings</button>
       <button id="open-year-2">History</button>
     </div>
@@ -2175,6 +2249,10 @@
     },
     quizSeen: {}, // { [questionId]: lastSeenISO }
     quizPrefs: { mode: 'choice', category: null }, // remembered across sessions
+    // Workouts — user-created named plans and filter preferences
+    workoutPlans: {}, // { [planId]: { id, name, createdAt, updatedAt, exercises: [{id, sets, reps}] } }
+    workoutPlanOrder: [], // array of planIds
+    workoutPrefs: { muscleFilter: null, difficultyFilter: null },
     startDate: '2026-04-27',
   });
 
@@ -5062,6 +5140,225 @@
     });
   }
 
+  // --- Workouts ------------------------------------------------------------
+
+  let exercisesCache = null;
+  let exercisesLoading = null;
+
+  function loadExercises() {
+    if (exercisesCache) return Promise.resolve(exercisesCache);
+    if (exercisesLoading) return exercisesLoading;
+    exercisesLoading = fetch('exercises.json')
+      .then(r => { if (!r.ok) throw new Error('Could not load exercises'); return r.json(); })
+      .then(data => { exercisesCache = data; return data; })
+      .catch(err => { exercisesLoading = null; throw err; });
+    return exercisesLoading;
+  }
+
+  const MUSCLE_LABEL = {
+    'chest': 'Chest',
+    'front-delts': 'Front delts',
+    'side-delts': 'Side delts',
+    'rear-delts': 'Rear delts',
+    'traps': 'Traps',
+    'upper-back': 'Upper back',
+    'lats': 'Lats',
+    'lower-back': 'Lower back',
+    'biceps': 'Biceps',
+    'triceps': 'Triceps',
+    'forearms': 'Forearms',
+    'core': 'Core',
+    'obliques': 'Obliques',
+    'glutes': 'Glutes',
+    'quads': 'Quads',
+    'hamstrings': 'Hamstrings',
+    'calves': 'Calves',
+  };
+
+  const MUSCLE_ORDER = [
+    'chest', 'upper-back', 'lats', 'traps',
+    'front-delts', 'side-delts', 'rear-delts',
+    'biceps', 'triceps', 'forearms',
+    'core', 'obliques', 'lower-back',
+    'glutes', 'quads', 'hamstrings', 'calves',
+  ];
+
+  const DIFFICULTY_LABEL = {
+    beginner: 'Beginner',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
+  };
+
+  function difficultyBadge(d) {
+    return `<span class="ex-diff ex-diff-${d}">${DIFFICULTY_LABEL[d] || d}</span>`;
+  }
+
+  function exerciseMatchesFilters(ex, muscleFilter, diffFilter) {
+    if (muscleFilter) {
+      const hits = ex.primary.includes(muscleFilter) || ex.secondary.includes(muscleFilter);
+      if (!hits) return false;
+    }
+    if (diffFilter && ex.difficulty !== diffFilter) return false;
+    return true;
+  }
+
+  function openWorkouts() {
+    openSheet(`
+      <h2>Workouts</h2>
+      <p class="subtle">Dumbbell and bench. Pick a muscle, learn a move.</p>
+      <div id="workouts-body">
+        <p class="subtle">Loading exercises…</p>
+      </div>
+    `);
+    loadExercises()
+      .then(renderWorkoutsBody)
+      .catch(err => {
+        const body = document.getElementById('workouts-body');
+        if (body) {
+          body.innerHTML = `<p class="subtle" style="color:var(--terracotta)">${(err && err.message) || 'Could not load exercises.'}</p>
+            <div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Close</button></div>`;
+          body.querySelector('#cancel').addEventListener('click', closeSheet);
+        }
+      });
+  }
+
+  function renderWorkoutsBody() {
+    const body = document.getElementById('workouts-body');
+    if (!body) return;
+    const prefs = state.workoutPrefs || { muscleFilter: null, difficultyFilter: null };
+    let muscleFilter = prefs.muscleFilter || null;
+    let diffFilter = prefs.difficultyFilter || null;
+
+    const renderMuscleChips = () => `
+      <button class="cat-chip ${muscleFilter === null ? 'on' : ''}" data-muscle="">
+        All muscles<span class="ccount">${exercisesCache.length} moves</span>
+      </button>
+      ${MUSCLE_ORDER.map(m => {
+        const count = exercisesCache.filter(e => e.primary.includes(m) || e.secondary.includes(m)).length;
+        if (count === 0) return '';
+        return `
+          <button class="cat-chip ${muscleFilter === m ? 'on' : ''}" data-muscle="${m}">
+            ${MUSCLE_LABEL[m]}<span class="ccount">${count} moves</span>
+          </button>
+        `;
+      }).join('')}
+    `;
+
+    const renderDiffChips = () => {
+      const diffs = [
+        { key: null, label: 'All levels' },
+        { key: 'beginner', label: 'Beginner' },
+        { key: 'intermediate', label: 'Intermediate' },
+        { key: 'advanced', label: 'Advanced' },
+      ];
+      return diffs.map(d => `
+        <button class="cat-chip ${diffFilter === d.key ? 'on' : ''}" data-diff="${d.key === null ? '' : d.key}">
+          ${d.label}
+        </button>
+      `).join('');
+    };
+
+    const renderList = () => {
+      const filtered = exercisesCache.filter(e => exerciseMatchesFilters(e, muscleFilter, diffFilter));
+      if (filtered.length === 0) {
+        return `<p class="archive-empty">No exercises match that combination.</p>`;
+      }
+      return `<div class="archive-list">${filtered.map(ex => `
+        <button class="archive-item workout-item" data-id="${ex.id}">
+          <div class="aleft">
+            <p class="atext">${ex.name}</p>
+            <p class="adate">
+              ${ex.primary.map(m => `<span class="muscle-tag">${MUSCLE_LABEL[m]}</span>`).join('')}
+            </p>
+          </div>
+          ${difficultyBadge(ex.difficulty)}
+        </button>
+      `).join('')}</div>`;
+    };
+
+    body.innerHTML = `
+      <p class="sheet-section-label">Muscle</p>
+      <div class="cat-grid" id="muscle-grid">${renderMuscleChips()}</div>
+
+      <p class="sheet-section-label" style="margin-top:18px">Difficulty</p>
+      <div class="cat-grid" id="diff-grid">${renderDiffChips()}</div>
+
+      <p class="sheet-section-label" style="margin-top:18px">Exercises</p>
+      <div id="workout-list">${renderList()}</div>
+
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `;
+
+    const muscleGrid = body.querySelector('#muscle-grid');
+    const diffGrid = body.querySelector('#diff-grid');
+    const listEl = body.querySelector('#workout-list');
+
+    const persistPrefs = () => {
+      state.workoutPrefs = { muscleFilter, difficultyFilter: diffFilter };
+      save();
+    };
+
+    muscleGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      muscleFilter = chip.dataset.muscle || null;
+      muscleGrid.innerHTML = renderMuscleChips();
+      listEl.innerHTML = renderList();
+      persistPrefs();
+    });
+    diffGrid.addEventListener('click', (e) => {
+      const chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      diffFilter = chip.dataset.diff || null;
+      diffGrid.innerHTML = renderDiffChips();
+      listEl.innerHTML = renderList();
+      persistPrefs();
+    });
+    listEl.addEventListener('click', (e) => {
+      const item = e.target.closest('.workout-item');
+      if (!item) return;
+      openExerciseDetail(item.dataset.id);
+    });
+
+    body.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
+  function openExerciseDetail(id) {
+    const ex = exercisesCache && exercisesCache.find(e => e.id === id);
+    if (!ex) return;
+
+    const primary = ex.primary.map(m => `<span class="works-chip works-chip-primary">${MUSCLE_LABEL[m]}</span>`).join('');
+    const secondary = ex.secondary.map(m => `<span class="works-chip">${MUSCLE_LABEL[m]}</span>`).join('');
+    const steps = ex.howTo.map(s => `<li>${s}</li>`).join('');
+
+    openSheet(`
+      <p class="ex-eyebrow">${ex.category}</p>
+      <h2>${ex.name}</h2>
+      <p class="subtle">${difficultyBadge(ex.difficulty)} · ${ex.equipment.map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' + ')}</p>
+
+      <p class="sheet-section-label" style="margin-top:16px">Works</p>
+      <div class="works-chips">${primary}${secondary}</div>
+
+      <p class="sheet-section-label" style="margin-top:16px">How to</p>
+      <ol class="howto-steps">${steps}</ol>
+
+      <p class="sheet-section-label" style="margin-top:16px">What it builds</p>
+      <p class="ex-what">${ex.what}</p>
+
+      ${ex.tips ? `
+        <p class="sheet-section-label" style="margin-top:16px">Tips</p>
+        <p class="ex-tips">${ex.tips}</p>
+      ` : ''}
+
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="back">Back</button>
+      </div>
+    `);
+    sheet.querySelector('#back').addEventListener('click', openWorkouts);
+  }
+
   // --- Boot ----------------------------------------------------------------
 
   function renderAll() {
@@ -5084,6 +5381,8 @@
   document.getElementById('open-word').addEventListener('click', () => openWord());
   document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
+  document.getElementById('open-workouts').addEventListener('click', openWorkouts);
+  document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
   document.getElementById('open-archive').addEventListener('click', () => openArchive());
   document.getElementById('open-recent').addEventListener('click', openRecent);
   document.getElementById('open-review').addEventListener('click', openReview);
