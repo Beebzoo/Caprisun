@@ -1790,6 +1790,39 @@
   .workout-item .atext { white-space: normal; }
   .workout-item .adate { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 4px; }
 
+  .body-diagram {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 6px 0 18px;
+  }
+  .body-diagram svg { width: 100%; max-width: 130px; height: auto; }
+  .body-diagram .silhouette {
+    fill: var(--surface-2);
+    stroke: var(--border);
+    stroke-width: 1;
+    pointer-events: none;
+  }
+  .muscle {
+    fill: var(--surface-2);
+    stroke: var(--border);
+    stroke-width: 1;
+    transition: fill .15s, stroke .15s;
+    cursor: pointer;
+  }
+  .muscle:hover { stroke: var(--border-strong); }
+  .muscle.active { fill: var(--green-soft); stroke: var(--green-deep); }
+  .muscle.active.primary { fill: var(--green-deep); }
+  .muscle.filter-on { stroke: var(--ink); stroke-width: 2; }
+  .body-diagram-caption {
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    margin: -10px 0 14px;
+  }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -5193,6 +5226,85 @@
     return `<span class="ex-diff ex-diff-${d}">${DIFFICULTY_LABEL[d] || d}</span>`;
   }
 
+  function renderBodyDiagram() {
+    // Stylised silhouette + interactive muscle shapes. viewBox 100x240 per figure.
+    const silhouette = `
+      <g class="silhouette">
+        <circle cx="50" cy="22" r="14"/>
+        <rect x="45" y="34" width="10" height="8"/>
+        <path d="M22 46 Q24 42 30 42 L70 42 Q76 42 78 46 L74 132 L26 132 Z"/>
+        <rect x="12" y="44" rx="6" ry="6" width="14" height="58"/>
+        <rect x="10" y="100" rx="6" ry="6" width="14" height="50"/>
+        <rect x="74" y="44" rx="6" ry="6" width="14" height="58"/>
+        <rect x="76" y="100" rx="6" ry="6" width="14" height="50"/>
+        <rect x="26" y="132" rx="8" ry="8" width="20" height="54"/>
+        <rect x="54" y="132" rx="8" ry="8" width="20" height="54"/>
+        <rect x="28" y="184" rx="6" ry="6" width="18" height="50"/>
+        <rect x="54" y="184" rx="6" ry="6" width="18" height="50"/>
+      </g>
+    `;
+    const front = `
+      <svg viewBox="0 0 100 240" class="figure figure-front" aria-label="Front body">
+        ${silhouette}
+        <ellipse class="muscle" data-muscle="front-delts" cx="26" cy="48" rx="7" ry="6"/>
+        <ellipse class="muscle" data-muscle="front-delts" cx="74" cy="48" rx="7" ry="6"/>
+        <rect class="muscle" data-muscle="chest" x="28" y="52" rx="4" ry="4" width="20" height="18"/>
+        <rect class="muscle" data-muscle="chest" x="52" y="52" rx="4" ry="4" width="20" height="18"/>
+        <ellipse class="muscle" data-muscle="biceps" cx="19" cy="68" rx="5" ry="14"/>
+        <ellipse class="muscle" data-muscle="biceps" cx="81" cy="68" rx="5" ry="14"/>
+        <ellipse class="muscle" data-muscle="forearms" cx="17" cy="120" rx="6" ry="18"/>
+        <ellipse class="muscle" data-muscle="forearms" cx="83" cy="120" rx="6" ry="18"/>
+        <rect class="muscle" data-muscle="core" x="38" y="74" rx="3" ry="3" width="24" height="34"/>
+        <ellipse class="muscle" data-muscle="obliques" cx="32" cy="94" rx="4" ry="12"/>
+        <ellipse class="muscle" data-muscle="obliques" cx="68" cy="94" rx="4" ry="12"/>
+        <ellipse class="muscle" data-muscle="quads" cx="36" cy="156" rx="9" ry="22"/>
+        <ellipse class="muscle" data-muscle="quads" cx="64" cy="156" rx="9" ry="22"/>
+      </svg>
+    `;
+    const back = `
+      <svg viewBox="0 0 100 240" class="figure figure-back" aria-label="Back body">
+        ${silhouette}
+        <path class="muscle" data-muscle="traps" d="M30 44 Q50 54 70 44 L66 58 L50 55 L34 58 Z"/>
+        <ellipse class="muscle" data-muscle="rear-delts" cx="26" cy="50" rx="7" ry="6"/>
+        <ellipse class="muscle" data-muscle="rear-delts" cx="74" cy="50" rx="7" ry="6"/>
+        <rect class="muscle" data-muscle="upper-back" x="34" y="58" rx="3" ry="3" width="32" height="22"/>
+        <path class="muscle" data-muscle="lats" d="M28 64 L38 64 L42 98 Q38 102 32 100 Z"/>
+        <path class="muscle" data-muscle="lats" d="M62 64 L72 64 L68 100 Q62 102 58 98 Z"/>
+        <ellipse class="muscle" data-muscle="triceps" cx="19" cy="68" rx="5" ry="14"/>
+        <ellipse class="muscle" data-muscle="triceps" cx="81" cy="68" rx="5" ry="14"/>
+        <ellipse class="muscle" data-muscle="forearms" cx="17" cy="120" rx="6" ry="18"/>
+        <ellipse class="muscle" data-muscle="forearms" cx="83" cy="120" rx="6" ry="18"/>
+        <rect class="muscle" data-muscle="lower-back" x="40" y="104" rx="3" ry="3" width="20" height="22"/>
+        <ellipse class="muscle" data-muscle="glutes" cx="36" cy="142" rx="10" ry="10"/>
+        <ellipse class="muscle" data-muscle="glutes" cx="64" cy="142" rx="10" ry="10"/>
+        <ellipse class="muscle" data-muscle="hamstrings" cx="36" cy="166" rx="8" ry="16"/>
+        <ellipse class="muscle" data-muscle="hamstrings" cx="64" cy="166" rx="8" ry="16"/>
+        <ellipse class="muscle" data-muscle="calves" cx="37" cy="208" rx="7" ry="18"/>
+        <ellipse class="muscle" data-muscle="calves" cx="63" cy="208" rx="7" ry="18"/>
+      </svg>
+    `;
+    return `<div class="body-diagram">${front}${back}</div>`;
+  }
+
+  function highlightMuscles(root, primary, secondary) {
+    if (!root) return;
+    root.querySelectorAll('.muscle.active').forEach(el => el.classList.remove('active', 'primary'));
+    (secondary || []).forEach(m => {
+      root.querySelectorAll(`.muscle[data-muscle="${m}"]`).forEach(el => el.classList.add('active'));
+    });
+    (primary || []).forEach(m => {
+      root.querySelectorAll(`.muscle[data-muscle="${m}"]`).forEach(el => el.classList.add('active', 'primary'));
+    });
+  }
+
+  function applyFilterHighlight(root, muscleKey) {
+    if (!root) return;
+    root.querySelectorAll('.muscle.filter-on').forEach(el => el.classList.remove('filter-on'));
+    if (muscleKey) {
+      root.querySelectorAll(`.muscle[data-muscle="${muscleKey}"]`).forEach(el => el.classList.add('filter-on'));
+    }
+  }
+
   function exerciseMatchesFilters(ex, muscleFilter, diffFilter) {
     if (muscleFilter) {
       const hits = ex.primary.includes(muscleFilter) || ex.secondary.includes(muscleFilter);
@@ -5264,7 +5376,10 @@
         return `<p class="archive-empty">No exercises match that combination.</p>`;
       }
       return `<div class="archive-list">${filtered.map(ex => `
-        <button class="archive-item workout-item" data-id="${ex.id}">
+        <button class="archive-item workout-item"
+          data-id="${ex.id}"
+          data-muscles-primary="${ex.primary.join(' ')}"
+          data-muscles-secondary="${ex.secondary.join(' ')}">
           <div class="aleft">
             <p class="atext">${ex.name}</p>
             <p class="adate">
@@ -5277,6 +5392,9 @@
     };
 
     body.innerHTML = `
+      ${renderBodyDiagram()}
+      <p class="body-diagram-caption">Tap a muscle to filter · hover a move to preview</p>
+
       <p class="sheet-section-label">Muscle</p>
       <div class="cat-grid" id="muscle-grid">${renderMuscleChips()}</div>
 
@@ -5291,21 +5409,34 @@
       </div>
     `;
 
+    const diagramEl = body.querySelector('.body-diagram');
     const muscleGrid = body.querySelector('#muscle-grid');
     const diffGrid = body.querySelector('#diff-grid');
     const listEl = body.querySelector('#workout-list');
+
+    applyFilterHighlight(diagramEl, muscleFilter);
 
     const persistPrefs = () => {
       state.workoutPrefs = { muscleFilter, difficultyFilter: diffFilter };
       save();
     };
 
+    const setMuscleFilter = (m) => {
+      muscleFilter = (muscleFilter === m) ? null : m;
+      muscleGrid.innerHTML = renderMuscleChips();
+      listEl.innerHTML = renderList();
+      applyFilterHighlight(diagramEl, muscleFilter);
+      persistPrefs();
+    };
+
     muscleGrid.addEventListener('click', (e) => {
       const chip = e.target.closest('.cat-chip');
       if (!chip) return;
-      muscleFilter = chip.dataset.muscle || null;
+      const key = chip.dataset.muscle || null;
+      muscleFilter = key;
       muscleGrid.innerHTML = renderMuscleChips();
       listEl.innerHTML = renderList();
+      applyFilterHighlight(diagramEl, muscleFilter);
       persistPrefs();
     });
     diffGrid.addEventListener('click', (e) => {
@@ -5320,6 +5451,27 @@
       const item = e.target.closest('.workout-item');
       if (!item) return;
       openExerciseDetail(item.dataset.id);
+    });
+
+    diagramEl.addEventListener('click', (e) => {
+      const shape = e.target.closest('.muscle');
+      if (!shape) return;
+      setMuscleFilter(shape.dataset.muscle);
+    });
+
+    // Hover preview: highlight the exercise's muscles on the diagram.
+    let hoveredItem = null;
+    listEl.addEventListener('mouseover', (e) => {
+      const item = e.target.closest('.workout-item');
+      if (!item || item === hoveredItem) return;
+      hoveredItem = item;
+      const prim = (item.dataset.musclesPrimary || '').split(' ').filter(Boolean);
+      const sec = (item.dataset.musclesSecondary || '').split(' ').filter(Boolean);
+      highlightMuscles(diagramEl, prim, sec);
+    });
+    listEl.addEventListener('mouseleave', () => {
+      hoveredItem = null;
+      highlightMuscles(diagramEl, [], []);
     });
 
     body.querySelector('#cancel').addEventListener('click', closeSheet);
@@ -5338,7 +5490,9 @@
       <h2>${ex.name}</h2>
       <p class="subtle">${difficultyBadge(ex.difficulty)} · ${ex.equipment.map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' + ')}</p>
 
-      <p class="sheet-section-label" style="margin-top:16px">Works</p>
+      ${renderBodyDiagram()}
+
+      <p class="sheet-section-label">Works</p>
       <div class="works-chips">${primary}${secondary}</div>
 
       <p class="sheet-section-label" style="margin-top:16px">How to</p>
@@ -5356,6 +5510,7 @@
         <button class="btn btn-ghost" id="back">Back</button>
       </div>
     `);
+    highlightMuscles(sheet.querySelector('.body-diagram'), ex.primary, ex.secondary);
     sheet.querySelector('#back').addEventListener('click', openWorkouts);
   }
 
