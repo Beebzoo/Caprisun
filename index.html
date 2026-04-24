@@ -2087,6 +2087,147 @@
     letter-spacing: 0.06em;
   }
 
+  .day-heatmap-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 0 2px;
+  }
+  .day-heatmap { width: 100%; min-width: 240px; max-width: 360px; height: auto; display: block; }
+  .dh-cell {
+    fill: var(--surface-2);
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+  }
+  .dh-cell[data-iso]:hover { opacity: 0.75; }
+  .dh-cell.dh-blank  { fill: var(--surface-2); }
+  .dh-cell.dh-deep   { fill: var(--green-deep); }
+  .dh-cell.dh-soft   { fill: var(--green-soft); }
+  .dh-cell.dh-ochre  { fill: var(--ochre); }
+  .dh-cell.dh-terra  { fill: var(--terracotta); }
+  .dh-cell.dh-future {
+    fill: transparent;
+    stroke: var(--border);
+    stroke-width: 0.5;
+    cursor: default;
+  }
+  .dh-cell.dh-pre {
+    fill: transparent;
+    stroke: var(--border);
+    stroke-width: 0.5;
+    cursor: default;
+  }
+  .dh-row-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 8px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .act-summary-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .act-total {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .act-total-sub {
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .act-rows { display: grid; gap: 8px; }
+  .act-row {
+    display: grid;
+    grid-template-columns: 84px 1fr 64px;
+    gap: 10px;
+    align-items: center;
+  }
+  .act-label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .act-bar-wrap {
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .act-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    min-width: 2px;
+  }
+  .act-val {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    text-align: right;
+  }
+  .act-val small {
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-left: 2px;
+    text-transform: uppercase;
+  }
+
+  .act-legend {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+  .act-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .act-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .weekly-bars-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 6px 0 2px;
+  }
+  .weekly-bars {
+    width: 100%;
+    min-width: 280px;
+    max-width: 480px;
+    height: auto;
+    display: block;
+  }
+  .wb-axis {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .wb-empty {
+    fill: var(--surface-2);
+  }
+  .wb-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -6190,6 +6331,59 @@
     return mix;
   }
 
+  function computeSessionTotals(days) {
+    // Totals per activity over the last `days` days (including today).
+    const today = new Date();
+    const totals = {};
+    for (const a of ACTIVITIES) totals[a.key] = 0;
+    let grandTotal = 0;
+    let daysWithSession = 0;
+    for (let i = 0; i < days; i++) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      const sess = state.sessions[iso];
+      if (!sess) continue;
+      let any = false;
+      for (const a of ACTIVITIES) {
+        const v = sess[a.key] || 0;
+        if (v > 0) { totals[a.key] += v; grandTotal += v; any = true; }
+      }
+      if (any) daysWithSession += 1;
+    }
+    return { totals, grandTotal, daysWithSession, days };
+  }
+
+  function computeWeeklySessions(weeks) {
+    // Returns array oldest-first of { monday, byActivity, total }.
+    const thisMonday = startOfWeek(new Date());
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+    const result = [];
+    for (let i = 0; i < weeks; i++) {
+      const monday = addDays(firstMonday, i * 7);
+      const byActivity = {};
+      for (const a of ACTIVITIES) byActivity[a.key] = 0;
+      for (let d = 0; d < 7; d++) {
+        const day = addDays(monday, d);
+        const iso = toISODate(day);
+        const sess = state.sessions[iso];
+        if (!sess) continue;
+        for (const a of ACTIVITIES) {
+          if (sess[a.key]) byActivity[a.key] += sess[a.key];
+        }
+      }
+      const total = Object.values(byActivity).reduce((x, y) => x + y, 0);
+      result.push({ monday, byActivity, total });
+    }
+    return result;
+  }
+
+  const ACTIVITY_ACCENTS = {
+    gym:        '--green-deep',
+    yoga:       '--green-soft',
+    meditation: '--ochre',
+    reading:    '--terracotta',
+  };
+
   function renderSummaryTiles(sum) {
     const rate = sum.weeksSinceStart > 0
       ? Math.round((sum.sealed / sum.weeksSinceStart) * 100)
@@ -6330,6 +6524,132 @@
     </ul>`;
   }
 
+  function renderDayHeatmap() {
+    // 13 weeks ending today, columns = weeks, rows = Mon..Sun.
+    const weeks = 13;
+    const today = new Date();
+    const thisMonday = startOfWeek(today);
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+    const startMonday = getStartMonday();
+
+    const cellW = 12, cellH = 12, gap = 3;
+    const svgW = weeks * (cellW + gap) - gap;
+    const svgH = 7 * (cellH + gap) - gap;
+    const leftPad = 16;
+
+    const cells = [];
+    for (let w = 0; w < weeks; w++) {
+      for (let d = 0; d < 7; d++) {
+        const day = addDays(firstMonday, w * 7 + d);
+        const iso = toISODate(day);
+        const future = day > today;
+        const beforeStart = day < startMonday;
+        const color = state.dayColors[iso];
+        let cls = 'dh-cell';
+        if (future) cls += ' dh-future';
+        else if (beforeStart) cls += ' dh-pre';
+        else if (color) cls += ' dh-' + color;
+        else cls += ' dh-blank';
+        const x = w * (cellW + gap);
+        const y = d * (cellH + gap);
+        const interactive = !future && !beforeStart;
+        cells.push(`<rect class="${cls}" x="${x}" y="${y}" width="${cellW}" height="${cellH}" rx="2" ${interactive ? `data-iso="${iso}"` : ''}/>`);
+      }
+    }
+    const dayLabels = ['M', '', 'W', '', 'F', '', ''].map((l, i) => {
+      if (!l) return '';
+      const y = i * (cellH + gap) + cellH - 2;
+      return `<text class="dh-row-label" x="-4" y="${y}" text-anchor="end">${l}</text>`;
+    }).join('');
+
+    return `
+      <svg class="day-heatmap" viewBox="-${leftPad} 0 ${svgW + leftPad} ${svgH}" preserveAspectRatio="xMidYMid meet">
+        ${dayLabels}
+        ${cells.join('')}
+      </svg>
+    `;
+  }
+
+  function renderActivityTotals(stats) {
+    const totals = stats.totals;
+    const max = Math.max(...Object.values(totals), 1);
+    const rows = ACTIVITIES.map(a => {
+      const v = totals[a.key] || 0;
+      const pct = (v / max) * 100;
+      return `
+        <div class="act-row">
+          <span class="act-label">${a.name}</span>
+          <div class="act-bar-wrap">
+            <div class="act-bar" style="width: ${pct}%; background: var(${ACTIVITY_ACCENTS[a.key]});"></div>
+          </div>
+          <span class="act-val">${v}<small>min</small></span>
+        </div>
+      `;
+    }).join('');
+
+    const hrs = Math.floor(stats.grandTotal / 60);
+    const mins = stats.grandTotal % 60;
+    const totalLabel = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+
+    return `
+      <div class="act-summary-head">
+        <p class="act-total">${totalLabel}</p>
+        <p class="act-total-sub">total over ${stats.daysWithSession} active day${stats.daysWithSession === 1 ? '' : 's'}</p>
+      </div>
+      <div class="act-rows">${rows}</div>
+    `;
+  }
+
+  function renderWeeklyTrend(weeksData) {
+    if (weeksData.length === 0) return '';
+    const max = Math.max(...weeksData.map(w => w.total), 1);
+    const chartH = 140;
+    const barW = 18, gap = 6;
+    const svgW = weeksData.length * (barW + gap) - gap;
+    const svgH = chartH + 22;
+
+    let lastMonthMarked = -1;
+    const bars = weeksData.map((w, i) => {
+      const x = i * (barW + gap);
+      let y = chartH;
+      const segs = ACTIVITIES.map(a => {
+        const v = w.byActivity[a.key] || 0;
+        if (v === 0) return '';
+        const h = (v / max) * chartH;
+        y -= h;
+        return `<rect class="wb-seg" x="${x}" y="${y}" width="${barW}" height="${h}" fill="var(${ACTIVITY_ACCENTS[a.key]})" rx="1"/>`;
+      }).join('');
+      let label = '';
+      const monthIdx = w.monday.getMonth();
+      if (monthIdx !== lastMonthMarked && w.monday.getDate() <= 7) {
+        label = `<text class="wb-label" x="${x + barW / 2}" y="${chartH + 14}" text-anchor="middle">${monthShort(w.monday)}</text>`;
+        lastMonthMarked = monthIdx;
+      }
+      const emptyBase = w.total === 0
+        ? `<rect class="wb-empty" x="${x}" y="${chartH - 2}" width="${barW}" height="2" rx="1"/>`
+        : '';
+      return emptyBase + segs + label;
+    }).join('');
+
+    return `
+      <svg class="weekly-bars" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet">
+        <line class="wb-axis" x1="0" y1="${chartH + 0.5}" x2="${svgW}" y2="${chartH + 0.5}"/>
+        ${bars}
+      </svg>
+    `;
+  }
+
+  function renderActivityLegend() {
+    return `<ul class="act-legend">
+      ${ACTIVITIES.map(a => `
+        <li class="act-legend-row">
+          <span class="act-legend-dot" style="background: var(${ACTIVITY_ACCENTS[a.key]})"></span>
+          <span>${a.name}</span>
+        </li>
+      `).join('')}
+    </ul>`;
+  }
+
   function openStats() {
     openSheet(`
       <h2>Stats</h2>
@@ -6344,6 +6664,12 @@
     if (!body) return;
     const sum = computeChainSummary();
     const weekMix = computeMoodMix('weeks');
+    const dayMix = computeMoodMix('days');
+    const sess30 = computeSessionTotals(30);
+    const weekly = computeWeeklySessions(12);
+    const weeklyAvg = weekly.length > 0
+      ? Math.round(weekly.reduce((s, w) => s + w.total, 0) / weekly.length)
+      : 0;
 
     body.innerHTML = `
       ${renderSummaryTiles(sum)}
@@ -6355,19 +6681,37 @@
       <p class="stats-sub">52 weeks, tap to review.</p>
       <div class="year-heatmap-wrap">${renderYearHeatmap()}</div>
 
-      <p class="sheet-section-label" style="margin-top:22px">Mood mix</p>
+      <p class="sheet-section-label" style="margin-top:22px">Mood mix · weeks</p>
       <p class="stats-sub">How the sealed weeks broke down.</p>
       <div class="mood-mix-wrap">
         ${renderMoodDonut(weekMix, 'sealed')}
         ${renderMoodLegend(weekMix)}
       </div>
 
+      <p class="sheet-section-label" style="margin-top:22px">Every day · last 13 weeks</p>
+      <p class="stats-sub">Each square is a day, colored by how it felt.</p>
+      <div class="day-heatmap-wrap">${renderDayHeatmap()}</div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Mood mix · days</p>
+      <p class="stats-sub">All colored days, across the whole chain.</p>
+      <div class="mood-mix-wrap">
+        ${renderMoodDonut(dayMix, 'colored')}
+        ${renderMoodLegend(dayMix)}
+      </div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Sessions · last 30 days</p>
+      ${renderActivityTotals(sess30)}
+
+      <p class="sheet-section-label" style="margin-top:22px">Weekly trend · last 12 weeks</p>
+      <p class="stats-sub">Total minutes per week. Average: ${weeklyAvg} min.</p>
+      ${renderActivityLegend()}
+      <div class="weekly-bars-wrap">${renderWeeklyTrend(weekly)}</div>
+
       <div class="sheet-actions" style="margin-top:22px">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `;
 
-    // Wire the chain hero and year heatmap to open week review.
     const openWeekByIso = (iso) => {
       const [y, mo, d] = iso.split('-').map(Number);
       closeSheet();
@@ -6378,6 +6722,13 @@
     });
     body.querySelectorAll('.yh-cell:not(.pre)').forEach(el => {
       el.addEventListener('click', () => openWeekByIso(el.dataset.iso));
+    });
+    body.querySelectorAll('.dh-cell[data-iso]').forEach(el => {
+      el.addEventListener('click', () => {
+        const iso = el.dataset.iso;
+        closeSheet();
+        setTimeout(() => openDay(iso), 200);
+      });
     });
 
     body.querySelector('#cancel').addEventListener('click', closeSheet);
