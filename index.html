@@ -1950,6 +1950,143 @@
   .plan-ex-remove { color: var(--terracotta); border-color: var(--border); }
   .plan-ex-remove:hover { border-color: var(--terracotta); }
 
+  /* Stats */
+  .stats-sub {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin: -6px 0 10px;
+  }
+  .stats-summary { margin-bottom: 16px; }
+
+  .stats-chain-hero {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 5px;
+  }
+  .stats-chain-week {
+    aspect-ratio: 1 / 1.3;
+    border-radius: 6px;
+    background: var(--border);
+    border: none;
+    padding: 0;
+    transition: transform 0.15s ease;
+    cursor: pointer;
+  }
+  .stats-chain-week:hover:not(:disabled) { transform: translateY(-1px); }
+  .stats-chain-week.deep   { background: var(--green-deep); }
+  .stats-chain-week.soft   { background: var(--green-soft); }
+  .stats-chain-week.ochre  { background: var(--ochre); }
+  .stats-chain-week.terra  { background: var(--terracotta); }
+  .stats-chain-week.blank  { background: var(--surface-2); }
+  .stats-chain-week.current {
+    background: transparent;
+    border: 1px dashed var(--green-deep);
+  }
+  .stats-chain-week.pre-start {
+    background: transparent;
+    border: 1px dotted var(--border-strong);
+    cursor: default;
+  }
+  .stats-chain-legend { margin-top: 8px; }
+
+  .year-heatmap-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 0 2px;
+  }
+  .year-heatmap-svg { width: 100%; min-width: 520px; height: auto; display: block; }
+  .yh-cell {
+    fill: var(--surface-2);
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+  }
+  .yh-cell:hover { opacity: 0.8; }
+  .yh-cell.deep   { fill: var(--green-deep); }
+  .yh-cell.soft   { fill: var(--green-soft); }
+  .yh-cell.ochre  { fill: var(--ochre); }
+  .yh-cell.terra  { fill: var(--terracotta); }
+  .yh-cell.blank  { fill: var(--surface-2); }
+  .yh-cell.current {
+    fill: transparent;
+    stroke: var(--green-deep);
+    stroke-dasharray: 2 2;
+    stroke-width: 1;
+  }
+  .yh-cell.pre {
+    fill: transparent;
+    stroke: var(--border);
+    stroke-width: 0.5;
+    cursor: default;
+  }
+  .yh-month {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .mood-mix-wrap {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: 8px 0;
+  }
+  @media (max-width: 380px) {
+    .mood-mix-wrap { grid-template-columns: 1fr; justify-items: center; }
+  }
+  .mood-donut {
+    width: 160px;
+    height: 160px;
+    display: block;
+  }
+  .mood-donut .donut-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 34px;
+    fill: var(--ink);
+    font-weight: 500;
+  }
+  .mood-donut .donut-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .mood-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .mood-legend-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .mood-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .mood-legend-label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+  }
+  .mood-legend-count { color: var(--ink-soft); font-size: 13px; }
+  .mood-legend-count small {
+    color: var(--ink-faint);
+    margin-left: 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -2149,6 +2286,11 @@
         <span class="ptitle">Dumbbell library</span>
         <span class="psub">Browse, learn, build a plan.</span>
       </button>
+      <button class="play-card" id="open-stats" style="margin-top:10px">
+        <span class="pmeyebrow">Stats</span>
+        <span class="ptitle">Your chain in numbers</span>
+        <span class="psub">Weeks sealed, streaks, mood mix.</span>
+      </button>
     </section>
 
     <p class="footer serif">Keep the chain.</p>
@@ -2157,6 +2299,7 @@
       <button id="open-recent">Recent</button>
       <button id="open-archive">Archive</button>
       <button id="open-workouts-2">Workouts</button>
+      <button id="open-stats-2">Stats</button>
       <button id="open-settings">Settings</button>
       <button id="open-year-2">History</button>
     </div>
@@ -5989,6 +6132,257 @@
     }
   }
 
+  // --- Stats ---------------------------------------------------------------
+
+  const MOOD_COLORS = [
+    { key: 'deep',  label: 'Deep',       blurb: 'Clear, on plan',    cssVar: '--green-deep' },
+    { key: 'soft',  label: 'Soft',       blurb: 'Gentle, alright',    cssVar: '--green-soft' },
+    { key: 'ochre', label: 'Ochre',      blurb: 'Mixed, in-between',  cssVar: '--ochre' },
+    { key: 'terra', label: 'Terracotta', blurb: 'Heavy, off',         cssVar: '--terracotta' },
+  ];
+
+  function computeChainSummary() {
+    // Consider all weeks from startMonday up to (but not including) the current week,
+    // since the current week can't be sealed until Sunday.
+    const startMonday = getStartMonday();
+    const thisMonday = startOfWeek(new Date());
+    const weeksSinceStart = Math.max(0, Math.floor((thisMonday - startMonday) / (7 * 86400000)));
+
+    let sealed = 0;
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let runStreak = 0;
+    let allSealedIsos = [];
+
+    // Walk oldest → newest so we can track longest streak correctly.
+    for (let i = 0; i < weeksSinceStart; i++) {
+      const m = addDays(startMonday, i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      if (color) {
+        sealed += 1;
+        runStreak += 1;
+        if (runStreak > longestStreak) longestStreak = runStreak;
+        allSealedIsos.push(iso);
+      } else {
+        runStreak = 0;
+      }
+    }
+    // Current streak: count back from the most-recent completed week.
+    for (let i = weeksSinceStart - 1; i >= 0; i--) {
+      const m = addDays(startMonday, i * 7);
+      const iso = toISODate(m);
+      if (state.weekColors[iso]) currentStreak += 1;
+      else break;
+    }
+
+    return { sealed, weeksSinceStart, currentStreak, longestStreak };
+  }
+
+  function computeMoodMix(scope) {
+    // scope = 'weeks' | 'days'
+    const source = scope === 'days' ? state.dayColors : state.weekColors;
+    const mix = { deep: 0, soft: 0, ochre: 0, terra: 0 };
+    for (const iso in source) {
+      const c = source[iso];
+      if (mix[c] !== undefined) mix[c] += 1;
+    }
+    return mix;
+  }
+
+  function renderSummaryTiles(sum) {
+    const rate = sum.weeksSinceStart > 0
+      ? Math.round((sum.sealed / sum.weeksSinceStart) * 100)
+      : null;
+    return `
+      <div class="summary-grid stats-summary">
+        <div class="summary-tile">
+          <p class="slabel">Weeks sealed</p>
+          <p class="svalue">${sum.sealed}<small>/ ${sum.weeksSinceStart}</small></p>
+        </div>
+        <div class="summary-tile">
+          <p class="slabel">Current streak</p>
+          <p class="svalue">${sum.currentStreak}<small>wk${sum.currentStreak === 1 ? '' : 's'}</small></p>
+        </div>
+        <div class="summary-tile wide">
+          <p class="slabel">Longest streak · seal rate</p>
+          <p class="svalue">${sum.longestStreak}<small>wk${sum.longestStreak === 1 ? '' : 's'}</small> · ${rate !== null ? rate + '%' : '—'}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderChainHero() {
+    // Last 12 weeks (or fewer if pre-start), bigger tiles, tappable.
+    const thisMonday = startOfWeek(new Date());
+    const startMonday = getStartMonday();
+    const pre = isPreStart();
+    const rightMost = pre ? startMonday : thisMonday;
+    const count = 12;
+    const blocks = [];
+    for (let i = count - 1; i >= 0; i--) {
+      const m = addDays(rightMost, -i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      const isCurrent = i === 0;
+      const beforeStart = m < startMonday;
+      let cls = 'stats-chain-week';
+      if (beforeStart) cls += ' pre-start';
+      else if (isCurrent) cls += ' current';
+      else if (color) cls += ' ' + color;
+      else cls += ' blank';
+      blocks.push(`<button class="${cls}" data-iso="${iso}" ${beforeStart ? 'disabled' : ''} aria-label="Week of ${monthShort(m)} ${m.getDate()}"></button>`);
+    }
+    const firstShown = addDays(rightMost, -(count - 1) * 7);
+    return `
+      <div class="stats-chain-hero">
+        ${blocks.join('')}
+      </div>
+      <div class="chain-legend stats-chain-legend">
+        <span>${monthShort(firstShown)} ${firstShown.getDate()}</span>
+        <span>${pre ? 'first week' : 'this week'}</span>
+      </div>
+    `;
+  }
+
+  function renderYearHeatmap() {
+    const thisMonday = startOfWeek(new Date());
+    const weeks = 52;
+    const firstMonday = addDays(thisMonday, -(weeks - 1) * 7);
+    const startMonday = getStartMonday();
+
+    const cellW = 12, cellH = 14, gap = 3;
+    const svgW = weeks * (cellW + gap) - gap;
+    const svgH = cellH;
+
+    const cells = [];
+    const monthLabels = [];
+    let lastMonthMarked = -1;
+    for (let i = 0; i < weeks; i++) {
+      const m = addDays(firstMonday, i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      const isCurrent = i === weeks - 1;
+      const beforeStart = m < startMonday;
+      let cls = 'yh-cell';
+      if (beforeStart) cls += ' pre';
+      else if (isCurrent) cls += ' current';
+      else if (color) cls += ' ' + color;
+      else cls += ' blank';
+      const x = i * (cellW + gap);
+      cells.push(`<rect class="${cls}" x="${x}" y="0" width="${cellW}" height="${cellH}" rx="2" data-iso="${iso}"/>`);
+      const monthIdx = m.getMonth();
+      if (monthIdx !== lastMonthMarked && m.getDate() <= 7) {
+        monthLabels.push(`<text class="yh-month" x="${x}" y="${svgH + 12}">${monthShort(m)}</text>`);
+        lastMonthMarked = monthIdx;
+      }
+    }
+    return `
+      <svg class="year-heatmap-svg" viewBox="0 0 ${svgW} ${svgH + 16}" preserveAspectRatio="xMidYMid meet">
+        ${cells.join('')}
+        ${monthLabels.join('')}
+      </svg>
+    `;
+  }
+
+  function renderMoodDonut(mix, totalLabel) {
+    const total = (mix.deep + mix.soft + mix.ochre + mix.terra) || 0;
+    const R = 70, SW = 22, CIRC = 2 * Math.PI * R;
+    let offset = 0;
+    const segs = MOOD_COLORS.map(c => {
+      const count = mix[c.key] || 0;
+      if (count === 0) return '';
+      const pct = count / (total || 1);
+      const length = pct * CIRC;
+      const gapPx = total === count ? 0 : 2;
+      const dasharray = `${Math.max(0, length - gapPx)} ${CIRC}`;
+      const seg = `<circle cx="100" cy="100" r="${R}" fill="none"
+          stroke="var(${c.cssVar})" stroke-width="${SW}"
+          stroke-dasharray="${dasharray}" stroke-dashoffset="${-offset}"/>`;
+      offset += length;
+      return seg;
+    }).join('');
+    const centerNum = total;
+    return `
+      <svg class="mood-donut" viewBox="0 0 200 200" aria-label="Mood mix">
+        <circle cx="100" cy="100" r="${R}" fill="none" stroke="var(--surface-2)" stroke-width="${SW}"/>
+        <g transform="rotate(-90 100 100)">${segs}</g>
+        <text x="100" y="96" text-anchor="middle" class="donut-value">${centerNum}</text>
+        <text x="100" y="116" text-anchor="middle" class="donut-label">${totalLabel || 'sealed'}</text>
+      </svg>
+    `;
+  }
+
+  function renderMoodLegend(mix) {
+    const total = (mix.deep + mix.soft + mix.ochre + mix.terra) || 0;
+    return `<ul class="mood-legend">
+      ${MOOD_COLORS.map(c => {
+        const count = mix[c.key] || 0;
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        return `
+          <li class="mood-legend-row">
+            <span class="mood-dot" style="background: var(${c.cssVar})"></span>
+            <span class="mood-legend-label">${c.label}</span>
+            <span class="mood-legend-count">${count} <small>${pct}%</small></span>
+          </li>
+        `;
+      }).join('')}
+    </ul>`;
+  }
+
+  function openStats() {
+    openSheet(`
+      <h2>Stats</h2>
+      <p class="subtle">The chain, laid out in numbers.</p>
+      <div id="stats-body"></div>
+    `);
+    renderStatsBody();
+  }
+
+  function renderStatsBody() {
+    const body = document.getElementById('stats-body');
+    if (!body) return;
+    const sum = computeChainSummary();
+    const weekMix = computeMoodMix('weeks');
+
+    body.innerHTML = `
+      ${renderSummaryTiles(sum)}
+
+      <p class="sheet-section-label">The chain · last 12 weeks</p>
+      ${renderChainHero()}
+
+      <p class="sheet-section-label" style="margin-top:22px">The year</p>
+      <p class="stats-sub">52 weeks, tap to review.</p>
+      <div class="year-heatmap-wrap">${renderYearHeatmap()}</div>
+
+      <p class="sheet-section-label" style="margin-top:22px">Mood mix</p>
+      <p class="stats-sub">How the sealed weeks broke down.</p>
+      <div class="mood-mix-wrap">
+        ${renderMoodDonut(weekMix, 'sealed')}
+        ${renderMoodLegend(weekMix)}
+      </div>
+
+      <div class="sheet-actions" style="margin-top:22px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `;
+
+    // Wire the chain hero and year heatmap to open week review.
+    const openWeekByIso = (iso) => {
+      const [y, mo, d] = iso.split('-').map(Number);
+      closeSheet();
+      setTimeout(() => openWeekReview(new Date(y, mo - 1, d)), 200);
+    };
+    body.querySelectorAll('.stats-chain-week:not(.pre-start)').forEach(el => {
+      el.addEventListener('click', () => openWeekByIso(el.dataset.iso));
+    });
+    body.querySelectorAll('.yh-cell:not(.pre)').forEach(el => {
+      el.addEventListener('click', () => openWeekByIso(el.dataset.iso));
+    });
+
+    body.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
   // --- Boot ----------------------------------------------------------------
 
   function renderAll() {
@@ -6013,6 +6407,8 @@
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
   document.getElementById('open-workouts').addEventListener('click', openWorkouts);
   document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
+  document.getElementById('open-stats').addEventListener('click', openStats);
+  document.getElementById('open-stats-2').addEventListener('click', openStats);
   document.getElementById('open-archive').addEventListener('click', () => openArchive());
   document.getElementById('open-recent').addEventListener('click', openRecent);
   document.getElementById('open-review').addEventListener('click', openReview);
