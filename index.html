@@ -1173,6 +1173,34 @@
     text-align: center;
   }
 
+  /* Recent view */
+  .recent-day {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .recent-day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    padding: 0 2px 4px;
+  }
+  .recent-day-head .rday-today {
+    color: var(--green-deep);
+    font-weight: 600;
+  }
+  .archive-item .akind {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin-right: 8px;
+  }
+
   /* Capture (personal sentence / reflect) */
   .capture-help {
     font-size: 13px;
@@ -1893,6 +1921,7 @@
     <p class="footer serif">Keep the chain.</p>
     <div class="footer-actions">
       <button id="open-guide">Guide</button>
+      <button id="open-recent">Recent</button>
       <button id="open-archive">Archive</button>
       <button id="open-settings">Settings</button>
       <button id="open-year-2">History</button>
@@ -4144,6 +4173,81 @@
     return dates[0];
   }
 
+  // --- Recent days ---------------------------------------------------------
+
+  const RECENT_DAYS = 14;
+
+  function openRecent() {
+    const fmtDate = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    const today = startOfDay(new Date());
+    const todayISO = toISODate(today);
+    const startISO = state.startDate || todayISO;
+
+    const days = [];
+    for (let i = 0; i < RECENT_DAYS; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const iso = toISODate(d);
+      if (iso < startISO) break;
+      days.push({ iso, date: d });
+    }
+
+    const blocks = days.map(({ iso, date }) => {
+      const q = pickQuoteForDate(date);
+      const w = pickWordForDate(date);
+      const quotePreview = q.text.length > 64 ? q.text.slice(0, 64).trim() + '…' : q.text;
+      const wordDef = (w.definition || '').replace(/\.$/, '');
+      const wordText = wordDef.length > 72 ? wordDef.slice(0, 72).trim() + '…' : wordDef;
+      const isToday = iso === todayISO;
+      return `
+        <div class="recent-day">
+          <div class="recent-day-head">
+            <span>${fmtDate.format(date)}</span>
+            ${isToday ? '<span class="rday-today">Today</span>' : ''}
+          </div>
+          <button class="archive-item" data-iso="${iso}" data-kind="quote">
+            <span class="aleft">
+              <span class="adate"><span class="akind">Quote</span>${q.author}</span>
+              <span class="atext">"${quotePreview.replace(/</g, '&lt;')}"</span>
+            </span>
+          </button>
+          <button class="archive-item" data-iso="${iso}" data-kind="word">
+            <span class="aleft">
+              <span class="adate"><span class="akind">Word</span>${w.pos}</span>
+              <span class="atext">${w.word} — ${wordText.replace(/</g, '&lt;')}</span>
+            </span>
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    const body = days.length === 0
+      ? `<p class="archive-empty">Nothing yet — the chain hasn't started.</p>`
+      : blocks;
+
+    openSheet(`
+      <h2>Recent days</h2>
+      <p class="subtle">The quote and word of the day from the last ${days.length} day${days.length === 1 ? '' : 's'}. Tap one to open it.</p>
+      ${body}
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+      </div>
+    `);
+
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelectorAll('.archive-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const iso = el.dataset.iso;
+        const kind = el.dataset.kind;
+        closeSheet();
+        setTimeout(() => {
+          if (kind === 'quote') openQuote({ dateISO: iso });
+          else openWord({ dateISO: iso });
+        }, 180);
+      });
+    });
+  }
+
   // --- Archive -------------------------------------------------------------
 
   function openArchive(tab) {
@@ -4981,6 +5085,7 @@
   document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
   document.getElementById('open-archive').addEventListener('click', () => openArchive());
+  document.getElementById('open-recent').addEventListener('click', openRecent);
   document.getElementById('open-review').addEventListener('click', openReview);
   document.getElementById('today-note-btn').addEventListener('click', () => {
     const iso = toISODate(new Date());
