@@ -1823,6 +1823,133 @@
     margin: -10px 0 14px;
   }
 
+  /* Plans */
+  .plan-item .plan-chev,
+  .plan-pick-item .plan-chev {
+    font-size: 22px;
+    color: var(--ink-faint);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .pick-mode-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--green-deep);
+    color: var(--bg);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    font-size: 13px;
+  }
+  .pick-mode-banner strong { font-weight: 600; }
+  .pick-mode-banner button {
+    background: transparent;
+    border: 1px solid rgba(245, 241, 232, 0.35);
+    color: var(--bg);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  .pick-mode-banner button:hover { background: rgba(245, 241, 232, 0.1); }
+  .pick-add-chip {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--green-deep);
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  .workout-item-picking { border-color: var(--green-soft); }
+  .inline-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--green-deep);
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+  }
+  .plan-ex-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .plan-ex-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .plan-ex-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .plan-ex-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .plan-ex-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+  .plan-ex-inputs label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .plan-ex-inputs input {
+    width: 44px;
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    text-align: center;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .plan-ex-inputs input:focus { outline: none; border-color: var(--green-deep); }
+  .plan-ex-times { color: var(--ink-faint); font-size: 14px; letter-spacing: 0; }
+  .plan-ex-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .plan-ex-btn {
+    width: 26px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .plan-ex-btn:hover:not(:disabled) { border-color: var(--border-strong); color: var(--ink); }
+  .plan-ex-btn:disabled { opacity: 0.35; cursor: default; }
+  .plan-ex-remove { color: var(--terracotta); border-color: var(--border); }
+  .plan-ex-remove:hover { border-color: var(--terracotta); }
+
   /* Quiz — runner */
   .quiz-cat-tag {
     display: inline-block;
@@ -5314,14 +5441,30 @@
     return true;
   }
 
-  function openWorkouts() {
+  // Tab + pick-mode state survives sheet re-renders but resets when the app reloads.
+  let workoutTab = 'browse';
+  let workoutPickMode = null; // planId or null
+
+  function openWorkouts(opts) {
+    if (opts && opts.tab) workoutTab = opts.tab;
     openSheet(`
       <h2>Workouts</h2>
       <p class="subtle">Dumbbell and bench. Pick a muscle, learn a move.</p>
+      <div class="archive-tabs" id="workout-tabs">
+        <button class="archive-tab ${workoutTab === 'browse' ? 'active' : ''}" data-tab="browse">Browse</button>
+        <button class="archive-tab ${workoutTab === 'plans' ? 'active' : ''}" data-tab="plans">My plans</button>
+      </div>
       <div id="workouts-body">
         <p class="subtle">Loading exercises…</p>
       </div>
     `);
+    const tabsEl = sheet.querySelector('#workout-tabs');
+    tabsEl.addEventListener('click', (e) => {
+      const t = e.target.closest('.archive-tab');
+      if (!t) return;
+      workoutTab = t.dataset.tab;
+      openWorkouts();
+    });
     loadExercises()
       .then(renderWorkoutsBody)
       .catch(err => {
@@ -5337,9 +5480,18 @@
   function renderWorkoutsBody() {
     const body = document.getElementById('workouts-body');
     if (!body) return;
+    if (workoutTab === 'plans') {
+      renderPlansBody(body);
+    } else {
+      renderBrowseBody(body);
+    }
+  }
+
+  function renderBrowseBody(body) {
     const prefs = state.workoutPrefs || { muscleFilter: null, difficultyFilter: null };
     let muscleFilter = prefs.muscleFilter || null;
     let diffFilter = prefs.difficultyFilter || null;
+    const pickPlan = workoutPickMode ? state.workoutPlans[workoutPickMode] : null;
 
     const renderMuscleChips = () => `
       <button class="cat-chip ${muscleFilter === null ? 'on' : ''}" data-muscle="">
@@ -5375,8 +5527,11 @@
       if (filtered.length === 0) {
         return `<p class="archive-empty">No exercises match that combination.</p>`;
       }
+      const rightSide = pickPlan
+        ? `<span class="pick-add-chip">Add</span>`
+        : '';
       return `<div class="archive-list">${filtered.map(ex => `
-        <button class="archive-item workout-item"
+        <button class="archive-item workout-item ${pickPlan ? 'workout-item-picking' : ''}"
           data-id="${ex.id}"
           data-muscles-primary="${ex.primary.join(' ')}"
           data-muscles-secondary="${ex.secondary.join(' ')}">
@@ -5386,14 +5541,22 @@
               ${ex.primary.map(m => `<span class="muscle-tag">${MUSCLE_LABEL[m]}</span>`).join('')}
             </p>
           </div>
-          ${difficultyBadge(ex.difficulty)}
+          ${pickPlan ? rightSide : difficultyBadge(ex.difficulty)}
         </button>
       `).join('')}</div>`;
     };
 
+    const banner = pickPlan ? `
+      <div class="pick-mode-banner">
+        <span>Adding to <strong>"${escapeHTML(pickPlan.name)}"</strong></span>
+        <button id="cancel-pick">Cancel</button>
+      </div>
+    ` : '';
+
     body.innerHTML = `
+      ${banner}
       ${renderBodyDiagram()}
-      <p class="body-diagram-caption">Tap a muscle to filter · hover a move to preview</p>
+      <p class="body-diagram-caption">${pickPlan ? 'Tap an exercise to add it' : 'Tap a muscle to filter · hover a move to preview'}</p>
 
       <p class="sheet-section-label">Muscle</p>
       <div class="cat-grid" id="muscle-grid">${renderMuscleChips()}</div>
@@ -5421,19 +5584,10 @@
       save();
     };
 
-    const setMuscleFilter = (m) => {
-      muscleFilter = (muscleFilter === m) ? null : m;
-      muscleGrid.innerHTML = renderMuscleChips();
-      listEl.innerHTML = renderList();
-      applyFilterHighlight(diagramEl, muscleFilter);
-      persistPrefs();
-    };
-
     muscleGrid.addEventListener('click', (e) => {
       const chip = e.target.closest('.cat-chip');
       if (!chip) return;
-      const key = chip.dataset.muscle || null;
-      muscleFilter = key;
+      muscleFilter = chip.dataset.muscle || null;
       muscleGrid.innerHTML = renderMuscleChips();
       listEl.innerHTML = renderList();
       applyFilterHighlight(diagramEl, muscleFilter);
@@ -5450,13 +5604,25 @@
     listEl.addEventListener('click', (e) => {
       const item = e.target.closest('.workout-item');
       if (!item) return;
-      openExerciseDetail(item.dataset.id);
+      if (pickPlan) {
+        addExerciseToPlan(pickPlan.id, item.dataset.id);
+        const planId = pickPlan.id;
+        workoutPickMode = null;
+        openPlanDetail(planId);
+      } else {
+        openExerciseDetail(item.dataset.id);
+      }
     });
 
     diagramEl.addEventListener('click', (e) => {
       const shape = e.target.closest('.muscle');
       if (!shape) return;
-      setMuscleFilter(shape.dataset.muscle);
+      const m = shape.dataset.muscle;
+      muscleFilter = (muscleFilter === m) ? null : m;
+      muscleGrid.innerHTML = renderMuscleChips();
+      listEl.innerHTML = renderList();
+      applyFilterHighlight(diagramEl, muscleFilter);
+      persistPrefs();
     });
 
     // Hover preview: highlight the exercise's muscles on the diagram.
@@ -5474,7 +5640,300 @@
       highlightMuscles(diagramEl, [], []);
     });
 
+    if (pickPlan) {
+      body.querySelector('#cancel-pick').addEventListener('click', () => {
+        const planId = pickPlan.id;
+        workoutPickMode = null;
+        openPlanDetail(planId);
+      });
+    }
     body.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
+  function renderPlansBody(body) {
+    const plans = (state.workoutPlanOrder || [])
+      .map(id => state.workoutPlans[id])
+      .filter(Boolean);
+
+    const list = plans.length === 0
+      ? `<p class="archive-empty">No plans yet. Build one to save the moves you actually do.</p>`
+      : `<div class="archive-list">${plans.map(p => `
+          <button class="archive-item plan-item" data-plan-id="${p.id}">
+            <div class="aleft">
+              <p class="atext">${escapeHTML(p.name)}</p>
+              <p class="adate">${p.exercises.length} move${p.exercises.length === 1 ? '' : 's'} · updated ${formatPlanTimestamp(p.updatedAt)}</p>
+            </div>
+            <span class="plan-chev">›</span>
+          </button>
+        `).join('')}</div>`;
+
+    body.innerHTML = `
+      <div id="plans-list">${list}</div>
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+        <button class="btn btn-primary" id="new-plan">New plan</button>
+      </div>
+    `;
+
+    body.querySelector('#plans-list').addEventListener('click', (e) => {
+      const item = e.target.closest('.plan-item');
+      if (!item) return;
+      openPlanDetail(item.dataset.planId);
+    });
+    body.querySelector('#new-plan').addEventListener('click', () => {
+      const name = (prompt('Name this plan', 'Push day') || '').trim();
+      if (!name) return;
+      const id = createPlan(name);
+      openPlanDetail(id);
+    });
+    body.querySelector('#cancel').addEventListener('click', closeSheet);
+  }
+
+  // --- Plan mutations ------------------------------------------------------
+
+  function createPlan(name) {
+    const id = 'plan-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1000).toString(36);
+    const now = new Date().toISOString();
+    if (!state.workoutPlans) state.workoutPlans = {};
+    if (!Array.isArray(state.workoutPlanOrder)) state.workoutPlanOrder = [];
+    state.workoutPlans[id] = {
+      id,
+      name,
+      createdAt: now,
+      updatedAt: now,
+      exercises: [],
+    };
+    state.workoutPlanOrder.unshift(id);
+    save();
+    return id;
+  }
+
+  function deletePlan(planId) {
+    if (!state.workoutPlans || !state.workoutPlans[planId]) return;
+    delete state.workoutPlans[planId];
+    state.workoutPlanOrder = (state.workoutPlanOrder || []).filter(id => id !== planId);
+    save();
+  }
+
+  function renamePlan(planId, newName) {
+    const plan = state.workoutPlans && state.workoutPlans[planId];
+    if (!plan) return;
+    plan.name = newName;
+    plan.updatedAt = new Date().toISOString();
+    save();
+  }
+
+  function addExerciseToPlan(planId, exerciseId) {
+    const plan = state.workoutPlans && state.workoutPlans[planId];
+    if (!plan) return;
+    plan.exercises.push({ id: exerciseId, sets: 3, reps: 10 });
+    plan.updatedAt = new Date().toISOString();
+    save();
+  }
+
+  function removeExerciseFromPlan(planId, index) {
+    const plan = state.workoutPlans && state.workoutPlans[planId];
+    if (!plan) return;
+    plan.exercises.splice(index, 1);
+    plan.updatedAt = new Date().toISOString();
+    save();
+  }
+
+  function updateExerciseInPlan(planId, index, patch) {
+    const plan = state.workoutPlans && state.workoutPlans[planId];
+    if (!plan || !plan.exercises[index]) return;
+    Object.assign(plan.exercises[index], patch);
+    plan.updatedAt = new Date().toISOString();
+    save();
+  }
+
+  function moveExerciseInPlan(planId, index, direction) {
+    const plan = state.workoutPlans && state.workoutPlans[planId];
+    if (!plan) return;
+    const target = index + direction;
+    if (target < 0 || target >= plan.exercises.length) return;
+    const list = plan.exercises;
+    [list[index], list[target]] = [list[target], list[index]];
+    plan.updatedAt = new Date().toISOString();
+    save();
+  }
+
+  function formatPlanTimestamp(iso) {
+    if (!iso) return 'just now';
+    const then = new Date(iso);
+    const now = new Date();
+    const diff = Math.round((now - then) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
+    const days = Math.floor(diff / 86400);
+    if (days < 7) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+    return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // --- Plan detail sheet ---------------------------------------------------
+
+  function openPlanDetail(planId) {
+    const plan = state.workoutPlans && state.workoutPlans[planId];
+    if (!plan) { workoutTab = 'plans'; openWorkouts(); return; }
+    // Load exercises so we can look up names; if already cached it resolves immediately.
+    loadExercises().then(() => renderPlanDetailSheet(planId));
+  }
+
+  function renderPlanDetailSheet(planId) {
+    const plan = state.workoutPlans[planId];
+    if (!plan) return;
+
+    const rows = plan.exercises.map((entry, i) => {
+      const ex = exercisesCache.find(e => e.id === entry.id);
+      const name = ex ? ex.name : '(exercise no longer available)';
+      return `
+        <div class="plan-ex-row" data-index="${i}">
+          <div class="plan-ex-main">
+            <p class="plan-ex-name">${escapeHTML(name)}</p>
+            <div class="plan-ex-inputs">
+              <label>Sets
+                <input type="number" min="1" max="20" step="1" value="${entry.sets}" data-field="sets"/>
+              </label>
+              <span class="plan-ex-times">×</span>
+              <label>Reps
+                <input type="number" min="1" max="100" step="1" value="${entry.reps}" data-field="reps"/>
+              </label>
+            </div>
+          </div>
+          <div class="plan-ex-actions">
+            <button class="plan-ex-btn" data-action="up" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button class="plan-ex-btn" data-action="down" aria-label="Move down" ${i === plan.exercises.length - 1 ? 'disabled' : ''}>↓</button>
+            <button class="plan-ex-btn plan-ex-remove" data-action="remove" aria-label="Remove">×</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const body = plan.exercises.length === 0
+      ? `<p class="archive-empty">No moves yet. Tap "Add exercise" to start.</p>`
+      : `<div class="plan-ex-list">${rows}</div>`;
+
+    openSheet(`
+      <p class="ex-eyebrow">Workout plan</p>
+      <h2 id="plan-title">${escapeHTML(plan.name)}</h2>
+      <p class="subtle">${plan.exercises.length} move${plan.exercises.length === 1 ? '' : 's'} · updated ${formatPlanTimestamp(plan.updatedAt)} · <button class="inline-link" id="rename-plan">Rename</button></p>
+
+      ${body}
+
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="back">Back</button>
+        <button class="btn btn-primary" id="add-exercise">Add exercise</button>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-danger-ghost" id="delete-plan">Delete plan</button>
+      </div>
+    `);
+
+    sheet.querySelector('#rename-plan').addEventListener('click', () => {
+      const next = (prompt('Rename plan', plan.name) || '').trim();
+      if (!next || next === plan.name) return;
+      renamePlan(planId, next);
+      renderPlanDetailSheet(planId);
+    });
+
+    const listEl = sheet.querySelector('.plan-ex-list');
+    if (listEl) {
+      listEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.plan-ex-btn');
+        if (!btn) return;
+        const row = btn.closest('.plan-ex-row');
+        const idx = Number(row.dataset.index);
+        const action = btn.dataset.action;
+        if (action === 'up') moveExerciseInPlan(planId, idx, -1);
+        else if (action === 'down') moveExerciseInPlan(planId, idx, 1);
+        else if (action === 'remove') {
+          if (!confirm('Remove this exercise from the plan?')) return;
+          removeExerciseFromPlan(planId, idx);
+        }
+        renderPlanDetailSheet(planId);
+      });
+      listEl.addEventListener('change', (e) => {
+        const input = e.target.closest('input[data-field]');
+        if (!input) return;
+        const row = input.closest('.plan-ex-row');
+        const idx = Number(row.dataset.index);
+        const field = input.dataset.field;
+        let val = parseInt(input.value, 10);
+        if (isNaN(val) || val < 1) val = 1;
+        if (field === 'sets' && val > 20) val = 20;
+        if (field === 'reps' && val > 100) val = 100;
+        input.value = val;
+        updateExerciseInPlan(planId, idx, { [field]: val });
+      });
+    }
+
+    sheet.querySelector('#back').addEventListener('click', () => {
+      workoutTab = 'plans';
+      openWorkouts();
+    });
+    sheet.querySelector('#add-exercise').addEventListener('click', () => {
+      workoutPickMode = planId;
+      workoutTab = 'browse';
+      openWorkouts();
+    });
+    sheet.querySelector('#delete-plan').addEventListener('click', () => {
+      if (!confirm(`Delete "${plan.name}"? This can't be undone.`)) return;
+      deletePlan(planId);
+      workoutTab = 'plans';
+      openWorkouts();
+    });
+  }
+
+  function openPlanPicker(exerciseId) {
+    const plans = (state.workoutPlanOrder || [])
+      .map(id => state.workoutPlans[id])
+      .filter(Boolean);
+
+    const list = plans.length === 0
+      ? `<p class="archive-empty">No plans yet. Create one below.</p>`
+      : `<div class="archive-list">${plans.map(p => `
+          <button class="archive-item plan-pick-item" data-plan-id="${p.id}">
+            <div class="aleft">
+              <p class="atext">${escapeHTML(p.name)}</p>
+              <p class="adate">${p.exercises.length} move${p.exercises.length === 1 ? '' : 's'}</p>
+            </div>
+            <span class="plan-chev">+</span>
+          </button>
+        `).join('')}</div>`;
+
+    openSheet(`
+      <p class="ex-eyebrow">Add to plan</p>
+      <h2>Pick a plan</h2>
+      <p class="subtle">Adds with 3 sets of 10 by default.</p>
+
+      ${list}
+
+      <div class="sheet-actions" style="margin-top:18px">
+        <button class="btn btn-ghost" id="back">Back</button>
+        <button class="btn btn-primary" id="new-plan">New plan</button>
+      </div>
+    `);
+
+    sheet.querySelectorAll('.plan-pick-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const planId = el.dataset.planId;
+        addExerciseToPlan(planId, exerciseId);
+        openPlanDetail(planId);
+      });
+    });
+    sheet.querySelector('#back').addEventListener('click', () => openExerciseDetail(exerciseId));
+    sheet.querySelector('#new-plan').addEventListener('click', () => {
+      const name = (prompt('Name this plan', 'Push day') || '').trim();
+      if (!name) return;
+      const planId = createPlan(name);
+      addExerciseToPlan(planId, exerciseId);
+      openPlanDetail(planId);
+    });
   }
 
   function openExerciseDetail(id) {
@@ -5484,6 +5943,11 @@
     const primary = ex.primary.map(m => `<span class="works-chip works-chip-primary">${MUSCLE_LABEL[m]}</span>`).join('');
     const secondary = ex.secondary.map(m => `<span class="works-chip">${MUSCLE_LABEL[m]}</span>`).join('');
     const steps = ex.howTo.map(s => `<li>${s}</li>`).join('');
+
+    const pickPlan = workoutPickMode ? state.workoutPlans[workoutPickMode] : null;
+    const primaryAction = pickPlan
+      ? `<button class="btn btn-primary" id="add-to-this-plan">Add to "${escapeHTML(pickPlan.name)}"</button>`
+      : `<button class="btn btn-primary" id="add-to-plan">Add to plan…</button>`;
 
     openSheet(`
       <p class="ex-eyebrow">${ex.category}</p>
@@ -5508,10 +5972,21 @@
 
       <div class="sheet-actions" style="margin-top:18px">
         <button class="btn btn-ghost" id="back">Back</button>
+        ${primaryAction}
       </div>
     `);
     highlightMuscles(sheet.querySelector('.body-diagram'), ex.primary, ex.secondary);
     sheet.querySelector('#back').addEventListener('click', openWorkouts);
+    if (pickPlan) {
+      sheet.querySelector('#add-to-this-plan').addEventListener('click', () => {
+        addExerciseToPlan(pickPlan.id, ex.id);
+        const planId = pickPlan.id;
+        workoutPickMode = null;
+        openPlanDetail(planId);
+      });
+    } else {
+      sheet.querySelector('#add-to-plan').addEventListener('click', () => openPlanPicker(ex.id));
+    }
   }
 
   // --- Boot ----------------------------------------------------------------
