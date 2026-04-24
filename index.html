@@ -4453,6 +4453,23 @@
   }
 
   function buildChoices(q, all) {
+    // Prefer the curated options shipped with the question.
+    if (q.options && q.correct_letter) {
+      const letters = ['a', 'b', 'c', 'd'];
+      const curated = letters
+        .map(l => q.options[l])
+        .filter(v => typeof v === 'string' && v.trim().length > 0);
+      const correctOption = q.options[q.correct_letter];
+      if (curated.length >= 2 && typeof correctOption === 'string' && correctOption.length > 0) {
+        const options = curated.slice();
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+        return { options, correctOption };
+      }
+    }
+
     const correctShape = answerShape(q.answer);
     const correctLen = lengthBucket(answerWordCount(q.answer));
     const sameCat = all.filter(o => o.category === q.category && o.id !== q.id);
@@ -4507,7 +4524,7 @@
       const j = Math.floor(Math.random() * (i + 1));
       [options[i], options[j]] = [options[j], options[i]];
     }
-    return options;
+    return { options, correctOption: q.answer };
   }
 
   function normalizeAns(s) {
@@ -4719,13 +4736,15 @@
       }).join('');
       const catLabel = (QUIZ_CATEGORIES.find(c => c.key === q.category) || {}).label || q.category;
 
+      const explain = (q.context || q.notes || '').trim();
       let interaction = '';
       if (mode === 'choice') {
         if (!currentChoices) currentChoices = buildChoices(q, quizQuestions);
-        const opts = currentChoices.map(opt => {
+        const { options: choiceOpts, correctOption } = currentChoices;
+        const opts = choiceOpts.map(opt => {
           let cls = 'quiz-option';
           if (revealed) {
-            if (opt === q.answer) cls += ' correct';
+            if (opt === correctOption) cls += ' correct';
             else if (opt === chosenOption) cls += ' wrong';
             else cls += ' muted';
           }
@@ -4737,7 +4756,7 @@
             <div class="quiz-a-reveal" style="margin-top:16px">
               <p class="alabel">Answer</p>
               <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-              ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+              ${explain ? `<p class="anotes">${explain.replace(/</g, '&lt;')}</p>` : ''}
             </div>
             <div class="sheet-actions"><button class="btn btn-primary" id="next">Next</button></div>
           ` : ''}
@@ -4759,7 +4778,7 @@
               <p class="aans" style="color:${typedMatched ? 'var(--green-deep)' : 'var(--terracotta)'}">${typedValue.replace(/</g, '&lt;') || '—'}</p>
               <p class="alabel" style="margin-top:12px">Correct answer</p>
               <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-              ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+              ${explain ? `<p class="anotes">${explain.replace(/</g, '&lt;')}</p>` : ''}
             </div>
             ${!typedMatched ? `
               <div class="rating-row" style="grid-template-columns: 1fr 1fr; margin-bottom:10px">
@@ -4776,7 +4795,7 @@
           <div class="quiz-a-reveal">
             <p class="alabel">Answer</p>
             <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-            ${q.notes ? `<p class="anotes">${q.notes.replace(/</g, '&lt;')}</p>` : ''}
+            ${explain ? `<p class="anotes">${explain.replace(/</g, '&lt;')}</p>` : ''}
           </div>
           <div class="rating-row" style="grid-template-columns: 1fr 1fr">
             <button class="rating-btn forgot" data-got="no">Didn't know</button>
@@ -4812,7 +4831,7 @@
           btn.addEventListener('click', () => {
             if (revealed) return;
             chosenOption = btn.dataset.opt;
-            const correct = chosenOption === q.answer;
+            const correct = chosenOption === (currentChoices && currentChoices.correctOption);
             commitResult(q, correct);
             revealed = true;
             render();
