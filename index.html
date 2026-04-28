@@ -79,28 +79,17 @@
   header::before {
     content: '';
     position: absolute;
-    top: -14px;
-    right: -10px;
-    width: 100px;
-    height: 100px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 C 25 30, 22 60, 50 90 C 60 70, 78 50, 92 50 C 70 48, 58 30, 50 10 Z' fill='%234F7A55' opacity='0.32'/><path d='M50 12 C 50 40, 55 70, 50 88' stroke='%234F7A55' stroke-width='1.5' fill='none' opacity='0.45'/></svg>");
+    top: -22px;
+    right: -18px;
+    width: 130px;
+    height: 130px;
+    background-image: url("Pics/pngtree-beautiful-flying-kingfisher-on-transparent-background-png-image_14645995.png");
     background-repeat: no-repeat;
     background-size: contain;
+    background-position: top right;
     pointer-events: none;
-    transform: rotate(20deg);
-  }
-  header::after {
-    content: '';
-    position: absolute;
-    top: 36px;
-    right: 78px;
-    width: 42px;
-    height: 42px;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 C 25 30, 22 60, 50 90 C 60 70, 78 50, 92 50 C 70 48, 58 30, 50 10 Z' fill='%23C9A35B' opacity='0.28'/></svg>");
-    background-repeat: no-repeat;
-    background-size: contain;
-    pointer-events: none;
-    transform: rotate(-30deg);
+    opacity: 0.55;
+    transform: rotate(-6deg);
   }
 
   .day-name {
@@ -537,9 +526,20 @@
   .tile .edit-link:hover { opacity: 1; }
 
   /* Footer */
+  .footer-mark {
+    margin-top: 56px;
+    text-align: center;
+  }
+  .footer-bird {
+    display: block;
+    width: 110px;
+    height: auto;
+    margin: 0 auto 10px;
+    opacity: 0.85;
+  }
   .footer {
     text-align: center;
-    margin-top: 56px;
+    margin: 0;
     font-family: 'Fraunces', Georgia, serif;
     font-size: 13px;
     color: var(--ink-faint);
@@ -2855,7 +2855,10 @@
       </button>
     </section>
 
-    <p class="footer serif">Keep the chain.</p>
+    <div class="footer-mark">
+      <img class="footer-bird" src="Pics/720x480.png" alt="" />
+      <p class="footer serif">Keep the chain.</p>
+    </div>
     <div class="footer-actions">
       <button id="open-guide">Guide</button>
       <button id="open-recent">Recent</button>
