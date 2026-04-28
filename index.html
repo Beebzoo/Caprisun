@@ -65,16 +65,33 @@
   }
 
   /* Header */
-  header { margin-bottom: 40px; }
+  header { margin-bottom: 32px; }
+
+  .day-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    font-size: 56px;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .day-date {
+    color: var(--ink-soft);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    margin-top: 6px;
+  }
 
   .greeting {
-    font-size: 30px;
-    line-height: 1.1;
-    margin: 0 0 6px;
+    font-size: 22px;
+    line-height: 1.2;
+    margin: 14px 0 0;
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    color: var(--ink-soft);
   }
 
   .greet-icons {
@@ -84,15 +101,15 @@
   }
 
   .icon-maple {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     color: var(--terracotta);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .icon-mountain {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--green-soft);
     transform: translateY(-1px);
   }
@@ -109,8 +126,58 @@
     font-size: 15px;
     color: var(--ink-soft);
     line-height: 1.4;
-    margin: 12px 0 0;
+    margin: 14px 0 0;
     max-width: 32em;
+  }
+
+  /* Daily checklist (home) */
+  .checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .check-item:hover { border-color: var(--border-strong); }
+  .check-item .tick {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: transparent;
+    flex-shrink: 0;
+  }
+  .check-item.on {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--bg);
+  }
+  .check-item.on .tick {
+    background: var(--bg);
+    border-color: var(--bg);
+    color: var(--green-deep);
+  }
+  .check-item.on .tick::after { content: '✓'; }
+  .checklist-progress {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
   }
 
   .motivation .mot-author {
@@ -2492,7 +2559,9 @@
 <body>
   <main class="app">
     <header>
-      <h1 class="greeting serif">
+      <h1 class="day-name" id="day-name">Tuesday</h1>
+      <div class="day-date" id="date"></div>
+      <p class="greeting">
         <span id="greeting">Good morning.</span>
         <span class="greet-icons" aria-hidden="true">
           <svg class="icon-maple" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -2505,10 +2574,36 @@
             <path d="M15.2 12 L16 10.5 L17 12 L16.5 12.3 L15.7 12.3 Z" fill="#F5F1E8" />
           </svg>
         </span>
-      </h1>
-      <div class="date" id="date"></div>
+      </p>
       <p class="motivation" id="motivation"></p>
     </header>
+
+    <section id="checklist-section">
+      <p class="section-label"><span>Checklist</span><span id="checklist-progress"></span></p>
+      <div class="checklist" id="checklist"></div>
+    </section>
+
+    <section id="moment-section">
+      <p class="section-label"><span>A moment</span></p>
+      <div class="moment-grid">
+        <button class="moment-tile" id="open-review" style="display:none">
+          <span class="meyebrow">Review</span>
+          <span class="mtitle" id="review-preview">Spaced repetition.</span>
+        </button>
+        <button class="moment-tile" id="open-quote">
+          <span class="meyebrow">Quote of the day</span>
+          <span class="mtitle" id="quote-preview">A line to sit with.</span>
+        </button>
+        <button class="moment-tile" id="open-word">
+          <span class="meyebrow">Word of the day</span>
+          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
+        </button>
+        <button class="moment-tile" id="open-quiz">
+          <span class="meyebrow">Geography</span>
+          <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
+        </button>
+      </div>
+    </section>
 
     <section id="chain-section">
       <p class="section-label">
@@ -2536,28 +2631,6 @@
         <h3 id="start-title">Monday, 27 April</h3>
         <p id="start-sub">A fresh week. The first link.</p>
         <div class="countdown" id="start-countdown">In 4 days</div>
-      </div>
-    </section>
-
-    <section id="moment-section">
-      <p class="section-label"><span>A moment</span></p>
-      <div class="moment-grid">
-        <button class="moment-tile" id="open-review" style="display:none">
-          <span class="meyebrow">Review</span>
-          <span class="mtitle" id="review-preview">Spaced repetition.</span>
-        </button>
-        <button class="moment-tile" id="open-quote">
-          <span class="meyebrow">Quote of the day</span>
-          <span class="mtitle" id="quote-preview">A line to sit with.</span>
-        </button>
-        <button class="moment-tile" id="open-word">
-          <span class="meyebrow">Word of the day</span>
-          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
-        </button>
-        <button class="moment-tile" id="open-quiz">
-          <span class="meyebrow">Geography</span>
-          <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
-        </button>
       </div>
     </section>
 
@@ -2638,9 +2711,10 @@
 
   const HABITS = [
     { key: 'teeth',     name: 'Teeth + mouthwash' },
+    { key: 'shower',    name: 'Shower' },
     { key: 'breakfast', name: 'Breakfast' },
     { key: 'vitamins',  name: 'Vitamins' },
-    { key: 'shower',    name: 'Shower' },
+    { key: 'cream',     name: 'Cream' },
   ];
 
   const QUOTES = [
@@ -2822,6 +2896,9 @@
     // 5x drill counts (motor-memory) — independent of SRS deck
     quotePractice: {}, // key: YYYY-MM-DD → number of completed repetitions (0..5)
     wordPractice: {},  // key: YYYY-MM-DD → number of completed repetitions (0..5)
+    // Free-form writing about a word — keyed by the word string
+    // { [word]: { text, savedAt } }
+    wordWriting: {},
     // SRS decks — keyed by word / quote text
     // Each entry: { stage, nextReview, lastReview, firstSeen, personalSentence/personalNote, usedInWild, history: [{date, rating}] }
     wordDeck: {},
@@ -3297,6 +3374,7 @@
   function hourOfDay() { return new Date().getHours(); }
 
   function renderHeader() {
+    const now = new Date();
     const h = hourOfDay();
     const greet =
       h < 5 ? 'Still up.' :
@@ -3304,12 +3382,17 @@
       h < 17 ? 'Good afternoon.' :
       h < 21 ? 'Good evening.' : 'Good night.';
     document.getElementById('greeting').textContent = greet;
-    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    document.getElementById('date').textContent = fmt.format(new Date());
+
+    const dayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(now);
+    const dayEl = document.getElementById('day-name');
+    if (dayEl) dayEl.textContent = dayName;
+
+    const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
+    document.getElementById('date').textContent = dateFmt.format(now);
 
     const motEl = document.getElementById('motivation');
     if (motEl) {
-      const m = pickMotivationForDate(new Date());
+      const m = pickMotivationForDate(now);
       if (m.author) motEl.innerHTML = `${m.text}<span class="mot-author">${m.author}</span>`;
       else motEl.textContent = m.text;
     }
@@ -3429,6 +3512,39 @@
       save();
       renderFlowersPrompt();
     });
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById('checklist');
+    const progressEl = document.getElementById('checklist-progress');
+    if (!container) return;
+    const iso = toISODate(new Date());
+    const habits = state.habits[iso] || {};
+
+    container.innerHTML = HABITS.map(h => `
+      <button class="check-item ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
+        <span class="tick"></span>
+        <span>${h.name}</span>
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.check-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const k = btn.dataset.habit;
+        const cur = state.habits[iso] || {};
+        if (cur[k]) delete cur[k];
+        else cur[k] = true;
+        if (Object.keys(cur).length) state.habits[iso] = cur;
+        else delete state.habits[iso];
+        save();
+        renderChecklist();
+      });
+    });
+
+    if (progressEl) {
+      const done = HABITS.filter(h => habits[h.key]).length;
+      progressEl.textContent = `${done}/${HABITS.length}`;
+    }
   }
 
   function renderPreStart() {
@@ -4021,6 +4137,7 @@
 
       save();
       renderTiles();
+      renderChecklist();
       renderTodayNoteBtn();
       closeSheet();
       if (onClose) setTimeout(onClose, 180);
@@ -4389,13 +4506,18 @@
     const deckHTML = isToday ? renderWordDeckSection(w, deckEntry) : '';
 
     const practiceCount = state.wordPractice[dateISO] || 0;
-    const practiceHTML = isToday ? renderPracticeBlock({
+    const practiceHTML = renderPracticeBlock({
       target: w.word,
       count: practiceCount,
       placeholder: 'Type the word. Press enter after each.',
-      label: 'Practice writing',
+      label: 'Practice 1 · Type 5 times',
       longForm: false,
-    }) : '';
+    });
+
+    const writingEntry = state.wordWriting[w.word];
+    const writingHTML = renderWordWritingSection(w, writingEntry);
+
+    const pastWordsHTML = isToday ? renderPastWordsSection(dateISO) : '';
 
     openSheet(`
       <h2>Word of the day</h2>
@@ -4410,25 +4532,120 @@
       <p class="word-example">${w.example}</p>
       ${deckHTML}
       ${practiceHTML}
+      ${writingHTML}
+      ${pastWordsHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
-    if (isToday) {
-      wireWordDeckSection(w);
-      wirePractice({
-        target: w.word,
-        getCount: () => state.wordPractice[dateISO] || 0,
-        setCount: (n) => {
-          if (n > 0) state.wordPractice[dateISO] = n;
-          else delete state.wordPractice[dateISO];
-          save();
-        },
-        onChange: renderMomentTiles,
+    if (isToday) wireWordDeckSection(w);
+
+    wirePractice({
+      target: w.word,
+      getCount: () => state.wordPractice[dateISO] || 0,
+      setCount: (n) => {
+        if (n > 0) state.wordPractice[dateISO] = n;
+        else delete state.wordPractice[dateISO];
+        save();
+      },
+      onChange: renderMomentTiles,
+    });
+
+    wireWordWriting(w);
+    wirePastWords();
+  }
+
+  function renderWordWritingSection(w, entry) {
+    const text = entry?.text || '';
+    const savedNote = entry
+      ? `<span class="practice-count">Saved ${formatShortDate(entry.savedAt.slice(0, 10))}</span>`
+      : '';
+    return `
+      <div class="sheet-section">
+        <p class="practice-label"><span>Practice 2 · Write about it</span>${savedNote}</p>
+        <textarea class="practice-input" id="word-writing-input" rows="4" placeholder="What does &quot;${w.word}&quot; bring up for you? When might you use it? What does it remind you of?">${text.replace(/</g, '&lt;')}</textarea>
+        <div class="sheet-actions" style="margin-top:8px">
+          <button class="btn btn-primary" id="word-writing-save">${entry ? 'Update' : 'Save'}</button>
+          ${entry ? `<button class="btn btn-ghost" id="word-writing-clear">Clear</button>` : ''}
+        </div>
+        <p class="practice-hint">Two or three lines is plenty — make it personal so it sticks.</p>
+      </div>
+    `;
+  }
+
+  function wireWordWriting(w) {
+    const input = sheet.querySelector('#word-writing-input');
+    const saveBtn = sheet.querySelector('#word-writing-save');
+    const clearBtn = sheet.querySelector('#word-writing-clear');
+    if (!input || !saveBtn) return;
+    saveBtn.addEventListener('click', () => {
+      const text = (input.value || '').trim();
+      if (text.length < 4) {
+        input.style.borderColor = 'var(--terracotta)';
+        setTimeout(() => { input.style.borderColor = ''; }, 400);
+        return;
+      }
+      state.wordWriting[w.word] = { text, savedAt: new Date().toISOString() };
+      save();
+      saveBtn.textContent = 'Saved';
+      setTimeout(() => { saveBtn.textContent = 'Update'; }, 900);
+    });
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        delete state.wordWriting[w.word];
+        save();
+        input.value = '';
+        clearBtn.style.display = 'none';
       });
     }
+  }
+
+  function renderPastWordsSection(todayISO) {
+    const today = parseISO(todayISO);
+    const startISO = state.startDate || todayISO;
+    const items = [];
+    for (let i = 1; i < 30; i++) {
+      const d = addDays(today, -i);
+      const iso = toISODate(d);
+      if (iso < startISO) break;
+      const w = pickWordForDate(d);
+      items.push({ iso, date: d, w });
+    }
+    if (!items.length) return '';
+    const fmtDate = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    const rows = items.map(({ iso, date, w }) => {
+      const def = (w.definition || '').replace(/\.$/, '');
+      const short = def.length > 80 ? def.slice(0, 80).trim() + '…' : def;
+      const writing = state.wordWriting[w.word];
+      const badge = writing ? `<span class="abadge">Written about</span>` : '';
+      return `
+        <button class="archive-item" data-past-word-iso="${iso}">
+          <span class="aleft">
+            <span class="adate">${fmtDate.format(date)} · ${w.pos}</span>
+            <span class="atext">${w.word} — ${short.replace(/</g, '&lt;')}</span>
+          </span>
+          ${badge}
+        </button>
+      `;
+    }).join('');
+    return `
+      <div class="sheet-section">
+        <p class="sheet-section-label">Past words · tap to practice</p>
+        <div class="archive-list">${rows}</div>
+      </div>
+    `;
+  }
+
+  function wirePastWords() {
+    sheet.querySelectorAll('[data-past-word-iso]').forEach(el => {
+      el.addEventListener('click', () => {
+        const iso = el.dataset.pastWordIso;
+        closeSheet();
+        setTimeout(() => openWord({ dateISO: iso }), 180);
+      });
+    });
   }
 
   function renderWordDeckSection(w, entry) {
@@ -7240,6 +7457,7 @@
 
   function renderAll() {
     renderHeader();
+    renderChecklist();
     renderChain();
     renderFlowersPrompt();
     renderPreStart();
