@@ -1,0 +1,25 @@
+{
+  "name": "Caprisun",
+  "short_name": "Caprisun",
+  "description": "Daily ritual — sleep, checklist, recap, plan. Keep the chain.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1E6CB",
+  "theme_color": "#2D4A3E",
+  "icons": [
+    {
+      "src": "Pics/Meaple_Leaf_of_Canada.svg.png",
+      "sizes": "250x271",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "Pics/Meaple_Leaf_of_Canada.svg.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

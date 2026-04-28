@@ -4,6 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Caprisun</title>
+<meta name="theme-color" content="#2D4A3E" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Caprisun" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="Pics/Meaple_Leaf_of_Canada.svg.png" />
+<link rel="icon" type="image/png" href="Pics/Meaple_Leaf_of_Canada.svg.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -278,6 +285,52 @@
     font-style: italic;
     font-size: 12px;
   }
+  .ritual-sleep-avg {
+    text-align: center;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-style: italic;
+    letter-spacing: 0.04em;
+    min-height: 14px;
+  }
+  .ritual-mood {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .ritual-mood-label {
+    margin: 0 0 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--green-leaf);
+    text-align: center;
+  }
+  .mood-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .mood-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--ink-faint);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .mood-dot:hover { border-color: var(--border-strong); }
+  .mood-dot:active { transform: scale(0.92); }
+  .mood-dot.selected {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: #F8F1DD;
+  }
   .ritual-eyebrow {
     font-size: 11px;
     text-transform: uppercase;
@@ -322,6 +375,27 @@
     transition: opacity 0.25s ease;
   }
   .ritual-saved.show { opacity: 1; }
+  .ritual-readback {
+    margin: -2px 0 8px;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--ochre);
+    border-radius: 0 6px 6px 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+  .ritual-readback .label {
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    color: var(--green-leaf);
+    display: block;
+    margin-bottom: 2px;
+  }
 
   .motivation .mot-author {
     font-style: normal;
@@ -1033,6 +1107,56 @@
     color: var(--green-deep);
   }
   .habit-chip.on .tick::after { content: '✓'; }
+
+  /* Custom habits manager (Settings) */
+  .custom-habit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .custom-habit-empty {
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--ink-faint);
+    font-size: 12px;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+  .custom-habit-row .remove {
+    color: var(--ink-faint);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .custom-habit-row .remove:hover { color: var(--terracotta); }
+  .custom-habit-add {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .custom-habit-add input[type="text"] {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font: inherit;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .custom-habit-add input[type="text"]:focus { outline: none; border-color: var(--border-strong); }
 
   /* Sleep row */
   .sleep-row {
@@ -2759,6 +2883,17 @@
           <input type="time" id="wake-time" />
         </div>
         <div class="ritual-summary placeholder" id="sleep-summary">Enter both times to see your sleep.</div>
+        <div class="ritual-sleep-avg" id="sleep-avg"></div>
+        <div class="ritual-mood">
+          <p class="ritual-mood-label">How did you wake up?</p>
+          <div class="mood-dots" id="mood-dots">
+            <button class="mood-dot" data-mood="1" aria-label="Drained">1</button>
+            <button class="mood-dot" data-mood="2" aria-label="Low">2</button>
+            <button class="mood-dot" data-mood="3" aria-label="Okay">3</button>
+            <button class="mood-dot" data-mood="4" aria-label="Good">4</button>
+            <button class="mood-dot" data-mood="5" aria-label="Great">5</button>
+          </div>
+        </div>
       </div>
 
       <p class="ritual-eyebrow">
@@ -2766,6 +2901,7 @@
         <span class="rdate" id="yesterday-date"></span>
         <span class="ritual-saved" id="recap-saved">Saved</span>
       </p>
+      <p class="ritual-readback" id="yesterday-plan-readback" style="display:none"></p>
       <textarea class="ritual-text" id="yesterday-recap" placeholder="A short recap — what you did, how it felt."></textarea>
 
       <p class="ritual-eyebrow">
@@ -2916,6 +3052,12 @@
     { key: 'vitamins',  name: 'Vitamins' },
     { key: 'cream',     name: 'Cream' },
   ];
+
+  // Built-in HABITS plus the user's custom ones, in display order.
+  function getAllHabits() {
+    const customs = (state.customHabits || []).map((h) => ({ key: h.id, name: h.name, custom: true }));
+    return [...HABITS, ...customs];
+  }
 
   const QUOTES = [
     { text: "The obstacle is the way.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Impediments to action become the path forward. What stands in the way, rightly met, reveals the way." },
@@ -3095,6 +3237,12 @@
     // Short morning intention for today.
     // { [dateISO]: string }
     morningPlan: {},
+    // Morning mood/energy 1..5 (1 = drained, 5 = great).
+    // { [dateISO]: number }
+    mood: {},
+    // User-defined extra checklist items.
+    // [{ id: 'custom_xxx', name: '...' }]
+    customHabits: [],
     dayColors: {}, // key: YYYY-MM-DD, value: 'deep' | 'soft' | 'ochre' | 'terra'
     quizResults: {},
     seenQuotes: {},
@@ -3539,7 +3687,7 @@
 
   function weekHabits(weekDays) {
     const counts = {};
-    for (const h of HABITS) counts[h.key] = 0;
+    for (const h of getAllHabits()) counts[h.key] = 0;
     for (const { iso } of weekDays) {
       const h = state.habits[iso] || {};
       for (const k of Object.keys(counts)) if (h[k]) counts[k]++;
@@ -3751,6 +3899,22 @@
       summaryEl.classList.remove('placeholder');
       summaryEl.innerHTML = `<strong>${formatSleepHours(hours)}</strong> of sleep`;
     }
+    updateSleepAvg();
+  }
+
+  function updateSleepAvg() {
+    const el = document.getElementById('sleep-avg');
+    if (!el) return;
+    const today = new Date();
+    const samples = [];
+    for (let i = 0; i < 7; i++) {
+      const iso = toISODate(addDays(today, -i));
+      const v = state.sleep?.[iso];
+      if (typeof v === 'number' && v > 0) samples.push(v);
+    }
+    if (samples.length < 2) { el.textContent = ''; return; }
+    const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
+    el.textContent = `7-day avg: ${formatSleepHours(avg)} (${samples.length} night${samples.length === 1 ? '' : 's'})`;
   }
 
   function renderMorningRitual() {
@@ -3773,8 +3937,25 @@
     const recapEl = document.getElementById('yesterday-recap');
     if (recapEl) recapEl.value = state.dayNotes[yesterdayISO] || '';
 
+    const readbackEl = document.getElementById('yesterday-plan-readback');
+    if (readbackEl) {
+      const yPlan = (state.morningPlan && state.morningPlan[yesterdayISO] || '').trim();
+      if (yPlan) {
+        readbackEl.style.display = '';
+        readbackEl.innerHTML = `<span class="label">You'd planned</span>${yPlan.replace(/</g, '&lt;')}`;
+      } else {
+        readbackEl.style.display = 'none';
+        readbackEl.innerHTML = '';
+      }
+    }
+
     const planEl = document.getElementById('today-plan');
     if (planEl) planEl.value = (state.morningPlan && state.morningPlan[todayISO]) || '';
+
+    const moodVal = state.mood?.[todayISO];
+    document.querySelectorAll('#mood-dots .mood-dot').forEach((dot) => {
+      dot.classList.toggle('selected', Number(dot.dataset.mood) === moodVal);
+    });
   }
 
   function flashSaved(id) {
@@ -3848,6 +4029,23 @@
         save();
       }, 'plan-saved');
     }
+
+    document.querySelectorAll('#mood-dots .mood-dot').forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const todayISO = toISODate(new Date());
+        const v = Number(dot.dataset.mood);
+        if (!state.mood) state.mood = {};
+        if (state.mood[todayISO] === v) {
+          delete state.mood[todayISO]; // tap again to clear
+        } else {
+          state.mood[todayISO] = v;
+        }
+        save();
+        document.querySelectorAll('#mood-dots .mood-dot').forEach((d) => {
+          d.classList.toggle('selected', Number(d.dataset.mood) === state.mood[todayISO]);
+        });
+      });
+    });
   }
 
   function renderChecklist() {
@@ -3857,10 +4055,11 @@
     const iso = toISODate(new Date());
     const habits = state.habits[iso] || {};
 
-    container.innerHTML = HABITS.map(h => `
+    const allHabits = getAllHabits();
+    container.innerHTML = allHabits.map(h => `
       <button class="check-item ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
         <span class="tick"></span>
-        <span>${h.name}</span>
+        <span>${h.name.replace(/</g, '&lt;')}</span>
       </button>
     `).join('');
 
@@ -3878,8 +4077,8 @@
     });
 
     if (progressEl) {
-      const done = HABITS.filter(h => habits[h.key]).length;
-      progressEl.textContent = `${done}/${HABITS.length}`;
+      const done = allHabits.filter(h => habits[h.key]).length;
+      progressEl.textContent = `${done}/${allHabits.length}`;
     }
   }
 
@@ -4022,11 +4221,11 @@
       `;
     }).join('');
 
-    const habitTiles = HABITS.map(h => {
+    const habitTiles = getAllHabits().map(h => {
       const c = habitCounts[h.key] || 0;
       return `
         <div class="summary-tile">
-          <p class="slabel">${h.name}</p>
+          <p class="slabel">${h.name.replace(/</g, '&lt;')}</p>
           <p class="svalue">${c}<small>/ 7 days</small></p>
         </div>
       `;
@@ -4257,10 +4456,10 @@
       `;
     }).join('');
 
-    const habitChips = HABITS.map(h => `
+    const habitChips = getAllHabits().map(h => `
       <button class="habit-chip ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
         <span class="tick"></span>
-        <span>${h.name}</span>
+        <span>${h.name.replace(/</g, '&lt;')}</span>
       </button>
     `).join('');
 
@@ -4576,6 +4775,16 @@
       </div>
 
       <div class="sheet-section">
+        <p class="sheet-section-label">Checklist · custom items</p>
+        <div id="custom-habits-list"></div>
+        <div class="custom-habit-add">
+          <input id="custom-habit-input" type="text" maxlength="40" placeholder="Add a habit (e.g. Stretch)" />
+          <button class="btn btn-primary" id="custom-habit-add">Add</button>
+        </div>
+        <p class="subtle" style="margin-top:8px">Built-in items (Teeth, Shower, Breakfast, Vitamins, Cream) are always there. Anything you add here appears below them on the home checklist. Removing keeps your past tick history.</p>
+      </div>
+
+      <div class="sheet-section">
         <p class="sheet-section-label">Start date</p>
         <input id="start-input" type="date" value="${state.startDate}" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font:inherit;color:var(--ink);font-family:'Fraunces',Georgia,serif;font-size:15px;" />
         <p class="subtle" style="margin-top:8px">The first Monday the framework is live. Days before this are hidden.</p>
@@ -4601,6 +4810,12 @@
     `);
 
     renderSyncSection();
+    renderCustomHabitsList();
+
+    sheet.querySelector('#custom-habit-add').addEventListener('click', addCustomHabitFromInput);
+    sheet.querySelector('#custom-habit-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addCustomHabitFromInput(); }
+    });
 
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
     sheet.querySelector('#save-settings').addEventListener('click', () => {
@@ -4670,6 +4885,49 @@
       body: 'Zero gym and no meaningful movement all week. The only outcome that breaks the chain. Rare — means something real is wrong (illness, genuine crisis, burnout). Two reds back-to-back is a signal to stop and diagnose, not push harder.',
     },
   ];
+
+  function renderCustomHabitsList() {
+    const list = sheet?.querySelector('#custom-habits-list');
+    if (!list) return;
+    const items = state.customHabits || [];
+    if (items.length === 0) {
+      list.innerHTML = `<div class="custom-habit-empty">No custom items yet. Add one below.</div>`;
+      return;
+    }
+    list.innerHTML = items.map((h) => `
+      <div class="custom-habit-row" data-id="${h.id}">
+        <span>${(h.name || '').replace(/</g, '&lt;')}</span>
+        <button class="remove" data-id="${h.id}">Remove</button>
+      </div>
+    `).join('');
+    list.querySelectorAll('.remove').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.customHabits = (state.customHabits || []).filter((h) => h.id !== btn.dataset.id);
+        save();
+        renderCustomHabitsList();
+        renderChecklist();
+      });
+    });
+  }
+
+  function addCustomHabitFromInput() {
+    const input = sheet?.querySelector('#custom-habit-input');
+    if (!input) return;
+    const name = (input.value || '').trim();
+    if (!name) return;
+    if (!state.customHabits) state.customHabits = [];
+    if (state.customHabits.some((h) => h.name.toLowerCase() === name.toLowerCase())) {
+      input.style.borderColor = 'var(--terracotta)';
+      setTimeout(() => { input.style.borderColor = ''; }, 500);
+      return;
+    }
+    const id = `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+    state.customHabits.push({ id, name });
+    save();
+    input.value = '';
+    renderCustomHabitsList();
+    renderChecklist();
+  }
 
   function openGuide() {
     const items = GUIDE_TIERS.map(t => `
@@ -7358,7 +7616,7 @@
 
   function computeHabitStats(days) {
     const today = new Date();
-    return HABITS.map(h => {
+    return getAllHabits().map(h => {
       let done = 0, total = 0;
       const daily = [];
       for (let i = days - 1; i >= 0; i--) {
@@ -7828,6 +8086,12 @@
   renderAll();
   wireMorningRitual();
   initAuth();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
 })();
 </script>
 </body>
