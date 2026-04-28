@@ -219,6 +219,53 @@
     color: var(--green-deep);
   }
   .check-item.on .tick::after { content: '✓'; }
+  .check-item .hname { flex: 1; }
+  .check-item .streak {
+    margin-left: 6px;
+    font-size: 11px;
+    color: var(--green-leaf);
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .check-item.on .streak { color: rgba(248, 241, 221, 0.78); }
+
+  .checklist-celebrate {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-leaf) 100%);
+    color: #F8F1DD;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Fraunces', Georgia, serif;
+  }
+  .checklist-celebrate.on { display: flex; }
+  .checklist-celebrate.pop { animation: ccPop 0.45s ease-out; }
+  .checklist-celebrate .cc-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #F8F1DD;
+    color: var(--green-deep);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .checklist-celebrate .cc-label {
+    font-size: 14px;
+    letter-spacing: 0.01em;
+  }
+  @keyframes ccPop {
+    0%   { transform: scale(0.86); opacity: 0; }
+    60%  { transform: scale(1.04); opacity: 1; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+
   .checklist-progress {
     margin-top: 10px;
     font-size: 11px;
@@ -375,6 +422,103 @@
     transition: opacity 0.25s ease;
   }
   .ritual-saved.show { opacity: 1; }
+  .priorities-list {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .priority-row {
+    display: grid;
+    grid-template-columns: 26px 1fr 36px;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(74, 56, 28, 0.04);
+    transition: background 0.15s ease;
+  }
+  .priority-row:focus-within { border-color: var(--border-strong); }
+  .priority-num {
+    width: 26px;
+    text-align: center;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--green-leaf);
+    font-weight: 500;
+  }
+  .priority-text {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    font: inherit;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    padding: 10px 0;
+    line-height: 1.3;
+  }
+  .priority-text::placeholder { color: var(--ink-faint); font-style: italic; }
+  .priority-text:focus { outline: none; }
+  .priority-done {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+  .priority-done:hover { background: var(--border); }
+  .priority-done .ptick {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    font-size: 11px;
+    background: var(--surface);
+  }
+  .priority-row.done .priority-text {
+    color: var(--ink-faint);
+    text-decoration: line-through;
+    text-decoration-color: var(--green-soft);
+  }
+  .priority-row.done .priority-done .ptick {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: #F8F1DD;
+  }
+  .priority-row.done .priority-done .ptick::after { content: '✓'; }
+
+  .priority-notes-toggle { margin-top: 10px; }
+  .priority-notes-toggle summary {
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    padding: 6px 0;
+    list-style: none;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .priority-notes-toggle summary::-webkit-details-marker { display: none; }
+  .priority-notes-toggle summary::before {
+    content: '+';
+    color: var(--green-leaf);
+    font-size: 13px;
+    font-family: 'Fraunces', Georgia, serif;
+    transform: translateY(-1px);
+  }
+  .priority-notes-toggle[open] summary::before { content: '−'; }
+
   .ritual-readback {
     margin: -2px 0 8px;
     padding: 8px 12px;
@@ -394,7 +538,38 @@
     font-size: 10px;
     color: var(--green-leaf);
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+  }
+  .ritual-readback .readback-list {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0;
+    font-style: normal;
+  }
+  .ritual-readback .readback-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 2px 0;
+    font-style: italic;
+  }
+  .ritual-readback .readback-list li.done {
+    color: var(--green-leaf);
+    text-decoration: line-through;
+    text-decoration-color: var(--green-soft);
+    font-style: normal;
+  }
+  .ritual-readback .readback-list .rmark {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--green-leaf);
+    min-width: 12px;
+    font-style: normal;
+  }
+  .ritual-readback .readback-plan {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-faint);
   }
 
   .motivation .mot-author {
@@ -499,10 +674,18 @@
     gap: 12px;
   }
 
+  .seal-banner .seal-text { display: flex; flex-direction: column; gap: 4px; }
   .seal-banner p {
     margin: 0;
     font-family: 'Fraunces', Georgia, serif;
     font-size: 15px;
+  }
+  .seal-banner .seal-teaser {
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    color: rgba(245, 241, 232, 0.78);
+    letter-spacing: 0.04em;
   }
 
   .seal-banner button {
@@ -1216,6 +1399,23 @@
   }
   .summary-tile.wide { grid-column: 1 / -1; }
   .summary-tile.wide .svalue { font-size: 15px; }
+
+  .mood-week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 8px 0 4px;
+  }
+  .mood-week-dot {
+    height: 10px;
+    border-radius: 3px;
+    background: var(--surface-2);
+  }
+  .mood-week-dot.m1 { background: var(--terracotta); }
+  .mood-week-dot.m2 { background: #D88A6F; }
+  .mood-week-dot.m3 { background: var(--ochre); }
+  .mood-week-dot.m4 { background: var(--green-soft); }
+  .mood-week-dot.m5 { background: var(--green-deep); }
 
   /* Moment tiles */
   .moment-grid {
@@ -2905,15 +3105,40 @@
       <textarea class="ritual-text" id="yesterday-recap" placeholder="A short recap — what you did, how it felt."></textarea>
 
       <p class="ritual-eyebrow">
-        <span>Today</span>
-        <span class="ritual-saved" id="plan-saved">Saved</span>
+        <span>Today's three</span>
+        <span class="ritual-saved" id="priorities-saved">Saved</span>
       </p>
-      <textarea class="ritual-text" id="today-plan" placeholder="A line or two on the day ahead — work, training, who you're seeing."></textarea>
+      <div class="priorities-list" id="priorities-list">
+        <div class="priority-row" data-idx="0">
+          <span class="priority-num">1</span>
+          <input class="priority-text" data-idx="0" maxlength="80" placeholder="The most important thing today" />
+          <button class="priority-done" data-idx="0" aria-label="Mark done"><span class="ptick"></span></button>
+        </div>
+        <div class="priority-row" data-idx="1">
+          <span class="priority-num">2</span>
+          <input class="priority-text" data-idx="1" maxlength="80" placeholder="Another priority" />
+          <button class="priority-done" data-idx="1" aria-label="Mark done"><span class="ptick"></span></button>
+        </div>
+        <div class="priority-row" data-idx="2">
+          <span class="priority-num">3</span>
+          <input class="priority-text" data-idx="2" maxlength="80" placeholder="One more" />
+          <button class="priority-done" data-idx="2" aria-label="Mark done"><span class="ptick"></span></button>
+        </div>
+      </div>
+
+      <details class="priority-notes-toggle" id="priority-notes-toggle">
+        <summary><span>Anything else for today</span><span class="ritual-saved" id="plan-saved">Saved</span></summary>
+        <textarea class="ritual-text" id="today-plan" placeholder="Notes — context, gotchas, who you're seeing."></textarea>
+      </details>
     </section>
 
     <section id="checklist-section">
       <p class="section-label"><span>Checklist</span><span id="checklist-progress"></span></p>
       <div class="checklist" id="checklist"></div>
+      <div class="checklist-celebrate" id="checklist-celebrate">
+        <span class="cc-icon">✓</span>
+        <span class="cc-label">Full house. Well done.</span>
+      </div>
     </section>
 
     <section id="moment-section">
@@ -3057,6 +3282,24 @@
   function getAllHabits() {
     const customs = (state.customHabits || []).map((h) => ({ key: h.id, name: h.name, custom: true }));
     return [...HABITS, ...customs];
+  }
+
+  // Consecutive days, walking back from today, where this habit was ticked.
+  // Today not yet ticked doesn't break the streak (we just don't count today).
+  function habitStreak(key) {
+    const today = new Date();
+    const startBound = state.startDate || toISODate(today);
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const iso = toISODate(addDays(today, -i));
+      if (iso < startBound) break;
+      const rec = state.habits[iso];
+      const done = rec && rec[key];
+      if (done) streak++;
+      else if (i === 0) continue; // grace day
+      else break;
+    }
+    return streak;
   }
 
   const QUOTES = [
@@ -3237,6 +3480,9 @@
     // Short morning intention for today.
     // { [dateISO]: string }
     morningPlan: {},
+    // Today's three priorities.
+    // { [dateISO]: [{text, done}, {text, done}, {text, done}] }
+    priorities: {},
     // Morning mood/energy 1..5 (1 = drained, 5 = great).
     // { [dateISO]: number }
     mood: {},
@@ -3695,6 +3941,25 @@
     return counts;
   }
 
+  function weekMood(weekDays) {
+    const counts = [0, 0, 0, 0, 0]; // levels 1..5
+    let total = 0;
+    let sum = 0;
+    const series = [];
+    for (const { iso } of weekDays) {
+      const m = state.mood?.[iso];
+      if (m >= 1 && m <= 5) {
+        counts[m - 1]++;
+        total++;
+        sum += m;
+        series.push(m);
+      } else {
+        series.push(0);
+      }
+    }
+    return { counts, total, avg: total ? sum / total : 0, series };
+  }
+
   function weekSleep(weekDays) {
     const hrs = [];
     for (const { iso } of weekDays) {
@@ -3808,13 +4073,36 @@
     if (!pre && new Date().getDay() === 0 && !state.weekColors[toISODate(thisMonday)]) {
       const banner = document.createElement('div');
       banner.className = 'seal-banner';
+      const teaser = sealTeaser(thisMonday);
       banner.innerHTML = `
-        <p>Sunday. Time to seal the week.</p>
+        <div class="seal-text">
+          <p>Sunday. Time to seal the week.</p>
+          ${teaser ? `<p class="seal-teaser">${teaser}</p>` : ''}
+        </div>
         <button>Review</button>
       `;
       banner.querySelector('button').addEventListener('click', () => openWeekReview(thisMonday));
       slot.appendChild(banner);
     }
+  }
+
+  function sealTeaser(monday) {
+    const weekDays = sessionsForWeek(monday);
+    const habits = weekHabits(weekDays);
+    const allHabits = getAllHabits();
+    const habitTicks = Object.values(habits).reduce((a, b) => a + b, 0);
+    const habitMax = allHabits.length * weekDays.length;
+    const sleep = weekSleep(weekDays);
+    const mood = weekMood(weekDays);
+
+    const parts = [];
+    if (habitMax > 0) {
+      const pct = Math.round((habitTicks / habitMax) * 100);
+      parts.push(`${pct}% habits`);
+    }
+    if (sleep) parts.push(`${(Number.isInteger(sleep.avg) ? sleep.avg : sleep.avg.toFixed(1))} h sleep avg`);
+    if (mood.total > 0) parts.push(`${mood.avg.toFixed(1)} mood`);
+    return parts.join(' · ');
   }
 
   function renderFlowersPrompt() {
@@ -3866,6 +4154,23 @@
       save();
       renderFlowersPrompt();
     });
+  }
+
+  function getPriorities(dateISO) {
+    const arr = (state.priorities && state.priorities[dateISO]) || [];
+    const out = [];
+    for (let i = 0; i < 3; i++) out.push(arr[i] ? { text: arr[i].text || '', done: !!arr[i].done } : { text: '', done: false });
+    return out;
+  }
+
+  function setPriority(dateISO, idx, patch) {
+    if (!state.priorities) state.priorities = {};
+    const list = (state.priorities[dateISO] || []).slice();
+    while (list.length < 3) list.push({ text: '', done: false });
+    list[idx] = { ...list[idx], ...patch };
+    if (list.every((p) => !p.text && !p.done)) delete state.priorities[dateISO];
+    else state.priorities[dateISO] = list;
+    save();
   }
 
   function computeSleepHours(bed, wake) {
@@ -3939,10 +4244,15 @@
 
     const readbackEl = document.getElementById('yesterday-plan-readback');
     if (readbackEl) {
+      const yPriorities = getPriorities(yesterdayISO).filter((p) => p.text);
       const yPlan = (state.morningPlan && state.morningPlan[yesterdayISO] || '').trim();
-      if (yPlan) {
+      if (yPriorities.length || yPlan) {
+        const prioritiesHTML = yPriorities.length
+          ? `<ul class="readback-list">${yPriorities.map((p) => `<li class="${p.done ? 'done' : ''}"><span class="rmark">${p.done ? '✓' : '○'}</span>${p.text.replace(/</g, '&lt;')}</li>`).join('')}</ul>`
+          : '';
+        const planHTML = yPlan ? `<div class="readback-plan">${yPlan.replace(/</g, '&lt;')}</div>` : '';
         readbackEl.style.display = '';
-        readbackEl.innerHTML = `<span class="label">You'd planned</span>${yPlan.replace(/</g, '&lt;')}`;
+        readbackEl.innerHTML = `<span class="label">You'd planned</span>${prioritiesHTML}${planHTML}`;
       } else {
         readbackEl.style.display = 'none';
         readbackEl.innerHTML = '';
@@ -3951,6 +4261,22 @@
 
     const planEl = document.getElementById('today-plan');
     if (planEl) planEl.value = (state.morningPlan && state.morningPlan[todayISO]) || '';
+
+    const priorities = getPriorities(todayISO);
+    for (let i = 0; i < 3; i++) {
+      const row = document.querySelector(`.priority-row[data-idx="${i}"]`);
+      if (!row) continue;
+      const item = priorities[i] || { text: '', done: false };
+      const input = row.querySelector('.priority-text');
+      if (input && document.activeElement !== input) input.value = item.text || '';
+      row.classList.toggle('done', !!item.done);
+    }
+
+    const notesToggle = document.getElementById('priority-notes-toggle');
+    if (notesToggle) {
+      const hasNotes = !!(state.morningPlan && state.morningPlan[todayISO]);
+      if (hasNotes) notesToggle.setAttribute('open', '');
+    }
 
     const moodVal = state.mood?.[todayISO];
     document.querySelectorAll('#mood-dots .mood-dot').forEach((dot) => {
@@ -4046,6 +4372,43 @@
         });
       });
     });
+
+    document.querySelectorAll('.priority-text').forEach((input) => {
+      let timer;
+      const flush = () => {
+        const todayISO = toISODate(new Date());
+        const idx = Number(input.dataset.idx);
+        setPriority(todayISO, idx, { text: input.value });
+        flashSaved('priorities-saved');
+      };
+      input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(flush, 600);
+      });
+      input.addEventListener('blur', () => {
+        clearTimeout(timer);
+        flush();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          flush();
+          const next = document.querySelector(`.priority-text[data-idx="${Number(input.dataset.idx) + 1}"]`);
+          if (next) next.focus();
+        }
+      });
+    });
+
+    document.querySelectorAll('.priority-done').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const todayISO = toISODate(new Date());
+        const idx = Number(btn.dataset.idx);
+        const cur = getPriorities(todayISO)[idx];
+        setPriority(todayISO, idx, { done: !cur.done });
+        const row = btn.closest('.priority-row');
+        if (row) row.classList.toggle('done', !cur.done);
+      });
+    });
   }
 
   function renderChecklist() {
@@ -4056,12 +4419,17 @@
     const habits = state.habits[iso] || {};
 
     const allHabits = getAllHabits();
-    container.innerHTML = allHabits.map(h => `
-      <button class="check-item ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
-        <span class="tick"></span>
-        <span>${h.name.replace(/</g, '&lt;')}</span>
-      </button>
-    `).join('');
+    container.innerHTML = allHabits.map(h => {
+      const s = habitStreak(h.key);
+      const streakHTML = s >= 2 ? `<span class="streak">${s}d</span>` : '';
+      return `
+        <button class="check-item ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
+          <span class="tick"></span>
+          <span class="hname">${h.name.replace(/</g, '&lt;')}</span>
+          ${streakHTML}
+        </button>
+      `;
+    }).join('');
 
     container.querySelectorAll('.check-item').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -4076,9 +4444,22 @@
       });
     });
 
-    if (progressEl) {
-      const done = allHabits.filter(h => habits[h.key]).length;
-      progressEl.textContent = `${done}/${allHabits.length}`;
+    const done = allHabits.filter(h => habits[h.key]).length;
+    const total = allHabits.length;
+
+    if (progressEl) progressEl.textContent = `${done}/${total}`;
+
+    const celebrateEl = document.getElementById('checklist-celebrate');
+    if (celebrateEl) {
+      const fullHouse = total > 0 && done === total;
+      const wasOn = celebrateEl.classList.contains('on');
+      celebrateEl.classList.toggle('on', fullHouse);
+      if (fullHouse && !wasOn) {
+        celebrateEl.classList.remove('pop');
+        // restart pop animation by reflow
+        void celebrateEl.offsetWidth;
+        celebrateEl.classList.add('pop');
+      }
     }
   }
 
@@ -4250,6 +4631,17 @@
       </div>
     ` : '';
 
+    const mood = weekMood(weekDays);
+    const moodTile = mood.total > 0 ? `
+      <div class="summary-tile wide">
+        <p class="slabel">Mood mix</p>
+        <div class="mood-week-row">
+          ${mood.series.map((v) => `<span class="mood-week-dot${v ? ' m' + v : ''}"></span>`).join('')}
+        </div>
+        <p class="svalue">${mood.avg.toFixed(1)} avg<small>${mood.total} day${mood.total === 1 ? '' : 's'}</small></p>
+      </div>
+    ` : '';
+
     const anyActivity = ACTIVITIES.some(a => (totals[a.key] || 0) > 0);
 
     return `
@@ -4257,6 +4649,7 @@
         ${anyActivity ? activityTiles : '<div class="summary-tile wide"><p class="slabel">Sessions</p><p class="svalue" style="color:var(--ink-faint)">—<small>none logged</small></p></div>'}
         ${habitTiles}
         ${sleepTile}
+        ${moodTile}
         ${drinksTile}
       </div>
     `;
