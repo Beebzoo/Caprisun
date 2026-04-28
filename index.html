@@ -230,6 +230,110 @@
     letter-spacing: 0.04em;
   }
 
+  /* Morning ritual */
+  .ritual-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 16px 14px;
+    box-shadow: 0 1px 2px rgba(74, 56, 28, 0.04);
+    margin-bottom: 18px;
+  }
+  .ritual-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ritual-row:last-of-type { border-bottom: 0; }
+  .ritual-row label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .ritual-row input[type="time"] {
+    font: inherit;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: right;
+    min-width: 90px;
+  }
+  .ritual-row input[type="time"]:focus {
+    outline: none;
+    background: var(--surface-2);
+    border-color: var(--border);
+  }
+  .ritual-summary {
+    text-align: center;
+    margin-top: 10px;
+    padding: 10px 0 4px;
+    border-top: 1px dashed var(--border);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--green-leaf);
+  }
+  .ritual-summary strong {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--green-deep);
+    margin-right: 4px;
+  }
+  .ritual-summary.placeholder {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-size: 12px;
+  }
+  .ritual-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--green-leaf);
+    margin: 18px 0 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ritual-eyebrow .rdate {
+    color: var(--ink-faint);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    font-style: italic;
+    font-size: 11px;
+  }
+  .ritual-text {
+    width: 100%;
+    min-height: 84px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.45;
+    resize: vertical;
+    box-shadow: 0 1px 2px rgba(74, 56, 28, 0.04);
+  }
+  .ritual-text:focus { outline: none; border-color: var(--border-strong); }
+  .ritual-saved {
+    margin-left: auto;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--green-soft);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .ritual-saved.show { opacity: 1; }
+
   .motivation .mot-author {
     font-style: normal;
     font-size: 10px;
@@ -2645,6 +2749,35 @@
       <p class="motivation" id="motivation"></p>
     </header>
 
+    <section id="morning-ritual-section">
+      <p class="section-label"><span>Morning ritual</span></p>
+
+      <div class="ritual-card">
+        <div class="ritual-row">
+          <label for="bed-time">Last night, in bed at</label>
+          <input type="time" id="bed-time" />
+        </div>
+        <div class="ritual-row">
+          <label for="wake-time">Up this morning at</label>
+          <input type="time" id="wake-time" />
+        </div>
+        <div class="ritual-summary placeholder" id="sleep-summary">Enter both times to see your sleep.</div>
+      </div>
+
+      <p class="ritual-eyebrow">
+        <span>Yesterday</span>
+        <span class="rdate" id="yesterday-date"></span>
+        <span class="ritual-saved" id="recap-saved">Saved</span>
+      </p>
+      <textarea class="ritual-text" id="yesterday-recap" placeholder="A short recap — what you did, how it felt."></textarea>
+
+      <p class="ritual-eyebrow">
+        <span>Today</span>
+        <span class="ritual-saved" id="plan-saved">Saved</span>
+      </p>
+      <textarea class="ritual-text" id="today-plan" placeholder="A line or two on the day ahead — work, training, who you're seeing."></textarea>
+    </section>
+
     <section id="checklist-section">
       <p class="section-label"><span>Checklist</span><span id="checklist-progress"></span></p>
       <div class="checklist" id="checklist"></div>
@@ -2956,6 +3089,12 @@
     weekNotes: {},
     habits: {},
     sleep: {},
+    // Bedtime/wake-time pair, recorded the morning after.
+    // { [dateISO]: { bed: 'HH:MM', wake: 'HH:MM' } }
+    sleepTimes: {},
+    // Short morning intention for today.
+    // { [dateISO]: string }
+    morningPlan: {},
     dayColors: {}, // key: YYYY-MM-DD, value: 'deep' | 'soft' | 'ochre' | 'terra'
     quizResults: {},
     seenQuotes: {},
@@ -3579,6 +3718,136 @@
       save();
       renderFlowersPrompt();
     });
+  }
+
+  function computeSleepHours(bed, wake) {
+    if (!bed || !wake) return null;
+    const [bh, bm] = bed.split(':').map(Number);
+    const [wh, wm] = wake.split(':').map(Number);
+    if ([bh, bm, wh, wm].some(n => Number.isNaN(n))) return null;
+    let bedMin = bh * 60 + bm;
+    let wakeMin = wh * 60 + wm;
+    if (wakeMin <= bedMin) wakeMin += 24 * 60;
+    return (wakeMin - bedMin) / 60;
+  }
+
+  function formatSleepHours(h) {
+    const whole = Math.floor(h);
+    const mins = Math.round((h - whole) * 60);
+    if (mins === 0) return `${whole}h`;
+    return `${whole}h ${mins}m`;
+  }
+
+  function updateSleepSummary() {
+    const bedEl = document.getElementById('bed-time');
+    const wakeEl = document.getElementById('wake-time');
+    const summaryEl = document.getElementById('sleep-summary');
+    if (!summaryEl) return;
+    const hours = computeSleepHours(bedEl?.value, wakeEl?.value);
+    if (hours == null) {
+      summaryEl.classList.add('placeholder');
+      summaryEl.textContent = 'Enter both times to see your sleep.';
+    } else {
+      summaryEl.classList.remove('placeholder');
+      summaryEl.innerHTML = `<strong>${formatSleepHours(hours)}</strong> of sleep`;
+    }
+  }
+
+  function renderMorningRitual() {
+    const todayISO = toISODate(new Date());
+    const yesterdayISO = toISODate(addDays(new Date(), -1));
+
+    const times = (state.sleepTimes && state.sleepTimes[todayISO]) || {};
+    const bedEl = document.getElementById('bed-time');
+    const wakeEl = document.getElementById('wake-time');
+    if (bedEl) bedEl.value = times.bed || '';
+    if (wakeEl) wakeEl.value = times.wake || '';
+    updateSleepSummary();
+
+    const yEl = document.getElementById('yesterday-date');
+    if (yEl) {
+      const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+      yEl.textContent = fmt.format(addDays(new Date(), -1));
+    }
+
+    const recapEl = document.getElementById('yesterday-recap');
+    if (recapEl) recapEl.value = state.dayNotes[yesterdayISO] || '';
+
+    const planEl = document.getElementById('today-plan');
+    if (planEl) planEl.value = (state.morningPlan && state.morningPlan[todayISO]) || '';
+  }
+
+  function flashSaved(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('show');
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => el.classList.remove('show'), 1400);
+  }
+
+  function wireMorningRitual() {
+    const bedEl = document.getElementById('bed-time');
+    const wakeEl = document.getElementById('wake-time');
+    const recapEl = document.getElementById('yesterday-recap');
+    const planEl = document.getElementById('today-plan');
+
+    function saveSleepTimes() {
+      const todayISO = toISODate(new Date());
+      const bed = (bedEl?.value || '').trim();
+      const wake = (wakeEl?.value || '').trim();
+      if (!state.sleepTimes) state.sleepTimes = {};
+      if (!bed && !wake) {
+        delete state.sleepTimes[todayISO];
+      } else {
+        state.sleepTimes[todayISO] = { bed, wake };
+      }
+      const hours = computeSleepHours(bed, wake);
+      if (hours != null) {
+        state.sleep[todayISO] = Math.round(hours * 2) / 2;
+      } else if (!bed && !wake) {
+        // user cleared both — also clear derived hours
+        delete state.sleep[todayISO];
+      }
+      save();
+      updateSleepSummary();
+    }
+
+    if (bedEl) bedEl.addEventListener('change', saveSleepTimes);
+    if (wakeEl) wakeEl.addEventListener('change', saveSleepTimes);
+
+    function debouncedSave(el, fn, savedId) {
+      let timer;
+      el.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { fn(); flashSaved(savedId); }, 600);
+      });
+      el.addEventListener('blur', () => {
+        clearTimeout(timer);
+        fn();
+        flashSaved(savedId);
+      });
+    }
+
+    if (recapEl) {
+      debouncedSave(recapEl, () => {
+        const yesterdayISO = toISODate(addDays(new Date(), -1));
+        const v = recapEl.value;
+        if (v.trim()) state.dayNotes[yesterdayISO] = v;
+        else delete state.dayNotes[yesterdayISO];
+        save();
+      }, 'recap-saved');
+    }
+
+    if (planEl) {
+      debouncedSave(planEl, () => {
+        const todayISO = toISODate(new Date());
+        if (!state.morningPlan) state.morningPlan = {};
+        const v = planEl.value;
+        if (v.trim()) state.morningPlan[todayISO] = v;
+        else delete state.morningPlan[todayISO];
+        save();
+      }, 'plan-saved');
+    }
   }
 
   function renderChecklist() {
@@ -7524,6 +7793,7 @@
 
   function renderAll() {
     renderHeader();
+    renderMorningRitual();
     renderChecklist();
     renderChain();
     renderFlowersPrompt();
@@ -7556,6 +7826,7 @@
   });
 
   renderAll();
+  wireMorningRitual();
   initAuth();
 })();
 </script>
