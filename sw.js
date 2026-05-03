@@ -1,6 +1,6 @@
 // Caprisun service worker — offline cache for the daily ritual app.
 // Bump CACHE_VERSION whenever the app shell changes so stale assets get evicted.
-const CACHE_VERSION = 'caprisun-v5';
+const CACHE_VERSION = 'caprisun-v6';
 
 const APP_SHELL = [
   './',
@@ -9,6 +9,10 @@ const APP_SHELL = [
   './Pics/Meaple_Leaf_of_Canada.svg.png',
   './Pics/720x480.png',
   './Pics/pngtree-beautiful-flying-kingfisher-on-transparent-background-png-image_14645995.png',
+  './Pics/icons/icon-192.png',
+  './Pics/icons/icon-512.png',
+  './Pics/icons/icon-maskable-512.png',
+  './Pics/icons/apple-touch-icon.png',
   './quiz-questions.json',
   './exercises.json',
 ];
