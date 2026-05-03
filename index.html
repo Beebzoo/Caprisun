@@ -3924,6 +3924,11 @@
   // --- Cloud sync config ---------------------------------------------------
   const SUPABASE_URL = 'https://ejbmsfptfgkvkaitwjak.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_ttRo1JSqfBk4QJoTgndB7A_Rkj5Z7Mx';
+  // Canonical production URL the magic-link emails should redirect back to.
+  // This must also be added to Supabase → Authentication → URL Configuration
+  // → Site URL and Additional Redirect URLs, otherwise Supabase ignores
+  // whatever we send here and falls back to its configured Site URL.
+  const PRODUCTION_URL = 'https://beebzoo.github.io/Caprisun/';
   const sb = (window.supabase && window.supabase.createClient)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -4498,13 +4503,25 @@
       const send = async () => {
         const email = (input.value || '').trim();
         if (!email || !email.includes('@')) { warn.textContent = 'Enter a valid email.'; return; }
+        // The magic link is going to be opened from a different device or
+        // browser session than the one requesting it (typically: tap link
+        // in mail app, lands in default browser). So we never use
+        // window.location.origin — that bakes localhost or a stale dev
+        // URL into emails. Always send the canonical production URL,
+        // unless we're explicitly previewing on localhost (where the
+        // local-only redirect at least works for that machine).
+        const host = window.location.hostname;
+        const isLocalPreview = host === 'localhost' || host === '127.0.0.1';
+        const redirectTo = isLocalPreview
+          ? (window.location.origin + window.location.pathname)
+          : PRODUCTION_URL;
         sendBtn.disabled = true;
         sendBtn.textContent = 'Sending…';
         warn.textContent = '';
         try {
           const { error } = await sb.auth.signInWithOtp({
             email,
-            options: { emailRedirectTo: window.location.origin + window.location.pathname },
+            options: { emailRedirectTo: redirectTo },
           });
           if (error) throw error;
           body.innerHTML = `
