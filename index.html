@@ -4301,7 +4301,7 @@
     workoutPlans: {},
     workoutPlanOrder: [],
     workoutPrefs: { muscleFilter: null, difficultyFilter: null },
-    notify: { sundaySeal: false },
+    notify: { sundaySeal: false, morning: true },
     startDate: '2026-05-04',
   });
 
@@ -4353,6 +4353,14 @@
         || Object.keys(s.dayNotes || {}).length > 0
         || Object.keys(s.weekNotes || {}).length > 0;
       if (!hasChainData) s.startDate = '2026-05-04';
+    }
+
+    // Daily morning ping was added after the notify object existed.
+    // The shallow defaultState ⊕ saved spread can't fill nested keys,
+    // so backfill the default explicitly for any saved state that
+    // predates the morning toggle.
+    if (s.notify && s.notify.morning === undefined) {
+      s.notify.morning = true;
     }
     return s;
   }
@@ -6675,6 +6683,94 @@
     scheduleSundayReminder();
   }
 
+  // --- Daily 8 AM "Good morning" reminder ---------------------------------
+  // Mirrors the Sunday seal infrastructure. Default ON so the user can
+  // verify scheduled-notification delivery on their device tomorrow
+  // morning without having to remember to enable it tonight. Toggle off
+  // in Settings if you'd rather not get daily pings.
+
+  function nextMorning8am() {
+    const now = new Date();
+    const d = new Date(now);
+    d.setHours(8, 0, 0, 0);
+    if (d.getTime() <= now.getTime()) {
+      d.setDate(d.getDate() + 1);
+    }
+    return d;
+  }
+
+  async function scheduleMorningReminder() {
+    if (window.__morningTimer) {
+      clearTimeout(window.__morningTimer);
+      window.__morningTimer = null;
+    }
+    if (!state.notify || !state.notify.morning) return;
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') return;
+
+    const next = nextMorning8am();
+    const tag = `caprisun-morning-${toISODate(next)}`;
+    const title = 'Good morning.';
+    const body  = 'A new day in the chain.';
+    const seenKey = 'caprisun.notify.morning.last';
+
+    // Scheduled native notification — Chromium with TimestampTrigger.
+    // On Android Chrome (Pixel) this is the path that lets the
+    // notification fire even when the PWA is closed.
+    if ('serviceWorker' in navigator && 'TimestampTrigger' in window) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.getNotifications({ tag, includeTriggered: true });
+        if (!existing.length) {
+          await reg.showNotification(title, {
+            tag, body,
+            icon: './Pics/icons/icon-192.png',
+            showTrigger: new TimestampTrigger(next.getTime()),
+          });
+        }
+      } catch (e) {}
+    }
+
+    // In-page fallback: only fires while the app is open. Re-schedules
+    // itself for the day after so the cycle continues for as long as
+    // the tab/PWA stays alive.
+    const ms = next.getTime() - Date.now();
+    if (ms > 0 && ms < 36 * 3600 * 1000) {
+      window.__morningTimer = setTimeout(() => {
+        try {
+          if (localStorage.getItem(seenKey) !== tag) {
+            new Notification(title, { tag, body, icon: './Pics/icons/icon-192.png' });
+            localStorage.setItem(seenKey, tag);
+          }
+        } catch (e) {}
+        scheduleMorningReminder();
+      }, ms);
+    }
+  }
+
+  async function setMorningEnabled(on) {
+    if (!state.notify) state.notify = {};
+    state.notify.morning = !!on;
+    save();
+    if (on && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      try { await Notification.requestPermission(); } catch (e) {}
+    }
+    if (!on) {
+      if (window.__morningTimer) {
+        clearTimeout(window.__morningTimer);
+        window.__morningTimer = null;
+      }
+      if ('serviceWorker' in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const ns = await reg.getNotifications({ includeTriggered: true });
+          for (const n of ns) if (n.tag && n.tag.startsWith('caprisun-morning-')) n.close();
+        } catch (e) {}
+      }
+    }
+    scheduleMorningReminder();
+  }
+
   function importDataFromFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -6744,11 +6840,18 @@
       <div class="sheet-section">
         <p class="sheet-section-label">Reminders</p>
         <label class="reminder-row" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;cursor:pointer">
+          <input type="checkbox" id="notif-morning" ${state.notify && state.notify.morning ? 'checked' : ''} style="margin-top:3px" />
+          <span style="display:flex;flex-direction:column;gap:3px">
+            <strong style="font-family:'Fraunces',Georgia,serif;font-size:14px;color:var(--ink)">Good morning · 8 AM</strong>
+            <span class="subtle" style="margin:0">A daily ping at 8:00 to start the morning ritual: <em>"Good morning. A new day in the chain."</em></span>
+            <span class="subtle" style="margin:6px 0 0;font-size:11px;color:var(--ink-faint)">${reliabilityHint}</span>
+          </span>
+        </label>
+        <label class="reminder-row" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;cursor:pointer;border-top:1px solid var(--border)">
           <input type="checkbox" id="notif-sunday" ${state.notify && state.notify.sundaySeal ? 'checked' : ''} style="margin-top:3px" />
           <span style="display:flex;flex-direction:column;gap:3px">
             <strong style="font-family:'Fraunces',Georgia,serif;font-size:14px;color:var(--ink)">Sunday seal · 6 PM</strong>
-            <span class="subtle" style="margin:0">A single weekly nudge: <em>"It's Sunday. Time to seal the week."</em> No daily reminders, no streak guilt — just this one.</span>
-            <span class="subtle" style="margin:6px 0 0;font-size:11px;color:var(--ink-faint)">${reliabilityHint}</span>
+            <span class="subtle" style="margin:0">A weekly nudge: <em>"It's Sunday. Time to seal the week."</em></span>
           </span>
         </label>
       </div>
@@ -6803,7 +6906,8 @@
       },
       '#export-btn': exportData,
       '#export-md-btn': exportMarkdown,
-      '#notif-sunday': { event: 'change', handler: (e) => setSundaySealEnabled(e.target.checked) },
+      '#notif-sunday':  { event: 'change', handler: (e) => setSundaySealEnabled(e.target.checked) },
+      '#notif-morning': { event: 'change', handler: (e) => setMorningEnabled(e.target.checked) },
       '#import-btn': () => fileInput.click(),
       '#import-file': { event: 'change', handler: async (e) => {
         const file = e.target.files && e.target.files[0];
@@ -9948,6 +10052,7 @@
   wireTodoInputs();
   initAuth();
   scheduleSundayReminder();
+  scheduleMorningReminder();
 
   // ============================================================
   // === BEGIN SPLASH SCRIPT ====================================
