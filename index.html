@@ -2856,20 +2856,33 @@
     padding: 0;
   }
 
-  .wt-group { margin-top: 18px; }
+  .wt-group { margin-top: 12px; }
   .wt-group:first-of-type { margin-top: 8px; }
   .wt-group-header {
-    padding: 10px 14px;
+    width: 100%;
+    padding: 12px 16px;
+    border: 0;
     border-radius: var(--radius);
     color: #F8F1DD;
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 12px;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    transition: filter 0.15s ease;
+  }
+  .wt-group-header:hover { filter: brightness(1.06); }
+  .wt-group-label-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
   .wt-group-header strong {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -2880,13 +2893,47 @@
     font-style: italic;
     opacity: 0.85;
   }
+  .wt-group-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .wt-group-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    background: rgba(248, 241, 221, 0.18);
+    padding: 3px 8px;
+    border-radius: 999px;
+    min-height: 20px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .wt-group-count:empty { display: none; }
+  .wt-group-chev {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    line-height: 1;
+  }
+  .wt-group-chev::before { content: '+'; }
+  .wt-group.is-open .wt-group-chev::before { content: '−'; }
   .wt-group.push .wt-group-header  { background: var(--green-leaf); }
   .wt-group.pull .wt-group-header  { background: #2C5282; }
   .wt-group.legs .wt-group-header  { background: var(--ochre); }
   .wt-group.core .wt-group-header  { background: var(--terracotta); }
 
+  /* Collapse / expand the exercises list under the header. */
+  .wt-group .wt-exercises { display: none; }
+  .wt-group.is-open .wt-exercises { display: grid; }
+
   .wt-exercises {
-    display: grid;
+    grid-template-columns: 1fr;
     gap: 6px;
     margin-top: 8px;
   }
@@ -2948,6 +2995,7 @@
     margin-top: 8px;
   }
   .wt-rep-box {
+    position: relative;
     aspect-ratio: 1 / 1;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -2972,6 +3020,52 @@
     border-color: var(--green-deep);
     color: #F8F1DD;
   }
+  /* Tiny weight badge in the corner of a ticked box, e.g. a "7" at
+     the bottom-right means "logged at 7 kg." Bodyweight ticks have
+     no badge. */
+  .wt-rep-box-weight {
+    position: absolute;
+    bottom: 1px;
+    right: 3px;
+    font-size: 8px;
+    font-weight: 400;
+    line-height: 1;
+    opacity: 0.85;
+    letter-spacing: 0;
+  }
+
+  /* Weight selector for dumbbell exercises: three pills, one active. */
+  .wt-weight-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .wt-weight-btn {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .wt-weight-btn small {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-left: 3px;
+  }
+  .wt-weight-btn:hover { border-color: var(--border-strong); color: var(--ink); }
+  .wt-weight-btn.is-active {
+    background: var(--ochre);
+    border-color: var(--ochre);
+    color: var(--bg);
+  }
+  .wt-weight-btn.is-active small { color: rgba(245, 241, 232, 0.78); }
   .wt-summary {
     margin: 10px 0 14px;
     padding: 10px 12px;
@@ -4570,6 +4664,26 @@
     // predates the morning toggle.
     if (s.notify && s.notify.morning === undefined) {
       s.notify.morning = true;
+    }
+
+    // Workout log shape change: per-day per-slug entries used to be an
+    // array of rep counts; now they're an object keyed by rep count
+    // mapping to weight (or null for bodyweight). Convert in place;
+    // pre-weight ticks land as null-weight entries and the user can
+    // re-tick at the right weight if they care.
+    if (s.workoutLog && typeof s.workoutLog === 'object') {
+      for (const date in s.workoutLog) {
+        const day = s.workoutLog[date];
+        if (!day || typeof day !== 'object') continue;
+        for (const slug in day) {
+          const v = day[slug];
+          if (Array.isArray(v)) {
+            const obj = {};
+            for (const r of v) if (typeof r === 'number' && r > 0) obj[String(r)] = null;
+            day[slug] = obj;
+          }
+        }
+      }
     }
     return s;
   }
@@ -6923,15 +7037,32 @@
           }
         }
 
-        // Workout log — exercises hit that day with the rep counts ticked.
+        // Workout log — exercises hit that day with rep counts and (where
+        // logged) the weight used. Format:
+        //   - Goblet Squats (7kg): 10, 20, 30 reps           ← all-same weight
+        //   - Bicep Curls: 10@5kg, 20@7kg, 30@7kg reps        ← mixed weights
+        //   - Push-ups: 10, 20, 30 reps                       ← bodyweight
         const workoutDay = (state.workoutLog && state.workoutLog[dIso]) || {};
         const workoutEntries = Object.keys(workoutDay)
           .map(slug => {
             const ex = WORKOUT_EXERCISES.find(e => workoutSlug(e.name) === slug);
-            const reps = (workoutDay[slug] || []).slice().sort((a, b) => a - b);
-            return ex && reps.length
-              ? `  - ${ex.name}: ${reps.join(', ')} ${ex.unit}`
-              : null;
+            const map = workoutEntryAsMap(workoutDay[slug]);
+            const reps = Object.keys(map).map(Number).sort((a, b) => a - b);
+            if (!ex || !reps.length) return null;
+            const weights = reps.map(r => map[String(r)]).filter(w => typeof w === 'number');
+            const allWeighted = weights.length === reps.length;
+            const allSame = allWeighted && weights.every(w => w === weights[0]);
+            if (weights.length === 0) {
+              return `  - ${ex.name}: ${reps.join(', ')} ${ex.unit}`;
+            } else if (allSame) {
+              return `  - ${ex.name} (${weights[0]}kg): ${reps.join(', ')} ${ex.unit}`;
+            } else {
+              const parts = reps.map(r => {
+                const w = map[String(r)];
+                return typeof w === 'number' ? `${r}@${w}kg` : String(r);
+              });
+              return `  - ${ex.name}: ${parts.join(', ')} ${ex.unit}`;
+            }
           })
           .filter(Boolean);
         if (workoutEntries.length) {
@@ -8771,55 +8902,89 @@
   ];
 
   // Within each group, exercises run hardest → easiest (matches the
-  // source spreadsheet). Adding/reordering here changes the UI.
+  // source spreadsheet). `weighted: true` shows the 5/7/10 kg buttons;
+  // bodyweight moves (Push-ups, Plank, etc.) skip them.
   const WORKOUT_EXERCISES = [
     // PUSH
-    { group: 'push', name: 'Dumbbell Floor / Bench Press', unit: 'reps' },
-    { group: 'push', name: 'Dumbbell Shoulder Press',      unit: 'reps' },
-    { group: 'push', name: 'Arnold Press',                 unit: 'reps' },
-    { group: 'push', name: 'Pike Push-ups',                unit: 'reps' },
-    { group: 'push', name: 'Push-ups',                     unit: 'reps' },
-    { group: 'push', name: 'Dumbbell Chest Flyes',         unit: 'reps' },
-    { group: 'push', name: 'Overhead Tricep Extension',    unit: 'reps' },
-    { group: 'push', name: 'Dumbbell Lateral Raises',      unit: 'reps' },
-    { group: 'push', name: 'Tricep Kickbacks',             unit: 'reps' },
-    { group: 'push', name: 'Dumbbell Front Raises',        unit: 'reps' },
+    { group: 'push', name: 'Dumbbell Floor / Bench Press', unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Dumbbell Shoulder Press',      unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Arnold Press',                 unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Pike Push-ups',                unit: 'reps',         weighted: false },
+    { group: 'push', name: 'Push-ups',                     unit: 'reps',         weighted: false },
+    { group: 'push', name: 'Dumbbell Chest Flyes',         unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Overhead Tricep Extension',    unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Dumbbell Lateral Raises',      unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Tricep Kickbacks',             unit: 'reps',         weighted: true  },
+    { group: 'push', name: 'Dumbbell Front Raises',        unit: 'reps',         weighted: true  },
     // PULL
-    { group: 'pull', name: 'Dumbbell Deadlifts',           unit: 'reps' },
-    { group: 'pull', name: 'Renegade Rows',                unit: 'reps each' },
-    { group: 'pull', name: 'Bent-over Dumbbell Rows',      unit: 'reps' },
-    { group: 'pull', name: 'Single-Arm Dumbbell Rows',     unit: 'reps each' },
-    { group: 'pull', name: 'Dumbbell Pullovers',           unit: 'reps' },
-    { group: 'pull', name: 'Reverse Flyes',                unit: 'reps' },
-    { group: 'pull', name: 'Hammer Curls',                 unit: 'reps' },
-    { group: 'pull', name: 'Dumbbell Bicep Curls',         unit: 'reps' },
-    { group: 'pull', name: 'Zottman Curls',                unit: 'reps' },
-    { group: 'pull', name: 'Concentration Curls',          unit: 'reps each' },
+    { group: 'pull', name: 'Dumbbell Deadlifts',           unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Renegade Rows',                unit: 'reps each',    weighted: true  },
+    { group: 'pull', name: 'Bent-over Dumbbell Rows',      unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Single-Arm Dumbbell Rows',     unit: 'reps each',    weighted: true  },
+    { group: 'pull', name: 'Dumbbell Pullovers',           unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Reverse Flyes',                unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Hammer Curls',                 unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Dumbbell Bicep Curls',         unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Zottman Curls',                unit: 'reps',         weighted: true  },
+    { group: 'pull', name: 'Concentration Curls',          unit: 'reps each',    weighted: true  },
     // LEGS
-    { group: 'legs', name: 'Bulgarian Split Squats',        unit: 'reps each' },
-    { group: 'legs', name: 'Goblet Squats',                 unit: 'reps' },
-    { group: 'legs', name: 'Dumbbell Lunges',               unit: 'reps each' },
-    { group: 'legs', name: 'Romanian Deadlifts',            unit: 'reps' },
-    { group: 'legs', name: 'Single-Leg Romanian Deadlifts', unit: 'reps each' },
-    { group: 'legs', name: 'Step-ups (with dumbbells)',     unit: 'reps each' },
-    { group: 'legs', name: 'Sumo Squats',                   unit: 'reps' },
-    { group: 'legs', name: 'Curtsy Lunges',                 unit: 'reps each' },
-    { group: 'legs', name: 'Weighted Glute Bridges',        unit: 'reps' },
-    { group: 'legs', name: 'Dumbbell Calf Raises',          unit: 'reps' },
+    { group: 'legs', name: 'Bulgarian Split Squats',        unit: 'reps each',   weighted: true  },
+    { group: 'legs', name: 'Goblet Squats',                 unit: 'reps',        weighted: true  },
+    { group: 'legs', name: 'Dumbbell Lunges',               unit: 'reps each',   weighted: true  },
+    { group: 'legs', name: 'Romanian Deadlifts',            unit: 'reps',        weighted: true  },
+    { group: 'legs', name: 'Single-Leg Romanian Deadlifts', unit: 'reps each',   weighted: true  },
+    { group: 'legs', name: 'Step-ups (with dumbbells)',     unit: 'reps each',   weighted: true  },
+    { group: 'legs', name: 'Sumo Squats',                   unit: 'reps',        weighted: true  },
+    { group: 'legs', name: 'Curtsy Lunges',                 unit: 'reps each',   weighted: true  },
+    { group: 'legs', name: 'Weighted Glute Bridges',        unit: 'reps',        weighted: true  },
+    { group: 'legs', name: 'Dumbbell Calf Raises',          unit: 'reps',        weighted: true  },
     // CORE
-    { group: 'core', name: 'V-ups',                         unit: 'reps' },
-    { group: 'core', name: 'Leg Raises',                    unit: 'reps' },
-    { group: 'core', name: 'Side Plank',                    unit: 'seconds each' },
-    { group: 'core', name: 'Plank',                         unit: 'seconds' },
-    { group: 'core', name: 'Mountain Climbers',             unit: 'reps' },
-    { group: 'core', name: 'Bicycle Crunches',              unit: 'reps' },
-    { group: 'core', name: 'Russian Twists (weighted)',     unit: 'reps' },
-    { group: 'core', name: 'Dead Bug',                      unit: 'reps' },
-    { group: 'core', name: 'Crunches',                      unit: 'reps' },
-    { group: 'core', name: 'Superman',                      unit: 'reps' },
+    { group: 'core', name: 'V-ups',                         unit: 'reps',        weighted: false },
+    { group: 'core', name: 'Leg Raises',                    unit: 'reps',        weighted: false },
+    { group: 'core', name: 'Side Plank',                    unit: 'seconds each', weighted: false },
+    { group: 'core', name: 'Plank',                         unit: 'seconds',     weighted: false },
+    { group: 'core', name: 'Mountain Climbers',             unit: 'reps',        weighted: false },
+    { group: 'core', name: 'Bicycle Crunches',              unit: 'reps',        weighted: false },
+    { group: 'core', name: 'Russian Twists (weighted)',     unit: 'reps',        weighted: true  },
+    { group: 'core', name: 'Dead Bug',                      unit: 'reps',        weighted: false },
+    { group: 'core', name: 'Crunches',                      unit: 'reps',        weighted: false },
+    { group: 'core', name: 'Superman',                      unit: 'reps',        weighted: false },
   ];
 
   const WORKOUT_REP_STEPS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  const WORKOUT_WEIGHTS   = [5, 7, 10]; // kg
+  const DEFAULT_WORKOUT_WEIGHT = 7;
+
+  // Override map for image files whose name doesn't match the slug
+  // pattern. Slug → filename (with extension). Anything not in this
+  // map falls back to the slug + ext-chain in loadWorkoutImage().
+  const WORKOUT_IMAGE_FILENAMES = {
+    'arnold-press':                'arnold-press-2.webp',
+    'dumbbell-floor-bench-press':  'bench press.webp',
+    'dumbbell-bicep-curls':        'Dumbbell Bicep Curls.webp',
+    'dumbbell-calf-raises':        'Dumbbell Calf Raises.webp',
+    'dumbbell-front-raises':       'Dumbbell Front Raises.webp',
+    'dumbbell-lateral-raises':     'Dumbbell Lateral Raises.webp',
+    'dumbbell-lunges':             'Dumbbell Lunges.webp',
+    'dumbbell-pullovers':          'Dumbbell Pullovers.webp',
+    'bent-over-dumbbell-rows':     'dumbbell-bent-over-row.webp',
+    'dumbbell-chest-flyes':        'dumbell chest flyers.webp',
+    'dumbbell-deadlifts':          'dumbell deadlifts.webp',
+    'dumbbell-shoulder-press':     'dumbell shoulder press.webp',
+    'goblet-squats':               'Goblet Squats.webp',
+    'hammer-curls':                'Hammer Curls.webp',
+    'push-ups':                    'pushups.webp',
+    'renegade-rows':               'Renegade Rows.webp',
+    'reverse-flyes':               'reverse-flys-schraegbank.webp',
+    'romanian-deadlifts':          'Romanian Deadlifts.webp',
+    'single-arm-dumbbell-rows':    'Single-Arm Dumbbell Rows.webp',
+    'step-ups-with-dumbbells':     'Step-ups (with dumbbells).gif',
+    'sumo-squats':                 'Sumo Squats.webp',
+    'overhead-tricep-extension':   'tricep extension.webp',
+    'tricep-kickbacks':            'Tricep Kickbacks.webp',
+    'v-ups':                       'V-ups.webp',
+    'zottman-curls':               'zottman-curl.gif',
+  };
 
   // Slug used for the state key and the image filename. Must be stable
   // across renames; if you rename an exercise, update the slug-bearing
@@ -8855,16 +9020,26 @@
       imgEl.src = WORKOUT_IMAGE_OK[slug];
       return;
     }
+    // Build candidate list: explicit override first (filename may have
+    // spaces/caps that differ from the slug), then slug + ext chain as
+    // a fallback for any future uploads that follow the slug pattern.
+    const candidates = [];
+    const override = WORKOUT_IMAGE_FILENAMES[slug];
+    if (override) {
+      candidates.push(`Pics/Workout%20Pics/${encodeURIComponent(override)}`);
+    }
+    for (const ext of WORKOUT_IMAGE_EXTS) {
+      candidates.push(workoutImagePath(slug, ext));
+    }
     let i = 0;
     const tryNext = () => {
-      if (i >= WORKOUT_IMAGE_EXTS.length) {
+      if (i >= candidates.length) {
         WORKOUT_IMAGE_BAD[slug] = true;
         const parent = imgEl.parentElement;
         if (parent) parent.innerHTML = '<p class="wt-image-missing">No image yet for this one.</p>';
         return;
       }
-      const ext = WORKOUT_IMAGE_EXTS[i++];
-      imgEl.src = workoutImagePath(slug, ext);
+      imgEl.src = candidates[i++];
     };
     imgEl.onerror = tryNext;
     imgEl.onload = () => { WORKOUT_IMAGE_OK[slug] = imgEl.src; };
@@ -8889,13 +9064,45 @@
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
   }
 
+  // Normalize whatever shape the entry currently is into the canonical
+  // { '10': weight, '20': weight } object form. Used wherever we read.
+  function workoutEntryAsMap(entry) {
+    if (!entry) return {};
+    if (Array.isArray(entry)) {
+      const obj = {};
+      for (const r of entry) if (typeof r === 'number' && r > 0) obj[String(r)] = null;
+      return obj;
+    }
+    if (typeof entry === 'object') return entry;
+    return {};
+  }
+
+  // Total ticks across all exercises for a given day's log.
+  function workoutDayTotalTicks(dayLog) {
+    let total = 0;
+    for (const slug in dayLog) total += Object.keys(workoutEntryAsMap(dayLog[slug])).length;
+    return total;
+  }
+
+  // Total ticks within a single group on the given day. Used by the
+  // collapsible group header.
+  function workoutGroupCount(dayLog, groupKey) {
+    let n = 0;
+    for (const ex of WORKOUT_EXERCISES) {
+      if (ex.group !== groupKey) continue;
+      const slug = workoutSlug(ex.name);
+      n += Object.keys(workoutEntryAsMap(dayLog[slug])).length;
+    }
+    return n;
+  }
+
   function renderWorkoutTrackerBody() {
     const body = document.getElementById('workout-tracker-body');
     if (!body) return;
     const iso = workoutDayISO;
     const todayISO = toISODate(new Date());
     const dayLog = (state.workoutLog && state.workoutLog[iso]) || {};
-    const totalTicks = Object.values(dayLog).reduce((n, arr) => n + (arr ? arr.length : 0), 0);
+    const totalTicks = workoutDayTotalTicks(dayLog);
 
     const startISO = state.startDate;
     const canPrev = iso > startISO;
@@ -8909,13 +9116,21 @@
 
     const groupsHTML = WORKOUT_GROUPS.map(g => {
       const exercises = WORKOUT_EXERCISES.filter(e => e.group === g.key);
-      const rows = exercises.map(ex => renderWorkoutExercise(ex, dayLog[workoutSlug(ex.name)] || [])).join('');
+      const rows = exercises.map(ex => renderWorkoutExercise(ex, workoutEntryAsMap(dayLog[workoutSlug(ex.name)]))).join('');
+      const count = workoutGroupCount(dayLog, g.key);
+      const countText = count > 0 ? `${count} set${count === 1 ? '' : 's'}` : '';
       return `
         <div class="wt-group ${g.key}">
-          <div class="wt-group-header">
-            <strong>${g.label}</strong>
-            <span class="wt-group-sub">${escapeHTML(g.sub)} · hardest → easiest</span>
-          </div>
+          <button type="button" class="wt-group-header" aria-expanded="false">
+            <span class="wt-group-label-row">
+              <strong>${g.label}</strong>
+              <span class="wt-group-sub">${escapeHTML(g.sub)}</span>
+            </span>
+            <span class="wt-group-meta">
+              <span class="wt-group-count">${countText}</span>
+              <span class="wt-group-chev" aria-hidden="true"></span>
+            </span>
+          </button>
           <div class="wt-exercises">${rows}</div>
         </div>
       `;
@@ -8934,23 +9149,21 @@
       <div class="wt-summary">
         ${totalTicks > 0
           ? `<strong>${totalTicks}</strong> set${totalTicks === 1 ? '' : 's'} logged on this day.`
-          : `Nothing logged on this day yet.`}
+          : `Nothing logged on this day yet. Tap a group below to start.`}
       </div>
       ${groupsHTML}
     `;
 
-    // Wire day navigation.
+    // --- Day navigation ---
     const prevBtn = body.querySelector('#wt-prev');
     const nextBtn = body.querySelector('#wt-next');
     const dayInput = body.querySelector('#wt-day-input');
     if (prevBtn) prevBtn.addEventListener('click', () => {
-      const d = addDays(parseISO(workoutDayISO), -1);
-      const newISO = toISODate(d);
+      const newISO = toISODate(addDays(parseISO(workoutDayISO), -1));
       if (newISO >= startISO) { workoutDayISO = newISO; renderWorkoutTrackerBody(); }
     });
     if (nextBtn) nextBtn.addEventListener('click', () => {
-      const d = addDays(parseISO(workoutDayISO), 1);
-      const newISO = toISODate(d);
+      const newISO = toISODate(addDays(parseISO(workoutDayISO), 1));
       if (newISO <= todayISO) { workoutDayISO = newISO; renderWorkoutTrackerBody(); }
     });
     if (dayInput) dayInput.addEventListener('change', (e) => {
@@ -8958,14 +9171,24 @@
       if (v && v >= startISO && v <= todayISO) { workoutDayISO = v; renderWorkoutTrackerBody(); }
     });
 
-    // Wire exercise expand toggles.
+    // --- Group collapse toggles ---
+    body.querySelectorAll('.wt-group-header').forEach(h => {
+      h.addEventListener('click', () => {
+        const g = h.closest('.wt-group');
+        if (!g) return;
+        const willOpen = !g.classList.contains('is-open');
+        g.classList.toggle('is-open', willOpen);
+        h.setAttribute('aria-expanded', String(willOpen));
+      });
+    });
+
+    // --- Exercise card expand (image cue) ---
     body.querySelectorAll('.wt-exercise-head').forEach(head => {
       head.addEventListener('click', () => {
         const card = head.closest('.wt-exercise');
         if (!card) return;
         const wasOpen = card.classList.contains('is-open');
         card.classList.toggle('is-open');
-        // Lazy-load image only on first open to avoid pulling all 40 at once.
         if (!wasOpen) {
           const img = card.querySelector('img[data-needs-load="1"]');
           if (img) {
@@ -8976,44 +9199,98 @@
       });
     });
 
-    // Wire rep-box ticks.
+    // --- Weight buttons (single-select per exercise card) ---
+    body.querySelectorAll('.wt-weight-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.wt-exercise');
+        if (!card) return;
+        const newWeight = Number(btn.dataset.weight);
+        card.dataset.activeWeight = String(newWeight);
+        card.querySelectorAll('.wt-weight-btn').forEach(b => {
+          b.classList.toggle('is-active', Number(b.dataset.weight) === newWeight);
+        });
+      });
+    });
+
+    // --- Rep-box ticks (writes the active weight) ---
     body.querySelectorAll('.wt-rep-box').forEach(box => {
       box.addEventListener('click', (e) => {
         e.stopPropagation();
         const slug = box.dataset.slug;
         const reps = Number(box.dataset.reps);
         if (!slug || !reps) return;
-        toggleWorkoutRep(workoutDayISO, slug, reps);
-        // In-place update so we don't re-render and lose scroll position.
-        const isOn = box.classList.toggle('is-on');
-        // Update the parent card's "any logged" indicator + summary count.
         const card = box.closest('.wt-exercise');
-        if (card) {
-          const cardLog = (state.workoutLog[workoutDayISO] || {})[slug] || [];
-          card.classList.toggle('has-any', cardLog.length > 0);
-        }
-        const summary = body.querySelector('.wt-summary');
-        if (summary) {
-          const total = Object.values(state.workoutLog[workoutDayISO] || {})
-            .reduce((n, arr) => n + (arr ? arr.length : 0), 0);
-          summary.innerHTML = total > 0
-            ? `<strong>${total}</strong> set${total === 1 ? '' : 's'} logged on this day.`
-            : `Nothing logged on this day yet.`;
-        }
+        const ex = WORKOUT_EXERCISES.find(x => workoutSlug(x.name) === slug);
+        const weight = (ex && ex.weighted && card?.dataset.activeWeight)
+          ? Number(card.dataset.activeWeight)
+          : null;
+        toggleWorkoutRep(workoutDayISO, slug, reps, weight);
+
+        // Re-read state and update DOM in place (no re-render, no scroll-jump).
+        const repsMap = workoutEntryAsMap((state.workoutLog[workoutDayISO] || {})[slug]);
+        const isOn = Object.prototype.hasOwnProperty.call(repsMap, String(reps));
+        box.classList.toggle('is-on', isOn);
+        box.setAttribute('aria-pressed', String(isOn));
+        const w = repsMap[String(reps)];
+        const badge = (isOn && typeof w === 'number')
+          ? `<span class="wt-rep-box-weight">${w}</span>`
+          : '';
+        box.innerHTML = `${reps}${badge}`;
+        if (card) card.classList.toggle('has-any', Object.keys(repsMap).length > 0);
+
+        // Refresh group counts + top summary.
+        updateWorkoutCounts(body);
       });
     });
   }
 
-  function renderWorkoutExercise(ex, ticked) {
+  // Patch group-count badges and the top-of-sheet summary in place
+  // after a tick. Cheaper than re-rendering the whole sheet.
+  function updateWorkoutCounts(body) {
+    const dayLog = (state.workoutLog && state.workoutLog[workoutDayISO]) || {};
+    body.querySelectorAll('.wt-group').forEach(g => {
+      const key = WORKOUT_GROUPS.find(x => g.classList.contains(x.key))?.key;
+      if (!key) return;
+      const n = workoutGroupCount(dayLog, key);
+      const countEl = g.querySelector('.wt-group-count');
+      if (countEl) countEl.textContent = n > 0 ? `${n} set${n === 1 ? '' : 's'}` : '';
+    });
+    const summary = body.querySelector('.wt-summary');
+    if (summary) {
+      const total = workoutDayTotalTicks(dayLog);
+      summary.innerHTML = total > 0
+        ? `<strong>${total}</strong> set${total === 1 ? '' : 's'} logged on this day.`
+        : `Nothing logged on this day yet. Tap a group below to start.`;
+    }
+  }
+
+  function renderWorkoutExercise(ex, repsMap) {
     const slug = workoutSlug(ex.name);
-    const tickedSet = new Set(ticked);
+    const map = repsMap || {};
+    // Active weight: the most-recently-stored weight for this card,
+    // else the configured default. Drives where new ticks land.
+    let activeWeight = DEFAULT_WORKOUT_WEIGHT;
+    if (ex.weighted) {
+      const used = Object.values(map).filter(v => typeof v === 'number');
+      if (used.length) activeWeight = used[used.length - 1];
+    }
+    const weightButtons = ex.weighted ? `
+      <div class="wt-weight-row">
+        ${WORKOUT_WEIGHTS.map(w => `
+          <button type="button" class="wt-weight-btn${w === activeWeight ? ' is-active' : ''}" data-weight="${w}" aria-pressed="${w === activeWeight}">${w}<small>kg</small></button>
+        `).join('')}
+      </div>
+    ` : '';
     const boxes = WORKOUT_REP_STEPS.map(n => {
-      const on = tickedSet.has(n);
-      return `<button type="button" class="wt-rep-box${on ? ' is-on' : ''}" data-slug="${slug}" data-reps="${n}" aria-pressed="${on}">${n}</button>`;
+      const isOn = Object.prototype.hasOwnProperty.call(map, String(n));
+      const w = map[String(n)];
+      const badge = (isOn && typeof w === 'number') ? `<span class="wt-rep-box-weight">${w}</span>` : '';
+      return `<button type="button" class="wt-rep-box${isOn ? ' is-on' : ''}" data-slug="${slug}" data-reps="${n}" aria-pressed="${isOn}">${n}${badge}</button>`;
     }).join('');
-    const hasAny = ticked.length > 0;
+    const hasAny = Object.keys(map).length > 0;
     return `
-      <div class="wt-exercise${hasAny ? ' has-any' : ''}" data-slug="${slug}">
+      <div class="wt-exercise${hasAny ? ' has-any' : ''}" data-slug="${slug}" data-active-weight="${activeWeight}">
         <div class="wt-exercise-head">
           <span class="wt-exercise-name">${escapeHTML(ex.name)}</span>
           <span class="wt-exercise-unit">${escapeHTML(ex.unit)}</span>
@@ -9021,21 +9298,37 @@
         <div class="wt-exercise-image">
           <img alt="${escapeHTML(ex.name)} cue" data-needs-load="1" />
         </div>
+        ${weightButtons}
         <div class="wt-exercise-reps">${boxes}</div>
       </div>
     `;
   }
 
-  function toggleWorkoutRep(iso, slug, reps) {
+  // Toggle a single (slug, reps) entry for the given day. Stores the
+  // weight (kg) used at that rep count, or null for bodyweight moves.
+  // The entry is an object { '10': 5, '20': 7, ... } — weight per rep
+  // milestone. Tapping an already-ticked box removes that entry.
+  function toggleWorkoutRep(iso, slug, reps, weight) {
     if (!state.workoutLog) state.workoutLog = {};
     if (!state.workoutLog[iso]) state.workoutLog[iso] = {};
     const day = state.workoutLog[iso];
-    const arr = day[slug] || [];
-    const idx = arr.indexOf(reps);
-    if (idx >= 0) arr.splice(idx, 1);
-    else { arr.push(reps); arr.sort((a, b) => a - b); }
-    if (arr.length) day[slug] = arr;
-    else delete day[slug];
+    let entry = day[slug];
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      // Coerce legacy array shape into the object form on first write.
+      const obj = {};
+      if (Array.isArray(entry)) {
+        for (const r of entry) if (typeof r === 'number') obj[String(r)] = null;
+      }
+      entry = obj;
+      day[slug] = entry;
+    }
+    const repsKey = String(reps);
+    if (Object.prototype.hasOwnProperty.call(entry, repsKey)) {
+      delete entry[repsKey];
+    } else {
+      entry[repsKey] = (typeof weight === 'number' && isFinite(weight)) ? weight : null;
+    }
+    if (Object.keys(entry).length === 0) delete day[slug];
     if (Object.keys(day).length === 0) delete state.workoutLog[iso];
     save();
   }
