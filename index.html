@@ -672,56 +672,81 @@
   .priority-notes-toggle[open] summary::before { content: '−'; }
 
   .ritual-readback {
-    margin: -2px 0 8px;
-    padding: 8px 12px;
+    margin: 2px 0 12px;
+    padding: 12px 14px;
     background: var(--surface-2);
-    border-left: 3px solid var(--ochre);
-    border-radius: 0 6px 6px 0;
+    border-left: 4px solid var(--ochre);
+    border-radius: 0 8px 8px 0;
     font-family: 'Fraunces', Georgia, serif;
-    font-size: 13px;
-    font-style: italic;
+    font-size: 14px;
     color: var(--ink-soft);
-    line-height: 1.45;
+    line-height: 1.5;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  }
+  .ritual-readback .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
   }
   .ritual-readback .label {
-    font-style: normal;
+    font-family: 'Inter', sans-serif;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     font-size: 10px;
     color: var(--green-leaf);
-    display: block;
-    margin-bottom: 4px;
+    font-weight: 600;
   }
+  .ritual-readback .kept-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+  }
+  .ritual-readback .kept-tag.all   { background: var(--green-leaf); color: var(--bg); }
+  .ritual-readback .kept-tag.most  { background: var(--ochre);      color: var(--bg); }
+  .ritual-readback .kept-tag.none  { background: var(--terracotta); color: var(--bg); }
   .ritual-readback .readback-list {
     list-style: none;
     padding: 0;
-    margin: 4px 0 0;
-    font-style: normal;
+    margin: 6px 0 0;
   }
   .ritual-readback .readback-list li {
     display: flex;
     align-items: baseline;
-    gap: 8px;
-    padding: 2px 0;
-    font-style: italic;
+    gap: 10px;
+    padding: 3px 0;
+    font-size: 14px;
   }
   .ritual-readback .readback-list li.done {
     color: var(--green-leaf);
     text-decoration: line-through;
-    text-decoration-color: var(--green-soft);
-    font-style: normal;
+    text-decoration-color: rgba(79, 122, 85, 0.45);
+  }
+  .ritual-readback .readback-list li.missed {
+    color: var(--terracotta);
   }
   .ritual-readback .readback-list .rmark {
     font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    color: var(--green-leaf);
-    min-width: 12px;
+    font-size: 13px;
+    min-width: 14px;
     font-style: normal;
+    font-weight: 600;
   }
+  .ritual-readback .readback-list li.done    .rmark { color: var(--green-leaf); }
+  .ritual-readback .readback-list li.missed  .rmark { color: var(--terracotta); }
   .ritual-readback .readback-plan {
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--ink-faint);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(107, 95, 78, 0.18);
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
   }
 
   .motivation .mot-author {
@@ -2310,6 +2335,112 @@
   }
   .flowers-banner .undo:hover { color: var(--ink-soft); }
 
+  /* Week-8 anticipatory banner — appears during week 6, names the
+     dates of week 8 so the user can plan before motivation craters. */
+  .week8-banner {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--terracotta);
+    border-radius: var(--radius);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .week8-banner .w8-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--terracotta);
+    flex-shrink: 0;
+  }
+  .week8-banner .w8-icon svg { width: 20px; height: 20px; }
+  .week8-banner .w8-body { display: flex; flex-direction: column; gap: 6px; }
+  .week8-banner .w8-eyebrow {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--terracotta);
+    font-weight: 600;
+  }
+  .week8-banner .w8-title {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .week8-banner .w8-prompt {
+    margin: 2px 0 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .week8-banner .w8-action {
+    margin-top: 6px;
+    align-self: flex-start;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--terracotta);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 500;
+    border: 0;
+  }
+  .week8-banner .w8-action:hover { filter: brightness(1.05); }
+  .week8-banner.dismissed { display: none; }
+
+  /* "Missed twice" prompts — gentle reminders when a habit has been
+     missed two times in a row (defend the slot before it's three). */
+  .missed-prompt {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--ochre);
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .missed-prompt .mp-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .missed-prompt .mp-eyebrow {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ochre);
+    font-weight: 600;
+  }
+  .missed-prompt .mp-line {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .missed-prompt .mp-dismiss {
+    font-size: 11px;
+    color: var(--ink-faint);
+    background: transparent;
+    border: 0;
+    padding: 4px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .missed-prompt .mp-dismiss:hover { color: var(--ink-soft); }
+
   /* Thoughts — free-form journal entries on the home page */
   .thoughts-list {
     display: grid;
@@ -2671,6 +2802,60 @@
     margin: -6px 0 10px;
   }
   .stats-summary { margin-bottom: 16px; }
+
+  /* Insight cards — auto-computed correlations from existing data */
+  .insight-cards {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .insight-card {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green-leaf);
+    border-radius: var(--radius);
+    display: grid;
+    gap: 6px;
+  }
+  .insight-card.color-mood   { border-left-color: var(--ochre); }
+  .insight-card.color-yoga   { border-left-color: var(--terracotta); }
+  .insight-card .ic-eyebrow {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+  .insight-card .ic-line {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .insight-card .ic-line strong {
+    font-weight: 600;
+    color: var(--green-leaf);
+  }
+  .insight-card .ic-meta {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .insight-empty {
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+  }
 
   .stats-chain-hero {
     display: grid;
@@ -3558,6 +3743,8 @@
       </div>
       <div id="seal-slot"></div>
       <div id="flowers-slot"></div>
+      <div id="week8-slot"></div>
+      <div id="missed-twice-slot"></div>
     </section>
 
     <section id="today-section">
@@ -3667,20 +3854,32 @@
     return [...HABITS, ...customs];
   }
 
-  // Consecutive days, walking back from today, where this habit was ticked.
-  // Today not yet ticked doesn't break the streak (we just don't count today).
+  // Days where this habit was ticked, walking back from today.
+  // "Never miss twice" — a single isolated miss is forgiven; two consecutive
+  // misses end the streak. Today not yet ticked doesn't count against you.
   function habitStreak(key) {
     const today = new Date();
     const startBound = state.startDate || toISODate(today);
     let streak = 0;
+    let prevWasMiss = false;
     for (let i = 0; i < 365; i++) {
       const iso = toISODate(addDays(today, -i));
       if (iso < startBound) break;
       const rec = state.habits[iso];
       const done = rec && rec[key];
-      if (done) streak++;
-      else if (i === 0) continue; // grace day
-      else break;
+      if (done) {
+        streak++;
+        prevWasMiss = false;
+      } else if (i === 0) {
+        // today not yet ticked — don't count, don't penalise
+        continue;
+      } else if (!prevWasMiss) {
+        // first isolated miss — forgive, keep walking
+        prevWasMiss = true;
+      } else {
+        // two misses in a row — chain broken
+        break;
+      }
     }
     return streak;
   }
@@ -3911,6 +4110,9 @@
     workoutPlans: {}, // { [planId]: { id, name, createdAt, updatedAt, exercises: [{id, sets, reps}] } }
     workoutPlanOrder: [], // array of planIds
     workoutPrefs: { muscleFilter: null, difficultyFilter: null },
+    // Notification preferences. Only one notification exists in the app:
+    // the Sunday 6pm "seal the week" reminder. Off by default.
+    notify: { sundaySeal: false },
     startDate: '2026-04-27',
   });
 
@@ -4542,6 +4744,144 @@
     });
   }
 
+  // Index of the current week, 1-based, where week 1 is the Monday of state.startDate.
+  // Returns 0 if today is before startDate.
+  function currentWeekIndex() {
+    const start = startOfWeek(parseISO(state.startDate));
+    const thisMon = startOfWeek(new Date());
+    const diffDays = Math.round((startOfDay(thisMon) - startOfDay(start)) / 86400000);
+    if (diffDays < 0) return 0;
+    return Math.floor(diffDays / 7) + 1;
+  }
+
+  // Week 6 anticipatory banner. Visible only during week 6 (1-indexed),
+  // names the dates of week 8, and lets the user dismiss once they've planned.
+  function renderWeek8Banner() {
+    const slot = document.getElementById('week8-slot');
+    if (!slot) return;
+    slot.innerHTML = '';
+    if (isPreStart()) return;
+
+    const weekIdx = currentWeekIndex();
+    if (weekIdx !== 6) return;
+
+    const week8Monday = addDays(startOfWeek(parseISO(state.startDate)), 7 * 7); // start + 7 weeks
+    const week8MondayISO = toISODate(week8Monday);
+    const dismissKey = `caprisun.week8.dismissed.${week8MondayISO}`;
+    try {
+      if (localStorage.getItem(dismissKey) === '1') return;
+    } catch (e) {}
+
+    const week8End = addDays(week8Monday, 6);
+    const sameMonth = week8Monday.getMonth() === week8End.getMonth();
+    const range = sameMonth
+      ? `${monthShort(week8Monday)} ${week8Monday.getDate()}–${week8End.getDate()}`
+      : `${monthShort(week8Monday)} ${week8Monday.getDate()} – ${monthShort(week8End)} ${week8End.getDate()}`;
+
+    const banner = document.createElement('div');
+    banner.className = 'week8-banner';
+    banner.innerHTML = `
+      <div class="w8-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+          <path d="M3 9h18"></path>
+          <path d="M8 3v4M16 3v4"></path>
+        </svg>
+      </div>
+      <div class="w8-body">
+        <p class="w8-eyebrow">This is week 6</p>
+        <p class="w8-title">Week 8 lands the week of ${range}.</p>
+        <p class="w8-prompt">Yellow weeks show up here. What's on your calendar then? Plan it before motivation craters.</p>
+        <button class="w8-action" type="button" data-action="plan">Open that week</button>
+        <button class="w8-action" type="button" data-action="dismiss" style="background:transparent;color:var(--ink-soft);border:1px solid var(--border);padding:6px 12px;margin-left:8px">I've planned it</button>
+      </div>
+    `;
+    slot.appendChild(banner);
+
+    banner.querySelector('[data-action="plan"]').addEventListener('click', () => {
+      openWeekReview(week8Monday);
+    });
+    banner.querySelector('[data-action="dismiss"]').addEventListener('click', () => {
+      try { localStorage.setItem(dismissKey, '1'); } catch (e) {}
+      renderWeek8Banner();
+    });
+  }
+
+  // "Never miss twice" — surface a gentle prompt when a habit has been
+  // skipped two consecutive times. Only renders if today's slot is still open.
+  function renderMissedTwicePrompts() {
+    const slot = document.getElementById('missed-twice-slot');
+    if (!slot) return;
+    slot.innerHTML = '';
+    if (isPreStart()) return;
+
+    const today = new Date();
+    const todayISO = toISODate(today);
+    const startBound = state.startDate;
+    const dismissKeyFor = (kind) => `caprisun.missed.${kind}.dismissed.${todayISO}`;
+    const isDismissed = (kind) => {
+      try { return localStorage.getItem(dismissKeyFor(kind)) === '1'; } catch (e) { return false; }
+    };
+
+    const make = (kind, eyebrow, line) => {
+      if (isDismissed(kind)) return;
+      const el = document.createElement('div');
+      el.className = 'missed-prompt';
+      el.innerHTML = `
+        <div class="mp-text">
+          <p class="mp-eyebrow">${eyebrow}</p>
+          <p class="mp-line">${line}</p>
+        </div>
+        <button class="mp-dismiss" type="button" aria-label="Dismiss">Got it</button>
+      `;
+      el.querySelector('.mp-dismiss').addEventListener('click', () => {
+        try { localStorage.setItem(dismissKeyFor(kind), '1'); } catch (e) {}
+        el.remove();
+      });
+      slot.appendChild(el);
+    };
+
+    // --- Reading: two consecutive missed nights (and today not logged yet) ---
+    const readingToday = (sessionsForDate(todayISO).reading || 0) > 0;
+    if (!readingToday) {
+      const yISO = toISODate(addDays(today, -1));
+      const ddISO = toISODate(addDays(today, -2));
+      // Only count days that are within the live framework window.
+      if (yISO >= startBound && ddISO >= startBound) {
+        const readingY = (sessionsForDate(yISO).reading || 0) > 0;
+        const readingDD = (sessionsForDate(ddISO).reading || 0) > 0;
+        if (!readingY && !readingDD) {
+          make('reading', 'Two nights without reading', 'Defend the slot tonight.');
+        }
+      }
+    }
+
+    // --- Yoga: only prompted on Wednesday, when both prior Wednesdays were skipped ---
+    if (today.getDay() === 3) {
+      const yogaToday = (sessionsForDate(todayISO).yoga || 0) > 0;
+      if (!yogaToday) {
+        const lastWed = toISODate(addDays(today, -7));
+        const twoWedsAgo = toISODate(addDays(today, -14));
+        if (lastWed >= startBound && twoWedsAgo >= startBound) {
+          const yogaLast = (sessionsForDate(lastWed).yoga || 0) > 0;
+          const yogaTwoAgo = (sessionsForDate(twoWedsAgo).yoga || 0) > 0;
+          if (!yogaLast && !yogaTwoAgo) {
+            make('yoga', 'Two Wednesdays without yoga', 'The slot is yours — take it tonight.');
+          }
+        }
+      }
+    }
+
+    // --- Gym makeup: yesterday was a planned gym day and gym wasn't logged ---
+    const yISO2 = toISODate(addDays(today, -1));
+    const yDow = addDays(today, -1).getDay();
+    const yPlanned = (PLAN_BY_DAY[yDow] || []).includes('gym');
+    const yGymLogged = (sessionsForDate(yISO2).gym || 0) > 0;
+    if (yPlanned && !yGymLogged && yISO2 >= startBound) {
+      make('gym', 'Yesterday was a gym day', 'Log the makeup today — never miss twice.');
+    }
+  }
+
   function getPriorities(dateISO) {
     const arr = (state.priorities && state.priorities[dateISO]) || [];
     const out = [];
@@ -4633,12 +4973,22 @@
       const yPriorities = getPriorities(yesterdayISO).filter((p) => p.text);
       const yPlan = (state.morningPlan && state.morningPlan[yesterdayISO] || '').trim();
       if (yPriorities.length || yPlan) {
-        const prioritiesHTML = yPriorities.length
-          ? `<ul class="readback-list">${yPriorities.map((p) => `<li class="${p.done ? 'done' : ''}"><span class="rmark">${p.done ? '✓' : '○'}</span>${p.text.replace(/</g, '&lt;')}</li>`).join('')}</ul>`
+        const doneCount = yPriorities.filter((p) => p.done).length;
+        const total = yPriorities.length;
+        let tagHTML = '';
+        if (total > 0) {
+          let tagCls = 'kept-tag';
+          if (doneCount === total) tagCls += ' all';
+          else if (doneCount === 0) tagCls += ' none';
+          else if (doneCount >= Math.ceil(total / 2)) tagCls += ' most';
+          tagHTML = `<span class="${tagCls}">Kept ${doneCount} of ${total}</span>`;
+        }
+        const prioritiesHTML = total
+          ? `<ul class="readback-list">${yPriorities.map((p) => `<li class="${p.done ? 'done' : 'missed'}"><span class="rmark">${p.done ? '✓' : '✗'}</span>${p.text.replace(/</g, '&lt;')}</li>`).join('')}</ul>`
           : '';
         const planHTML = yPlan ? `<div class="readback-plan">${yPlan.replace(/</g, '&lt;')}</div>` : '';
         readbackEl.style.display = '';
-        readbackEl.innerHTML = `<span class="label">You'd planned</span>${prioritiesHTML}${planHTML}`;
+        readbackEl.innerHTML = `<div class="label-row"><span class="label">You'd planned</span>${tagHTML}</div>${prioritiesHTML}${planHTML}`;
       } else {
         readbackEl.style.display = 'none';
         readbackEl.innerHTML = '';
@@ -5694,6 +6044,212 @@
     URL.revokeObjectURL(url);
   }
 
+  // Build a chronological markdown digest of every sealed week, including
+  // the week note, each day's note, and each day's logged sessions. This
+  // is a hedge against the app itself going away — the data outlives the code.
+  function buildWeeklyMarkdown() {
+    const lines = [];
+    const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const fullDayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+    lines.push('# Caprisun — Weekly review export');
+    lines.push('');
+    lines.push(`_Exported ${new Date().toISOString().slice(0, 10)} · framework start ${state.startDate}_`);
+    lines.push('');
+
+    const startMonday = getStartMonday();
+    const thisMonday = startOfWeek(new Date());
+    const weeksSinceStart = Math.max(0, Math.floor((thisMonday - startMonday) / (7 * 86400000)));
+
+    const sealedMondays = [];
+    for (let i = 0; i < weeksSinceStart; i++) {
+      const m = addDays(startMonday, i * 7);
+      const iso = toISODate(m);
+      if (state.weekColors[iso]) sealedMondays.push({ monday: m, iso, weekIdx: i + 1 });
+    }
+
+    if (sealedMondays.length === 0) {
+      lines.push('_No sealed weeks yet._');
+      return lines.join('\n');
+    }
+
+    for (const { monday, iso, weekIdx } of sealedMondays) {
+      const end = addDays(monday, 6);
+      const range = `${monthShort(monday)} ${monday.getDate()} – ${monthShort(end)} ${end.getDate()}`;
+      const color = state.weekColors[iso];
+      const colorLabel = color ? COLOR_META[color].label : '—';
+      const weekDays = sessionsForWeek(monday);
+      const sleep = weekSleep(weekDays);
+      const mood = weekMood(weekDays);
+      const sum = weekSummary(weekDays);
+      const note = (state.weekNotes[iso] || '').trim();
+
+      lines.push(`## Week ${weekIdx} · ${range}`);
+      lines.push('');
+      lines.push(`- **Color:** ${colorLabel}`);
+      if (sleep) lines.push(`- **Sleep avg:** ${fmtSleepHM(sleep.avg)} (${sleep.days} night${sleep.days === 1 ? '' : 's'})`);
+      if (mood.total > 0) lines.push(`- **Mood avg:** ${mood.avg.toFixed(1)} / 5 (${mood.total} day${mood.total === 1 ? '' : 's'})`);
+      lines.push(`- **Sessions:** ${sum.gymCount} gym · ${sum.yogaCount} yoga · ${sum.medCount} meditation · ${sum.readCount} reading`);
+      lines.push('');
+
+      if (note) {
+        lines.push('### Note on the week');
+        lines.push('');
+        for (const ln of note.split('\n')) lines.push(`> ${ln}`);
+        lines.push('');
+      }
+
+      lines.push('### Days');
+      lines.push('');
+      for (let i = 0; i < 7; i++) {
+        const { date, iso: dIso, sessions } = weekDays[i];
+        const parts = [];
+        if (sessions.gym) parts.push(`Gym ${sessions.gym}m`);
+        if (sessions.yoga) parts.push(`Yoga ${sessions.yoga}m`);
+        if (sessions.meditation) parts.push(`Meditation ${sessions.meditation}m`);
+        if (sessions.reading) parts.push(`Reading ${sessions.reading}m`);
+        const m = state.mood[dIso];
+        const sl = state.sleep[dIso];
+        const dayColor = state.dayColors[dIso];
+        const meta = [];
+        if (parts.length) meta.push(parts.join(', '));
+        if (typeof m === 'number') meta.push(`mood ${m}/5`);
+        if (typeof sl === 'number') meta.push(`sleep ${fmtSleepHM(sl)}`);
+        if (dayColor) meta.push(COLOR_META[dayColor].label.toLowerCase());
+        const metaStr = meta.length ? ` — ${meta.join(' · ')}` : '';
+        lines.push(`- **${fullDayNames[i]} ${date.getDate()} ${monthShort(date)}**${metaStr}`);
+
+        const dayNote = (state.dayNotes[dIso] || '').trim();
+        if (dayNote) {
+          for (const ln of dayNote.split('\n')) lines.push(`  > ${ln}`);
+        }
+
+        // Priorities (today's three) for that day, if any text was set.
+        const priors = (state.priorities && state.priorities[dIso]) || [];
+        const priorsWithText = priors.filter(p => p && p.text && p.text.trim());
+        if (priorsWithText.length) {
+          for (const p of priorsWithText) {
+            const mark = p.done ? 'x' : ' ';
+            lines.push(`  - [${mark}] ${p.text.trim()}`);
+          }
+        }
+      }
+      lines.push('');
+    }
+
+    return lines.join('\n');
+  }
+
+  function exportMarkdown() {
+    const md = buildWeeklyMarkdown();
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `caprisun-weeks-${toISODate(new Date())}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // --- Sunday 6 PM "seal the week" reminder -------------------------------
+  // The only scheduled notification in the app. Off by default; opt-in via
+  // Settings. Uses Notification Triggers when supported; falls back to a
+  // setTimeout that fires while the app is open, plus an immediate-fire
+  // path for users who open the app on Sunday evening unreminded.
+
+  function nextSunday6pm() {
+    const now = new Date();
+    const d = new Date(now);
+    d.setHours(18, 0, 0, 0);
+    if (d.getDay() === 0 && d.getTime() > now.getTime()) return d;
+    const offset = (7 - d.getDay()) % 7 || 7;
+    d.setDate(d.getDate() + offset);
+    return d;
+  }
+
+  async function scheduleSundayReminder() {
+    if (window.__sundayTimer) {
+      clearTimeout(window.__sundayTimer);
+      window.__sundayTimer = null;
+    }
+    if (!state.notify || !state.notify.sundaySeal) return;
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') return;
+
+    const next = nextSunday6pm();
+    const tag = `caprisun-seal-${toISODate(next)}`;
+    const title = "It's Sunday. Time to seal the week.";
+    const body = "Open Caprisun and review the week.";
+    const seenKey = 'caprisun.notify.sundaySeal.last';
+
+    // Native scheduled notification (Chrome/Edge with Notification Triggers).
+    if ('serviceWorker' in navigator && 'TimestampTrigger' in window) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.getNotifications({ tag, includeTriggered: true });
+        if (!existing.length) {
+          await reg.showNotification(title, {
+            tag, body,
+            icon: './Pics/720x480.png',
+            showTrigger: new TimestampTrigger(next.getTime()),
+          });
+        }
+      } catch (e) {}
+    }
+
+    // In-page fallback: fires only while the app is open, but covers the
+    // common case of "I left the tab open on Sunday afternoon."
+    const ms = next.getTime() - Date.now();
+    if (ms > 0 && ms < 8 * 86400000) {
+      window.__sundayTimer = setTimeout(() => {
+        try {
+          if (localStorage.getItem(seenKey) === tag) return;
+          new Notification(title, { tag, body, icon: './Pics/720x480.png' });
+          localStorage.setItem(seenKey, tag);
+        } catch (e) {}
+      }, ms);
+    }
+
+    // Immediate-fire path: opened the app on Sunday after 18:00 with no
+    // reminder for this week yet.
+    const now = new Date();
+    if (now.getDay() === 0 && now.getHours() >= 18) {
+      const todayTag = `caprisun-seal-${toISODate(now)}`;
+      try {
+        if (localStorage.getItem(seenKey) !== todayTag) {
+          new Notification(title, { tag: todayTag, body, icon: './Pics/720x480.png' });
+          localStorage.setItem(seenKey, todayTag);
+        }
+      } catch (e) {}
+    }
+  }
+
+  async function setSundaySealEnabled(on) {
+    if (!state.notify) state.notify = {};
+    state.notify.sundaySeal = !!on;
+    save();
+    if (on && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      try { await Notification.requestPermission(); } catch (e) {}
+    }
+    if (!on) {
+      if (window.__sundayTimer) {
+        clearTimeout(window.__sundayTimer);
+        window.__sundayTimer = null;
+      }
+      // Best-effort cancel of any pre-scheduled notification.
+      if ('serviceWorker' in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const ns = await reg.getNotifications({ includeTriggered: true });
+          for (const n of ns) if (n.tag && n.tag.startsWith('caprisun-seal-')) n.close();
+        } catch (e) {}
+      }
+    }
+    scheduleSundayReminder();
+  }
+
   function importDataFromFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -5743,6 +6299,17 @@
       </div>
 
       <div class="sheet-section">
+        <p class="sheet-section-label">Reminders</p>
+        <label class="reminder-row" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;cursor:pointer">
+          <input type="checkbox" id="notif-sunday" ${state.notify && state.notify.sundaySeal ? 'checked' : ''} style="margin-top:3px" />
+          <span style="display:flex;flex-direction:column;gap:3px">
+            <strong style="font-family:'Fraunces',Georgia,serif;font-size:14px;color:var(--ink)">Sunday seal · 6 PM</strong>
+            <span class="subtle" style="margin:0">A single weekly notification: <em>"It's Sunday. Time to seal the week."</em> No daily nudges, no streak guilt — just the one reminder for the keystone ritual.</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="sheet-section">
         <p class="sheet-section-label">Backup</p>
         <p class="subtle" style="margin-bottom:10px">Everything lives in your browser (${kb} KB). Export a file to keep a copy somewhere safe — email, iCloud, Dropbox, anywhere.</p>
         <div class="sheet-actions" style="margin-top:0">
@@ -5750,6 +6317,10 @@
           <button class="btn btn-primary" id="export-btn">Export data</button>
         </div>
         <input type="file" id="import-file" accept="application/json,.json" style="display:none" />
+        <p class="subtle" style="margin:14px 0 8px">Or export a human-readable digest of every sealed week — week notes, day notes, sessions, priorities — in chronological order. Survives the app.</p>
+        <div class="sheet-actions" style="margin-top:0">
+          <button class="btn btn-ghost" id="export-md-btn">Export weeks (Markdown)</button>
+        </div>
       </div>
 
       <div class="sheet-actions">
@@ -5786,6 +6357,10 @@
     });
 
     sheet.querySelector('#export-btn').addEventListener('click', exportData);
+    sheet.querySelector('#export-md-btn').addEventListener('click', exportMarkdown);
+
+    const notifBox = sheet.querySelector('#notif-sunday');
+    if (notifBox) notifBox.addEventListener('change', () => setSundaySealEnabled(notifBox.checked));
 
     const importBtn = sheet.querySelector('#import-btn');
     const fileInput = sheet.querySelector('#import-file');
@@ -8894,6 +9469,150 @@
     return renderDeck('Word deck', stats.word) + renderDeck('Quote deck', stats.quote);
   }
 
+  // Format an avg-hours number (e.g. 7.3) as "7h 18min".
+  function fmtSleepHM(h) {
+    if (!isFinite(h) || h <= 0) return '—';
+    const totalMin = Math.round(h * 60);
+    const hh = Math.floor(totalMin / 60);
+    const mm = totalMin % 60;
+    return mm === 0 ? `${hh}h` : `${hh}h ${mm}min`;
+  }
+
+  // Compute up to three "insight cards" from existing data.
+  // Each card requires a minimum sample size before showing.
+  function computeInsightCards() {
+    const cards = [];
+    const startMonday = getStartMonday();
+    const thisMonday = startOfWeek(new Date());
+    const weeksSinceStart = Math.max(0, Math.floor((thisMonday - startMonday) / (7 * 86400000)));
+
+    // --- 1. Sleep by week color ---
+    // For each sealed week, average that week's sleep, group by color.
+    const sleepByColor = { deep: [], soft: [], ochre: [], terra: [] };
+    for (let i = 0; i < weeksSinceStart; i++) {
+      const m = addDays(startMonday, i * 7);
+      const iso = toISODate(m);
+      const color = state.weekColors[iso];
+      if (!color || !sleepByColor[color]) continue;
+      const wd = sessionsForWeek(m);
+      const sleep = weekSleep(wd);
+      if (sleep && sleep.days >= 3) sleepByColor[color].push(sleep.avg);
+    }
+    const colorAvgs = {};
+    for (const c of Object.keys(sleepByColor)) {
+      const arr = sleepByColor[c];
+      if (arr.length >= 2) colorAvgs[c] = arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+    // Pick the highest and lowest color buckets, prefer green vs yellow/red contrast.
+    const ordered = ['deep', 'soft', 'ochre', 'terra'];
+    const have = ordered.filter(c => colorAvgs[c] != null);
+    if (have.length >= 2) {
+      const high = have[0]; // best color we have
+      const low = have[have.length - 1]; // worst color we have
+      if (high !== low) {
+        const labelHigh = COLOR_META[high].label;
+        const labelLow = COLOR_META[low].label;
+        const nHigh = sleepByColor[high].length;
+        const nLow = sleepByColor[low].length;
+        cards.push({
+          kind: 'sleep',
+          eyebrow: 'Sleep × week color',
+          line: `<strong>${labelHigh}</strong> weeks averaged ${fmtSleepHM(colorAvgs[high])} sleep. <strong>${labelLow}</strong> weeks averaged ${fmtSleepHM(colorAvgs[low])}.`,
+          meta: `${nHigh} ${labelHigh.toLowerCase()} week${nHigh === 1 ? '' : 's'}, ${nLow} ${labelLow.toLowerCase()} week${nLow === 1 ? '' : 's'}.`,
+        });
+      }
+    }
+
+    // --- 2. Mood after gym vs rest day ---
+    // For each day with a logged mood, look at the previous day. If gym>0 → "after gym",
+    // else "after rest". Compare averages.
+    const afterGym = [];
+    const afterRest = [];
+    for (const iso in state.mood) {
+      const m = state.mood[iso];
+      if (!(m >= 1 && m <= 5)) continue;
+      if (iso < state.startDate) continue;
+      const prevISO = toISODate(addDays(parseISO(iso), -1));
+      if (prevISO < state.startDate) continue;
+      const prevGym = (sessionsForDate(prevISO).gym || 0) > 0;
+      if (prevGym) afterGym.push(m);
+      else afterRest.push(m);
+    }
+    if (afterGym.length >= 3 && afterRest.length >= 3) {
+      const avgGym = afterGym.reduce((a, b) => a + b, 0) / afterGym.length;
+      const avgRest = afterRest.reduce((a, b) => a + b, 0) / afterRest.length;
+      const diff = avgGym - avgRest;
+      if (Math.abs(diff) >= 0.2) {
+        const dir = diff > 0 ? 'higher' : 'lower';
+        cards.push({
+          kind: 'mood',
+          eyebrow: 'Mood × the day after gym',
+          line: `Your mood on days after a gym session is <strong>${Math.abs(diff).toFixed(1)} ${dir}</strong> than after rest days.`,
+          meta: `${afterGym.length} after-gym days · ${afterRest.length} after-rest days.`,
+        });
+      }
+    }
+
+    // --- 3. Wednesdays without yoga + meditation ---
+    // For Wednesdays since startDate, classify by whether yoga AND meditation
+    // were logged that day. Compare ochre/terra rates between groups.
+    const wedComplete = []; // { color }
+    const wedIncomplete = [];
+    let cursor = parseISO(state.startDate);
+    const todayISO = toISODate(new Date());
+    while (toISODate(cursor) <= todayISO) {
+      if (cursor.getDay() === 3) {
+        const wIso = toISODate(cursor);
+        const sess = sessionsForDate(wIso);
+        const dayColor = state.dayColors[wIso] || null;
+        const did = (sess.yoga > 0) && (sess.meditation > 0);
+        const bucket = did ? wedComplete : wedIncomplete;
+        bucket.push({ color: dayColor });
+      }
+      cursor = addDays(cursor, 1);
+    }
+    const isOff = (c) => c === 'ochre' || c === 'terra';
+    const incompleteColored = wedIncomplete.filter(w => w.color);
+    const completeColored = wedComplete.filter(w => w.color);
+    if (incompleteColored.length >= 3 && completeColored.length >= 3) {
+      const offRateInc = incompleteColored.filter(w => isOff(w.color)).length / incompleteColored.length;
+      const offRateCom = completeColored.filter(w => isOff(w.color)).length / completeColored.length;
+      if (offRateInc > offRateCom && offRateInc - offRateCom >= 0.15) {
+        const ratio = offRateCom > 0 ? (offRateInc / offRateCom) : null;
+        const ratioText = ratio && ratio >= 1.5
+          ? `${ratio.toFixed(1)}× more likely`
+          : `${Math.round((offRateInc - offRateCom) * 100)} pts more likely`;
+        cards.push({
+          kind: 'yoga',
+          eyebrow: 'Wednesday × week color',
+          line: `Wednesdays without yoga + meditation were <strong>${ratioText}</strong> to be ochre or red days.`,
+          meta: `${wedIncomplete.length} skipped Wednesdays · ${wedComplete.length} complete Wednesdays.`,
+        });
+      }
+    }
+
+    return cards;
+  }
+
+  function renderInsightCards() {
+    const cards = computeInsightCards();
+    if (cards.length === 0) {
+      // Encouragement to keep logging when there's not enough signal yet.
+      return `<div class="insight-empty">Insights appear here once a few weeks of data start talking to each other. Keep logging — the patterns surface around weeks 4–6.</div>`;
+    }
+    return `
+      <div class="insight-cards">
+        ${cards.map(c => `
+          <div class="insight-card color-${c.kind}">
+            <p class="ic-eyebrow">${c.eyebrow}</p>
+            <p class="ic-line">${c.line}</p>
+            <p class="ic-meta">${c.meta}</p>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
   function openStats() {
     openSheet(`
       <h2>Stats</h2>
@@ -8917,6 +9636,8 @@
       : 0;
 
     body.innerHTML = `
+      ${renderInsightCards()}
+
       ${renderSummaryTiles(sum)}
 
       <p class="sheet-section-label">The chain · last 12 weeks</p>
@@ -9008,6 +9729,8 @@
     renderTodos();
     renderChain();
     renderFlowersPrompt();
+    renderWeek8Banner();
+    renderMissedTwicePrompts();
     renderPreStart();
     renderTiles();
     renderTodayNoteBtn();
@@ -9040,6 +9763,7 @@
   wireMorningRitual();
   wireTodoInputs();
   initAuth();
+  scheduleSundayReminder();
 
   // ============================================================
   // === BEGIN SPLASH SCRIPT ====================================
