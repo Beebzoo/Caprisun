@@ -1550,6 +1550,68 @@
     line-height: 1.4;
   }
 
+  /* Sunday review walkthrough */
+  .walkthrough { display: flex; flex-direction: column; }
+  .wt-header { margin-bottom: 14px; }
+  .wt-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .wt-header h2 {
+    margin: 6px 0 6px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .wt-content { display: grid; gap: 12px; }
+  .wt-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .wt-footer .btn { flex: 1; }
+  .wt-progress {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .wt-progress .dot {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .wt-progress .dot.done { background: var(--green-deep); }
+  .wt-progress .dot.current { background: var(--green-leaf); }
+  .seal-summary {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .seal-summary strong {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .seal-summary p {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
   .today-note-btn {
     margin-top: 12px;
     width: 100%;
@@ -3461,7 +3523,6 @@
     <header>
       <h1 class="day-name" id="day-name">Tuesday</h1>
       <div class="day-date" id="date"></div>
-      <div class="chain-pin" id="chain-pin" aria-label="The chain — last 8 weeks"></div>
       <p class="greeting">
         <span id="greeting">Good morning.</span>
         <span class="greet-icons" aria-hidden="true">
@@ -3475,6 +3536,36 @@
       </p>
       <p class="motivation" id="motivation"></p>
     </header>
+
+    <section id="chain-section">
+      <p class="section-label">
+        <span>The chain</span>
+        <button id="open-year">View year</button>
+      </p>
+      <div class="chain" id="chain"></div>
+      <div class="chain-legend">
+        <span id="chain-start-label">8 weeks ago</span>
+        <span>this week</span>
+      </div>
+      <div id="seal-slot"></div>
+      <div id="flowers-slot"></div>
+    </section>
+
+    <section id="prestart-section" style="display:none">
+      <div class="start-banner">
+        <p class="eyebrow">The chain starts</p>
+        <h3 id="start-title">Monday, 27 April</h3>
+        <p id="start-sub">A fresh week. The first link.</p>
+        <div class="countdown" id="start-countdown">In 4 days</div>
+      </div>
+    </section>
+
+    <section id="today-section">
+      <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
+      <div id="today-banners"></div>
+      <div class="tiles" id="tiles"></div>
+      <button class="today-note-btn" id="today-note-btn">Leave a note for today…</button>
+    </section>
 
     <section id="morning-ritual-section">
       <p class="section-label"><span>Morning ritual</span></p>
@@ -3592,40 +3683,6 @@
           <span class="meyebrow">Word of the day</span>
           <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
         </button>
-        <button class="moment-tile" id="open-quiz">
-          <span class="meyebrow">Geography</span>
-          <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
-        </button>
-      </div>
-    </section>
-
-    <section id="chain-section">
-      <p class="section-label">
-        <span>The chain</span>
-        <button id="open-year">View year</button>
-      </p>
-      <div class="chain" id="chain"></div>
-      <div class="chain-legend">
-        <span id="chain-start-label">8 weeks ago</span>
-        <span>this week</span>
-      </div>
-      <div id="seal-slot"></div>
-      <div id="flowers-slot"></div>
-    </section>
-
-    <section id="today-section">
-      <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
-      <div id="today-banners"></div>
-      <div class="tiles" id="tiles"></div>
-      <button class="today-note-btn" id="today-note-btn">Leave a note for today…</button>
-    </section>
-
-    <section id="prestart-section" style="display:none">
-      <div class="start-banner">
-        <p class="eyebrow">The chain starts</p>
-        <h3 id="start-title">Monday, 27 April</h3>
-        <p id="start-sub">A fresh week. The first link.</p>
-        <div class="countdown" id="start-countdown">In 4 days</div>
       </div>
     </section>
 
@@ -4354,11 +4411,10 @@
   function pickQuoteForDate(date) {
     const seed = daySeed(date);
     const prefs = QUOTE_TONE_BY_DAY[date.getDay()] || [];
-    for (const tone of prefs) {
-      const matching = QUOTES.filter(q => q.tone === tone);
-      if (matching.length) return matching[seed % matching.length];
-    }
-    return QUOTES[seed % QUOTES.length];
+    // Union of all preferred tones for the day. Mon/Tue list only 'generative'
+    // so heavy quotes never appear there. Other days mix tones for variety.
+    const pool = prefs.length ? QUOTES.filter(q => prefs.includes(q.tone)) : QUOTES;
+    return (pool.length ? pool : QUOTES)[seed % (pool.length || QUOTES.length)];
   }
 
   function pickWordForDate(date) {
@@ -5181,6 +5237,17 @@
         renderTodos();
       });
     }
+    // Prevent chip taps from stealing focus / dismissing the soft keyboard.
+    // mousedown fires before the input would blur; preventDefault keeps focus
+    // on the to-do text input so the user can keep typing after picking chips.
+    const keepFocus = (e) => {
+      if (document.activeElement === textEl) e.preventDefault();
+    };
+    document.querySelectorAll('#todo-when-chips .chip, #todo-tag-chips .chip').forEach((chip) => {
+      chip.addEventListener('mousedown', keepFocus);
+      chip.addEventListener('touchstart', keepFocus, { passive: false });
+    });
+
     document.querySelectorAll('#todo-when-chips .chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         const wasActive = chip.classList.contains('active');
@@ -5189,9 +5256,13 @@
         if (dueEl) {
           if (chip.dataset.when === 'pick' && !wasActive) {
             dueEl.style.display = '';
-            dueEl.focus();
-            if (typeof dueEl.showPicker === 'function') {
-              try { dueEl.showPicker(); } catch {}
+            // Don't auto-focus the date input if the user is mid-type — that
+            // would dismiss the keyboard. Only show the picker; tap to open.
+            if (document.activeElement !== textEl) {
+              dueEl.focus();
+              if (typeof dueEl.showPicker === 'function') {
+                try { dueEl.showPicker(); } catch {}
+              }
             }
           } else {
             dueEl.style.display = 'none';
@@ -5330,13 +5401,30 @@
       const splitLabel = (act.key === 'gym' && todaySplit) ? todaySplit.name : null;
       const isMakeupTile = act.key === 'gym' && !!makeup && !logged;
 
+      // Gym tile preview: how many moves are queued for today's split?
+      let movesPreview = null;
+      if (act.key === 'gym' && todaySplit) {
+        const todayLog = state.workoutLog?.[todayISO];
+        const lastLog = lastWorkoutForSplit(todaySplit.key, todayISO);
+        const ids = todayLog?.exercises?.length
+          ? todayLog.exercises
+          : lastLog?.exercises?.length
+            ? lastLog.exercises
+            : todaySplit.defaults.map(d => d.id);
+        movesPreview = `${ids.length} move${ids.length === 1 ? '' : 's'}`;
+      }
+
+      const subLine = isMakeupTile
+        ? 'Make-up day'
+        : (movesPreview ? `${movesPreview} · avg ${avgFor(act)} min` : `Avg ${avgFor(act)} min`);
+
       const tile = document.createElement('button');
       tile.className = 'tile' + (logged ? ' logged' : '') + (isMakeupTile ? ' makeup' : '');
       tile.innerHTML = `
         ${planned ? '<span class="plan-dot" aria-label="planned for today"></span>' : ''}
         <div>
           <p class="name">${act.name}${splitLabel ? ` <span class="tile-split">· ${splitLabel}</span>` : ''}</p>
-          <p class="avg">${isMakeupTile ? 'Make-up day' : `Avg ${avgFor(act)} min`}</p>
+          <p class="avg">${subLine}</p>
         </div>
         <div class="logged-row">
           <span class="duration-pill">${mins} min</span>
@@ -5669,8 +5757,8 @@
     const weekNote = state.weekNotes[iso] || '';
     const review = state.weekReview?.[iso] || {};
 
-    const colorOptions = Object.entries(COLOR_META).map(([key, meta]) => {
-      const selected = (existing || suggested) === key ? 'selected' : '';
+    const colorOptionsFor = (chosen) => Object.entries(COLOR_META).map(([key, meta]) => {
+      const selected = chosen === key ? 'selected' : '';
       return `
         <button class="color-option ${selected}" data-color="${key}">
           <span class="color-swatch ${key}"></span>
@@ -5681,6 +5769,14 @@
         </button>
       `;
     }).join('');
+    const colorOptions = colorOptionsFor(existing || suggested);
+
+    // Walkthrough mode for sealing the current week for the first time —
+    // a step-by-step ritual rather than a long form to scroll.
+    if (isCurrent && !existing) {
+      runReviewWalkthrough();
+      return;
+    }
 
     const title = isCurrent ? 'This week' : 'Week review';
     const subtitleExtra = isCurrent && new Date().getDay() !== 0
@@ -5797,6 +5893,240 @@
       renderChain();
       closeSheet();
     });
+
+    // ---------------------------------------------------------------
+    // Sealing-walkthrough mode: a step-by-step ritual instead of a form.
+    // Step 1 colour the days · 2 colour the week · 3-5 the three prompts
+    // (one screen each) · 6 confirm + seal.
+    // ---------------------------------------------------------------
+    function runReviewWalkthrough() {
+      const TOTAL = 6;
+      let step = 0;
+      const draft = {
+        chosen: existing || suggested,
+        threats:   review.threats   || '',
+        swaps:     review.swaps     || '',
+        direction: review.direction || '',
+      };
+
+      const stripFresh = () => weekDays.map(({ date, iso: dIso }, i) => {
+        const c = state.dayColors[dIso];
+        let cls = 'week-day-tile';
+        const isFuture = dIso > todayISO;
+        const isToday = dIso === todayISO;
+        if (c) cls += ` ${c}`;
+        else if (isFuture) cls += ' future';
+        else cls += ' blank';
+        if (isToday) cls += ' today';
+        return `<button class="${cls}" data-date="${dIso}" aria-label="${dayNames[i]}">${dayInitials[i]}</button>`;
+      }).join('');
+
+      const legendText = () => {
+        const fd = suggestColorFromDays(weekDays);
+        return fd ? `${fd.coloredDays} of 7 coloured · avg ${COLOR_META[fd.color].label.toLowerCase()}` : 'Tap a day to colour it.';
+      };
+
+      const summaryLine = () => {
+        const parts = [];
+        if (summary.gymCount)  parts.push(`${summary.gymCount} gym`);
+        if (summary.yogaCount) parts.push(`${summary.yogaCount} yoga`);
+        if (summary.medCount)  parts.push(`${summary.medCount} meditation`);
+        if (summary.readCount) parts.push(`${summary.readCount} reading`);
+        return parts.length ? parts.join(' · ') : 'Nothing logged this week.';
+      };
+
+      const progressBar = () => {
+        return `<div class="wt-progress">${
+          Array.from({ length: TOTAL }, (_, i) => {
+            const cls = i < step ? 'done' : (i === step ? 'current' : '');
+            return `<span class="dot ${cls}"></span>`;
+          }).join('')
+        }</div>`;
+      };
+
+      function captureCurrentInputs() {
+        if (step === 2) draft.threats   = (sheet.querySelector('#wt-text')?.value ?? '').trim();
+        if (step === 3) draft.swaps     = (sheet.querySelector('#wt-text')?.value ?? '').trim();
+        if (step === 4) draft.direction = (sheet.querySelector('#wt-text')?.value ?? '').trim();
+      }
+
+      function persistDraft() {
+        if (!state.weekReview) state.weekReview = {};
+        const { threats, swaps, direction } = draft;
+        if (threats || swaps || direction) state.weekReview[iso] = { threats, swaps, direction };
+        else delete state.weekReview[iso];
+      }
+
+      function stepHTML() {
+        const eyebrow = `Step ${step + 1} of ${TOTAL} · ${rangeLabel}`;
+        if (step === 0) {
+          return `
+            <div class="walkthrough">
+              ${progressBar()}
+              <div class="wt-header">
+                <span class="wt-eyebrow">${eyebrow}</span>
+                <h2>How did each day go?</h2>
+                <p class="subtle">Tap any day to set its colour. The week's overall colour will follow from the average.</p>
+              </div>
+              <div class="wt-content">
+                <div class="week-days-strip">${stripFresh()}</div>
+                <div class="week-days-legend">
+                  <span>${legendText()}</span>
+                  <span>Mon → Sun</span>
+                </div>
+              </div>
+              <div class="wt-footer">
+                <button class="btn btn-ghost"   id="wt-cancel">Close</button>
+                <button class="btn btn-primary" id="wt-next">Next</button>
+              </div>
+            </div>
+          `;
+        }
+        if (step === 1) {
+          return `
+            <div class="walkthrough">
+              ${progressBar()}
+              <div class="wt-header">
+                <span class="wt-eyebrow">${eyebrow}</span>
+                <h2>What kind of week was it?</h2>
+                <p class="subtle">${summaryLine()}</p>
+              </div>
+              <div class="wt-content">
+                <div class="color-grid">${colorOptionsFor(draft.chosen)}</div>
+              </div>
+              <div class="wt-footer">
+                <button class="btn btn-ghost"   id="wt-prev">Back</button>
+                <button class="btn btn-primary" id="wt-next">Next</button>
+              </div>
+            </div>
+          `;
+        }
+        if (step === 2 || step === 3 || step === 4) {
+          const promptMap = {
+            2: { q: "What's on next week's calendar that could threaten the chain?",
+                 ph: "Travel · big deadline · social pressure · a hard family thing.",
+                 val: draft.threats },
+            3: { q: "Any swaps that need to happen now?",
+                 ph: "e.g. Move Friday gym to Thursday because of Roberta's parents.",
+                 val: draft.swaps },
+            4: { q: "One sentence — how do you feel about your direction?",
+                 ph: "Drift, momentum, off-course — say it plain.",
+                 val: draft.direction },
+          };
+          const p = promptMap[step];
+          return `
+            <div class="walkthrough">
+              ${progressBar()}
+              <div class="wt-header">
+                <span class="wt-eyebrow">${eyebrow} · Looking ahead</span>
+                <h2>${p.q}</h2>
+              </div>
+              <div class="wt-content">
+                <textarea class="note-area" id="wt-text" style="min-height:160px" placeholder="${p.ph}">${p.val.replace(/</g, '&lt;')}</textarea>
+              </div>
+              <div class="wt-footer">
+                <button class="btn btn-ghost"   id="wt-prev">Back</button>
+                <button class="btn btn-primary" id="wt-next">Next</button>
+              </div>
+            </div>
+          `;
+        }
+        // step 5: seal
+        const meta = COLOR_META[draft.chosen];
+        return `
+          <div class="walkthrough">
+            ${progressBar()}
+            <div class="wt-header">
+              <span class="wt-eyebrow">Step ${TOTAL} of ${TOTAL} · Seal it</span>
+              <h2>${meta.label} week</h2>
+              <p class="subtle">${meta.desc}.</p>
+            </div>
+            <div class="wt-content">
+              <div class="seal-summary">
+                <strong>Threats next week</strong>
+                <p>${(draft.threats || '—').replace(/</g, '&lt;')}</p>
+              </div>
+              <div class="seal-summary">
+                <strong>Swaps to make</strong>
+                <p>${(draft.swaps || '—').replace(/</g, '&lt;')}</p>
+              </div>
+              <div class="seal-summary">
+                <strong>Direction</strong>
+                <p>${(draft.direction || '—').replace(/</g, '&lt;')}</p>
+              </div>
+            </div>
+            <div class="wt-footer">
+              <button class="btn btn-ghost"   id="wt-prev">Back</button>
+              <button class="btn btn-primary" id="wt-seal">Seal week</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function wireStep() {
+        const cancel = sheet.querySelector('#wt-cancel');
+        const prev   = sheet.querySelector('#wt-prev');
+        const next   = sheet.querySelector('#wt-next');
+        const seal   = sheet.querySelector('#wt-seal');
+
+        if (cancel) cancel.addEventListener('click', () => {
+          captureCurrentInputs();
+          persistDraft();
+          save();
+          closeSheet();
+        });
+        if (prev) prev.addEventListener('click', () => {
+          captureCurrentInputs();
+          step = Math.max(0, step - 1);
+          renderStep();
+        });
+        if (next) next.addEventListener('click', () => {
+          captureCurrentInputs();
+          step = Math.min(TOTAL - 1, step + 1);
+          renderStep();
+        });
+        if (seal) seal.addEventListener('click', () => {
+          captureCurrentInputs();
+          persistDraft();
+          state.weekColors[iso] = draft.chosen;
+          save();
+          renderChain();
+          closeSheet();
+        });
+
+        // Day-strip drill (step 0): close walkthrough, open day, return on close.
+        sheet.querySelectorAll('.week-days-strip .week-day-tile').forEach(el => {
+          el.addEventListener('click', () => {
+            const d = el.dataset.date;
+            captureCurrentInputs();
+            persistDraft();
+            save();
+            closeSheet();
+            setTimeout(() => openDay(d, () => openWeekReview(monday)), 180);
+          });
+        });
+
+        // Color-option taps (step 1)
+        sheet.querySelectorAll('.color-option').forEach(el => {
+          el.addEventListener('click', () => {
+            sheet.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            draft.chosen = el.dataset.color;
+          });
+        });
+      }
+
+      function renderStep() {
+        host.innerHTML = stepHTML();
+        wireStep();
+        const ta = sheet.querySelector('#wt-text');
+        if (ta) setTimeout(() => ta.focus(), 60);
+      }
+
+      openSheet(`<div id="wt-host"></div>`);
+      const host = sheet.querySelector('#wt-host');
+      renderStep();
+    }
   }
 
   // --- Day sheet -----------------------------------------------------------
@@ -9462,7 +9792,6 @@
   document.getElementById('open-guide').addEventListener('click', openGuide);
   document.getElementById('open-quote').addEventListener('click', () => openQuote());
   document.getElementById('open-word').addEventListener('click', () => openWord());
-  document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
   document.getElementById('open-workouts').addEventListener('click', openWorkouts);
   document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
