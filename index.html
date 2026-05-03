@@ -51,9 +51,15 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
+    /* The first image (noise) sits on top and multiplies into the radial
+       glows underneath, giving the whole surface a subtle newsprint
+       grain. The other layers are unchanged. */
     background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/></svg>"),
       radial-gradient(ellipse 720px 360px at 50% -120px, var(--warm-glow), transparent 70%),
       radial-gradient(ellipse 600px 300px at 100% 8%, rgba(107, 143, 113, 0.10), transparent 70%);
+    background-size: 220px 220px, auto, auto;
+    background-blend-mode: multiply, normal, normal;
     background-attachment: fixed;
   }
 
@@ -220,6 +226,21 @@
     color: var(--green-deep);
   }
   .check-item.on .tick::after { content: '✓'; }
+
+  /* Tick stamp — JS adds .just-checked for ~280ms on the off→on
+     transition. Spring-y back-out timing function makes it feel like
+     pressing a real seal rather than a dialog confirmation. */
+  .check-item.just-checked .tick {
+    animation: tickStamp 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes tickStamp {
+    0%   { transform: scale(0.6) rotate(-12deg); }
+    60%  { transform: scale(1.18) rotate(8deg); }
+    100% { transform: scale(1)    rotate(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .check-item.just-checked .tick { animation: none; }
+  }
   .check-item .hname { flex: 1; }
   .check-item .streak {
     margin-left: 6px;
@@ -530,6 +551,22 @@
     border-color: var(--green-deep);
     color: #F8F1DD;
   }
+
+  /* Mood scale — each dot tinted along terra → ochre → soft → leaf →
+     deep so the spectrum reads at a glance, even before tapping. The
+     unselected tint is faint (the surface should still feel quiet);
+     selected pops to the full colour. */
+  .mood-dot[data-mood="1"] { background: rgba(184, 108, 90, 0.16); border-color: rgba(184, 108, 90, 0.38); }
+  .mood-dot[data-mood="2"] { background: rgba(201, 163, 91, 0.16); border-color: rgba(201, 163, 91, 0.38); }
+  .mood-dot[data-mood="3"] { background: rgba(140, 130, 100, 0.14); border-color: rgba(140, 130, 100, 0.38); }
+  .mood-dot[data-mood="4"] { background: rgba(107, 143, 113, 0.18); border-color: rgba(107, 143, 113, 0.42); }
+  .mood-dot[data-mood="5"] { background: rgba(45,   74,  62, 0.20); border-color: rgba(45,   74,  62, 0.55); }
+
+  .mood-dot[data-mood="1"].selected { background: var(--terracotta); border-color: var(--terracotta); color: #F8F1DD; }
+  .mood-dot[data-mood="2"].selected { background: var(--ochre);      border-color: var(--ochre);      color: #F8F1DD; }
+  .mood-dot[data-mood="3"].selected { background: var(--ink-soft);   border-color: var(--ink-soft);   color: #F8F1DD; }
+  .mood-dot[data-mood="4"].selected { background: var(--green-leaf); border-color: var(--green-leaf); color: #F8F1DD; }
+  .mood-dot[data-mood="5"].selected { background: var(--green-deep); border-color: var(--green-deep); color: #F8F1DD; }
   /* One-shot bounce when a mood is freshly selected. JS adds .bounce
      for a single tick; the animation runs once and the class is removed. */
   .mood-dot.bounce { animation: moodBounce 200ms ease-out; }
@@ -774,6 +811,8 @@
     letter-spacing: 0.14em;
     color: var(--green-leaf);
     margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(201, 163, 91, 0.22);
     font-weight: 500;
     display: flex;
     justify-content: space-between;
@@ -3924,6 +3963,11 @@
   // --- Cloud sync config ---------------------------------------------------
   const SUPABASE_URL = 'https://ejbmsfptfgkvkaitwjak.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_ttRo1JSqfBk4QJoTgndB7A_Rkj5Z7Mx';
+  // Canonical production URL the magic-link emails should redirect back to.
+  // This must also be added to Supabase → Authentication → URL Configuration
+  // → Site URL and Additional Redirect URLs, otherwise Supabase ignores
+  // whatever we send here and falls back to its configured Site URL.
+  const PRODUCTION_URL = 'https://beebzoo.github.io/Caprisun/';
   const sb = (window.supabase && window.supabase.createClient)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -4498,13 +4542,25 @@
       const send = async () => {
         const email = (input.value || '').trim();
         if (!email || !email.includes('@')) { warn.textContent = 'Enter a valid email.'; return; }
+        // The magic link is going to be opened from a different device or
+        // browser session than the one requesting it (typically: tap link
+        // in mail app, lands in default browser). So we never use
+        // window.location.origin — that bakes localhost or a stale dev
+        // URL into emails. Always send the canonical production URL,
+        // unless we're explicitly previewing on localhost (where the
+        // local-only redirect at least works for that machine).
+        const host = window.location.hostname;
+        const isLocalPreview = host === 'localhost' || host === '127.0.0.1';
+        const redirectTo = isLocalPreview
+          ? (window.location.origin + window.location.pathname)
+          : PRODUCTION_URL;
         sendBtn.disabled = true;
         sendBtn.textContent = 'Sending…';
         warn.textContent = '';
         try {
           const { error } = await sb.auth.signInWithOtp({
             email,
-            options: { emailRedirectTo: window.location.origin + window.location.pathname },
+            options: { emailRedirectTo: redirectTo },
           });
           if (error) throw error;
           body.innerHTML = `
@@ -5662,12 +5718,21 @@
       btn.addEventListener('click', () => {
         const k = btn.dataset.habit;
         const cur = state.habits[iso] || {};
+        const wasOff = !cur[k];
         if (cur[k]) delete cur[k];
         else cur[k] = true;
         if (Object.keys(cur).length) state.habits[iso] = cur;
         else delete state.habits[iso];
         save();
         renderChecklist();
+        // Stamp animation only on the off → on transition. Untick is silent.
+        if (wasOff) {
+          const fresh = container.querySelector(`.check-item[data-habit="${k}"]`);
+          if (fresh) {
+            fresh.classList.add('just-checked');
+            setTimeout(() => fresh.classList.remove('just-checked'), 320);
+          }
+        }
       });
     });
 
