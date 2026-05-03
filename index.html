@@ -298,7 +298,8 @@
     gap: 8px;
   }
   .todo-add input[type="date"] {
-    flex: 1;
+    margin-top: 8px;
+    width: 100%;
     padding: 10px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -310,7 +311,73 @@
     box-shadow: 0 1px 2px rgba(74, 56, 28, 0.04);
   }
   .todo-add input[type="date"]:focus { outline: none; border-color: var(--border-strong); color: var(--ink); }
-  .todo-add-btn { white-space: nowrap; }
+  .todo-add-btn { white-space: nowrap; width: 100%; }
+
+  .todo-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .todo-chips .chip {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    background: var(--surface);
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .todo-chips .chip:hover { border-color: var(--border-strong); color: var(--ink); }
+  .todo-chips .chip.active {
+    background: var(--green-deep);
+    color: #F8F1DD;
+    border-color: var(--green-deep);
+  }
+
+  .todo-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 10px;
+  }
+  .todo-filters .chip {
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--ink-faint);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .todo-filters .chip:hover { color: var(--ink-soft); border-color: var(--border-strong); }
+  .todo-filters .chip.active {
+    background: var(--green-deep);
+    color: #F8F1DD;
+    border-color: var(--green-deep);
+  }
+
+  .todo-item .ttags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-left: 4px;
+  }
+  .todo-item .ttag {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--green-leaf);
+    background: rgba(79, 122, 85, 0.10);
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
 
   .todo-list { display: grid; gap: 6px; }
   .todo-empty {
@@ -774,6 +841,42 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 6px;
+  }
+
+  /* Slim pinned chain — header anchor */
+  .chain-pin {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    margin-top: 18px;
+  }
+  .chain-pin button {
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    background: var(--border);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .chain-pin button:hover:not(:disabled) { transform: translateY(-1px); }
+  .chain-pin button:disabled { cursor: default; }
+  .chain-pin button.deep   { background: var(--green-deep); }
+  .chain-pin button.soft   { background: var(--green-soft); }
+  .chain-pin button.ochre  { background: var(--ochre); }
+  .chain-pin button.terra  { background: var(--terracotta); }
+  .chain-pin button.blank  { background: var(--surface-2); }
+  .chain-pin button.pre-start { background: var(--surface-2); opacity: 0.45; }
+  .chain-pin button.current {
+    background: transparent;
+    border: 1px dashed var(--green-deep);
+  }
+  .chain-pin button.current.ready {
+    background: repeating-linear-gradient(
+      45deg,
+      transparent 0 4px,
+      rgba(45, 74, 62, 0.10) 4px 8px
+    );
   }
 
   .week {
@@ -3208,6 +3311,7 @@
     <header>
       <h1 class="day-name" id="day-name">Tuesday</h1>
       <div class="day-date" id="date"></div>
+      <div class="chain-pin" id="chain-pin" aria-label="The chain — last 8 weeks"></div>
       <p class="greeting">
         <span id="greeting">Good morning.</span>
         <span class="greet-icons" aria-hidden="true">
@@ -3297,11 +3401,24 @@
       <p class="section-label"><span>To-do</span><span id="todo-summary"></span></p>
       <div class="todo-add">
         <input id="todo-text" type="text" maxlength="120" placeholder="Add a to-do (e.g. Call dentist)" />
+        <div class="todo-chips" id="todo-when-chips" role="group" aria-label="When">
+          <button type="button" class="chip" data-when="today">Today</button>
+          <button type="button" class="chip" data-when="tomorrow">Tomorrow</button>
+          <button type="button" class="chip" data-when="week">This week</button>
+          <button type="button" class="chip" data-when="pick">Pick date…</button>
+        </div>
+        <input id="todo-due" type="date" aria-label="Pick deadline" style="display:none" />
+        <div class="todo-chips" id="todo-tag-chips" role="group" aria-label="Where">
+          <button type="button" class="chip" data-tag="centrum">@centrum</button>
+          <button type="button" class="chip" data-tag="thuis">@thuis</button>
+          <button type="button" class="chip" data-tag="uni">@uni</button>
+          <button type="button" class="chip" data-tag="gym">@gym</button>
+        </div>
         <div class="todo-add-row">
-          <input id="todo-due" type="date" aria-label="Optional deadline" />
           <button class="btn btn-primary todo-add-btn" id="todo-add-btn">Add</button>
         </div>
       </div>
+      <div class="todo-filters" id="todo-filters" style="display:none"></div>
       <div class="todo-list" id="todo-list"></div>
       <details class="todo-done-toggle" id="todo-done-toggle" style="display:none">
         <summary><span id="todo-done-summary">Done</span></summary>
@@ -3702,6 +3819,14 @@
 
   // Spaced repetition intervals (days). Stage 0 → review in 1 day, stage 5 → 30 days.
   const SRS_INTERVALS = [1, 2, 4, 8, 16, 30];
+
+  // Cap new-word introductions when the review queue is overloaded.
+  // Standard Anki-style practice: clear what's due before adding more.
+  const SRS_NEW_GATE_DUE = 10;
+
+  function totalDueCount() {
+    return dueDeckEntries(state.wordDeck).length + dueDeckEntries(state.quoteDeck).length;
+  }
 
   let state = load();
 
@@ -4193,9 +4318,32 @@
 
   const WEEKS_SHOWN = 8;
 
+  function buildWeekButton(monday, { beforeStart, isRightmost, color, pre, slim }) {
+    const btn = document.createElement('button');
+    btn.className = slim ? '' : 'week';
+    if (beforeStart) {
+      btn.classList.add('pre-start');
+      btn.disabled = true;
+    } else if (isRightmost) {
+      btn.classList.add('current');
+      if (!pre && new Date().getDay() === 0) btn.classList.add('ready');
+      btn.addEventListener('click', () => openWeekReview(monday));
+    } else if (color) {
+      btn.classList.add(color);
+      btn.addEventListener('click', () => openWeekReview(monday));
+    } else {
+      btn.classList.add('blank');
+      btn.addEventListener('click', () => openWeekReview(monday));
+    }
+    btn.setAttribute('aria-label', `Week of ${monthShort(monday)} ${monday.getDate()}`);
+    return btn;
+  }
+
   function renderChain() {
     const chain = document.getElementById('chain');
+    const pin = document.getElementById('chain-pin');
     chain.innerHTML = '';
+    if (pin) pin.innerHTML = '';
     const thisMonday = startOfWeek(new Date());
     const startMonday = getStartMonday();
     const pre = isPreStart();
@@ -4207,27 +4355,9 @@
       const color = state.weekColors[iso];
       const isRightmost = i === 0;
       const beforeStart = monday < startMonday;
-
-      const btn = document.createElement('button');
-      btn.className = 'week';
-
-      if (beforeStart) {
-        btn.classList.add('pre-start');
-        btn.disabled = true;
-      } else if (isRightmost) {
-        btn.classList.add('current');
-        if (!pre && new Date().getDay() === 0) btn.classList.add('ready');
-        btn.addEventListener('click', () => openWeekReview(monday));
-      } else if (color) {
-        btn.classList.add(color);
-        btn.addEventListener('click', () => openWeekReview(monday));
-      } else {
-        btn.classList.add('blank');
-        btn.addEventListener('click', () => openWeekReview(monday));
-      }
-
-      btn.setAttribute('aria-label', `Week of ${monthShort(monday)} ${monday.getDate()}`);
-      chain.appendChild(btn);
+      const opts = { beforeStart, isRightmost, color, pre };
+      chain.appendChild(buildWeekButton(monday, { ...opts, slim: false }));
+      if (pin) pin.appendChild(buildWeekButton(monday, { ...opts, slim: true }));
     }
 
     // Left-edge label
@@ -4626,32 +4756,68 @@
     return { active, done };
   }
 
+  let todoFilter = null;
+
   function renderTodos() {
     const list = document.getElementById('todo-list');
     const summaryEl = document.getElementById('todo-summary');
     const doneToggle = document.getElementById('todo-done-toggle');
     const doneList = document.getElementById('todo-done-list');
     const doneSummary = document.getElementById('todo-done-summary');
+    const filtersEl = document.getElementById('todo-filters');
     if (!list) return;
 
     const { active, done } = sortedTodos(state.todos || []);
 
-    if (active.length === 0) {
-      list.innerHTML = `<div class="todo-empty">Nothing on the list. Add one above.</div>`;
+    const usedTags = Array.from(new Set(active.flatMap((t) => t.tags || []))).sort();
+    if (filtersEl) {
+      if (usedTags.length === 0) {
+        filtersEl.style.display = 'none';
+        filtersEl.innerHTML = '';
+        if (todoFilter !== null) todoFilter = null;
+      } else {
+        if (todoFilter && !usedTags.includes(todoFilter)) todoFilter = null;
+        filtersEl.style.display = '';
+        filtersEl.innerHTML = [
+          `<button type="button" class="chip${todoFilter === null ? ' active' : ''}" data-filter="">All</button>`,
+          ...usedTags.map((tg) =>
+            `<button type="button" class="chip${todoFilter === tg ? ' active' : ''}" data-filter="${tg}">@${tg}</button>`
+          ),
+        ].join('');
+        filtersEl.querySelectorAll('[data-filter]').forEach((el) => {
+          el.addEventListener('click', () => {
+            todoFilter = el.dataset.filter || null;
+            renderTodos();
+          });
+        });
+      }
+    }
+
+    const visible = todoFilter
+      ? active.filter((t) => (t.tags || []).includes(todoFilter))
+      : active;
+
+    if (visible.length === 0) {
+      list.innerHTML = active.length === 0
+        ? `<div class="todo-empty">Nothing on the list. Add one above.</div>`
+        : `<div class="todo-empty">Nothing tagged @${todoFilter}.</div>`;
     } else {
-      list.innerHTML = active.map((t) => {
+      list.innerHTML = visible.map((t) => {
         const status = todoStatus(t.due, false);
         const dueLabel = formatDue(t.due, status);
         const cls = ['todo-item'];
         if (status === 'overdue') cls.push('overdue');
         else if (status === 'today') cls.push('today-due');
+        const tagsHTML = (t.tags || []).length
+          ? `<span class="ttags">${(t.tags || []).map((tg) => `<span class="ttag">@${tg}</span>`).join('')}</span>`
+          : '';
         const dueHTML = dueLabel
           ? `<span class="tdue ${status === 'soon' || status === 'today' || status === 'overdue' ? status : ''}">${dueLabel}</span>`
           : '<span></span>';
         return `
           <div class="${cls.join(' ')}" data-id="${t.id}">
             <button class="ttick" data-action="toggle" aria-label="Mark done"></button>
-            <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+            <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}${tagsHTML}</span>
             ${dueHTML}
             <button class="trm" data-action="remove" aria-label="Remove">×</button>
           </div>
@@ -4710,6 +4876,35 @@
     renderTodos();
   }
 
+  function dueFromWhen(when) {
+    const today = new Date();
+    if (when === 'today') return toISODate(today);
+    if (when === 'tomorrow') return toISODate(addDays(today, 1));
+    if (when === 'week') {
+      // Sunday of the current week (week starts Monday).
+      const monday = startOfWeek(today);
+      return toISODate(addDays(monday, 6));
+    }
+    return null;
+  }
+
+  function selectedWhenChip() {
+    const el = document.querySelector('#todo-when-chips .chip.active');
+    return el ? el.dataset.when : null;
+  }
+
+  function selectedTagChips() {
+    return Array.from(document.querySelectorAll('#todo-tag-chips .chip.active'))
+      .map((el) => el.dataset.tag);
+  }
+
+  function clearTodoChipsAndDate() {
+    document.querySelectorAll('#todo-when-chips .chip.active').forEach((el) => el.classList.remove('active'));
+    document.querySelectorAll('#todo-tag-chips .chip.active').forEach((el) => el.classList.remove('active'));
+    const dueEl = document.getElementById('todo-due');
+    if (dueEl) { dueEl.value = ''; dueEl.style.display = 'none'; }
+  }
+
   function addTodoFromInputs() {
     const textEl = document.getElementById('todo-text');
     const dueEl = document.getElementById('todo-due');
@@ -4720,19 +4915,24 @@
       setTimeout(() => { textEl.style.borderColor = ''; }, 500);
       return;
     }
-    const due = (dueEl?.value || '').trim() || null;
+    const when = selectedWhenChip();
+    let due = null;
+    if (when === 'pick') due = (dueEl?.value || '').trim() || null;
+    else if (when) due = dueFromWhen(when);
+    const tags = selectedTagChips();
     if (!state.todos) state.todos = [];
     state.todos.push({
       id: `todo_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
       text,
       due,
+      tags,
       done: false,
       createdAt: new Date().toISOString(),
       doneAt: null,
     });
     save();
     textEl.value = '';
-    if (dueEl) dueEl.value = '';
+    clearTodoChipsAndDate();
     textEl.focus();
     renderTodos();
   }
@@ -4741,6 +4941,7 @@
     const addBtn = document.getElementById('todo-add-btn');
     const textEl = document.getElementById('todo-text');
     const clearBtn = document.getElementById('todo-clear');
+    const dueEl = document.getElementById('todo-due');
     if (addBtn) addBtn.addEventListener('click', addTodoFromInputs);
     if (textEl) {
       textEl.addEventListener('keydown', (e) => {
@@ -4754,6 +4955,28 @@
         renderTodos();
       });
     }
+    document.querySelectorAll('#todo-when-chips .chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const wasActive = chip.classList.contains('active');
+        document.querySelectorAll('#todo-when-chips .chip').forEach((c) => c.classList.remove('active'));
+        if (!wasActive) chip.classList.add('active');
+        if (dueEl) {
+          if (chip.dataset.when === 'pick' && !wasActive) {
+            dueEl.style.display = '';
+            dueEl.focus();
+            if (typeof dueEl.showPicker === 'function') {
+              try { dueEl.showPicker(); } catch {}
+            }
+          } else {
+            dueEl.style.display = 'none';
+            dueEl.value = '';
+          }
+        }
+      });
+    });
+    document.querySelectorAll('#todo-tag-chips .chip').forEach((chip) => {
+      chip.addEventListener('click', () => chip.classList.toggle('active'));
+    });
   }
 
   function renderChecklist() {
@@ -5999,6 +6222,18 @@
         </div>
       `;
     }
+    const due = totalDueCount();
+    if (due >= SRS_NEW_GATE_DUE) {
+      return `
+        <div class="sheet-section">
+          <p class="sheet-section-label">Reviews first</p>
+          <p class="capture-help">You have <strong>${due}</strong> reviews due. Clear those before adding new words — otherwise the deck balloons and the queue becomes the reason you stop reviewing. Come back to <em>${w.word}</em> once you're caught up.</p>
+          <div class="sheet-actions" style="margin-top:8px">
+            <button class="btn btn-primary" id="w-go-review">Review now</button>
+          </div>
+        </div>
+      `;
+    }
     return `
       <div class="sheet-section">
         <p class="sheet-section-label">Make it yours</p>
@@ -6026,6 +6261,13 @@
       };
       wild.addEventListener('click', toggle);
       if (label) label.addEventListener('click', toggle);
+    }
+    const goReview = sheet.querySelector('#w-go-review');
+    if (goReview) {
+      goReview.addEventListener('click', () => {
+        closeSheet();
+        setTimeout(() => openReview(), 120);
+      });
     }
     const addBtn = sheet.querySelector('#w-add');
     if (addBtn) {
