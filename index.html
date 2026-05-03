@@ -2399,6 +2399,50 @@
   .week8-banner .w8-action:hover { filter: brightness(1.05); }
   .week8-banner.dismissed { display: none; }
 
+  /* Sync staleness warning — shown when this device hasn't pulled from
+     the cloud in over 24 hours. Last-writer-wins means another device's
+     edits could overwrite anything done here without warning. */
+  .sync-stale-banner {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--terracotta);
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .sync-stale-banner .ssb-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .sync-stale-banner .ssb-eyebrow {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--terracotta);
+    font-weight: 600;
+  }
+  .sync-stale-banner .ssb-line {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .sync-stale-banner button {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--terracotta);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 500;
+    border: 0;
+  }
+  .sync-stale-banner button:disabled { opacity: 0.6; }
+
   /* "Missed twice" prompts — gentle reminders when a habit has been
      missed two times in a row (defend the slot before it's three). */
   .missed-prompt {
@@ -3621,6 +3665,24 @@
       <p class="motivation" id="motivation"></p>
     </header>
 
+    <div id="sync-stale-slot"></div>
+
+    <section id="chain-section">
+      <p class="section-label">
+        <span>The chain</span>
+        <button id="open-year">View year</button>
+      </p>
+      <div class="chain" id="chain"></div>
+      <div class="chain-legend">
+        <span id="chain-start-label">8 weeks ago</span>
+        <span>this week</span>
+      </div>
+      <div id="seal-slot"></div>
+      <div id="flowers-slot"></div>
+      <div id="week8-slot"></div>
+      <div id="missed-twice-slot"></div>
+    </section>
+
     <section id="morning-ritual-section">
       <p class="section-label"><span>Morning ritual</span></p>
 
@@ -3724,27 +3786,7 @@
           <span class="meyebrow">Word of the day</span>
           <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
         </button>
-        <button class="moment-tile" id="open-quiz">
-          <span class="meyebrow">Geography</span>
-          <span class="mtitle" id="quiz-preview">One capital. Four options.</span>
-        </button>
       </div>
-    </section>
-
-    <section id="chain-section">
-      <p class="section-label">
-        <span>The chain</span>
-        <button id="open-year">View year</button>
-      </p>
-      <div class="chain" id="chain"></div>
-      <div class="chain-legend">
-        <span id="chain-start-label">8 weeks ago</span>
-        <span>this week</span>
-      </div>
-      <div id="seal-slot"></div>
-      <div id="flowers-slot"></div>
-      <div id="week8-slot"></div>
-      <div id="missed-twice-slot"></div>
     </section>
 
     <section id="today-section">
@@ -3884,31 +3926,35 @@
     return streak;
   }
 
+  // tone: 'generative' (forward, action, agency), 'neutral' (reflective,
+  // philosophical without weight), or 'heavy' (existential, doom-adjacent).
+  // Mon/Tue draw from generative-only — never start the work week with
+  // "Hell is other people."
   const QUOTES = [
-    { text: "The obstacle is the way.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Impediments to action become the path forward. What stands in the way, rightly met, reveals the way." },
-    { text: "The unexamined life is not worth living.", author: "Socrates", year: "399 BC", source: "Plato's Apology", meaning: "Living without reflection — without questioning your beliefs and choices — strips life of its real value. The asking is the living." },
-    { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", year: "1889", source: "Twilight of the Idols", meaning: "Meaning makes suffering bearable. Comfort without purpose crushes us; purpose makes even hardship endurable." },
-    { text: "We suffer more often in imagination than in reality.", author: "Seneca", year: "c. 65 AD", source: "Letters from a Stoic", meaning: "The mind rehearses disasters that rarely arrive. Most of what you dread, you never actually live through." },
-    { text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Freedom sits in the response, not the circumstance. The world happens; how you meet it is yours." },
-    { text: "No man ever steps in the same river twice, for it's not the same river and he's not the same man.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Change is the one constant. The river has moved and so have you. Don't expect to find the same ground twice." },
-    { text: "I think, therefore I am.", author: "René Descartes", year: "1637", source: "Discourse on the Method", meaning: "The one thing you can't doubt is the fact that you're doubting. Your existence is certain even when everything else is in question." },
-    { text: "Man is condemned to be free.", author: "Jean-Paul Sartre", year: "1943", source: "Being and Nothingness", meaning: "We have no fixed nature. We are forever responsible for who we become — whether we want the responsibility or not." },
-    { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Before understanding the world, understand your own motives, patterns, and limits. Self-knowledge is the foundation." },
-    { text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus", year: "c. 108 AD", source: "Discourses", meaning: "Events are neutral. Your judgment of them is what creates suffering or acceptance." },
-    { text: "Man is born free, and everywhere he is in chains.", author: "Jean-Jacques Rousseau", year: "1762", source: "The Social Contract", meaning: "We arrive with an innate freedom, but society and its institutions bind us. The question is which chains are worth keeping." },
-    { text: "The heart has its reasons of which reason knows nothing.", author: "Blaise Pascal", year: "1670", source: "Pensées", meaning: "Some forms of knowing — faith, intuition, love — operate outside pure logic, and are no less true for it." },
-    { text: "Whereof one cannot speak, thereof one must be silent.", author: "Ludwig Wittgenstein", year: "1921", source: "Tractatus Logico-Philosophicus", meaning: "Language has limits. Some truths can only be shown — by how you live — not said." },
-    { text: "Do not spoil what you have by desiring what you have not.", author: "Epicurus", year: "c. 300 BC", source: "Letters", meaning: "The present is already full. Craving what's absent is how you ruin what's already here." },
-    { text: "Happiness depends upon ourselves.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Flourishing is a matter of character and action, not circumstance. It's built, not given." },
-    { text: "God is dead.", author: "Friedrich Nietzsche", year: "1882", source: "The Gay Science", meaning: "With the collapse of shared religious belief, we must create our own values. A challenge, not a celebration." },
-    { text: "Hell is other people.", author: "Jean-Paul Sartre", year: "1944", source: "No Exit", meaning: "We can't escape being seen by others, and their judgment shapes our sense of self. Sometimes unbearably." },
-    { text: "The only true wisdom is in knowing you know nothing.", author: "Socrates", year: "c. 399 BC", source: "Plato's Apology", meaning: "Real wisdom begins with admitting the limits of what you know. Certainty is often the enemy of understanding." },
-    { text: "Man is the measure of all things.", author: "Protagoras", year: "c. 450 BC", source: "via Plato", meaning: "Truth is relative to the observer. There is no view from nowhere — every perspective is situated." },
-    { text: "It is not death that a man should fear, but he should fear never beginning to live.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Mortality isn't the real tragedy. The real tragedy is arriving at death without ever fully showing up." },
-    { text: "Virtue is its own reward.", author: "Cicero", year: "c. 45 BC", source: "De Finibus", meaning: "Acting well isn't a transaction for future gain. Doing the right thing is already the thing worth doing." },
-    { text: "A man who views the world the same at fifty as he did at twenty has wasted thirty years of his life.", author: "Muhammad Ali", year: "1975", source: "interview (often cited as philosophical)", meaning: "Change is growth. Holding the same shape for decades isn't constancy — it's stagnation." },
-    { text: "One cannot step in the same river twice.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Reality is flux. The world you returned to isn't the one you left." },
-    { text: "To be is to do.", author: "Jean-Paul Sartre", year: "1943", source: "paraphrase of Being and Nothingness", meaning: "You are not your intentions or self-image. You are the sum of what you actually do." },
+    { tone: 'generative', text: "The obstacle is the way.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Impediments to action become the path forward. What stands in the way, rightly met, reveals the way." },
+    { tone: 'neutral',    text: "The unexamined life is not worth living.", author: "Socrates", year: "399 BC", source: "Plato's Apology", meaning: "Living without reflection — without questioning your beliefs and choices — strips life of its real value. The asking is the living." },
+    { tone: 'generative', text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", year: "1889", source: "Twilight of the Idols", meaning: "Meaning makes suffering bearable. Comfort without purpose crushes us; purpose makes even hardship endurable." },
+    { tone: 'generative', text: "We suffer more often in imagination than in reality.", author: "Seneca", year: "c. 65 AD", source: "Letters from a Stoic", meaning: "The mind rehearses disasters that rarely arrive. Most of what you dread, you never actually live through." },
+    { tone: 'generative', text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Freedom sits in the response, not the circumstance. The world happens; how you meet it is yours." },
+    { tone: 'neutral',    text: "No man ever steps in the same river twice, for it's not the same river and he's not the same man.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Change is the one constant. The river has moved and so have you. Don't expect to find the same ground twice." },
+    { tone: 'neutral',    text: "I think, therefore I am.", author: "René Descartes", year: "1637", source: "Discourse on the Method", meaning: "The one thing you can't doubt is the fact that you're doubting. Your existence is certain even when everything else is in question." },
+    { tone: 'heavy',      text: "Man is condemned to be free.", author: "Jean-Paul Sartre", year: "1943", source: "Being and Nothingness", meaning: "We have no fixed nature. We are forever responsible for who we become — whether we want the responsibility or not." },
+    { tone: 'generative', text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Before understanding the world, understand your own motives, patterns, and limits. Self-knowledge is the foundation." },
+    { tone: 'generative', text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus", year: "c. 108 AD", source: "Discourses", meaning: "Events are neutral. Your judgment of them is what creates suffering or acceptance." },
+    { tone: 'heavy',      text: "Man is born free, and everywhere he is in chains.", author: "Jean-Jacques Rousseau", year: "1762", source: "The Social Contract", meaning: "We arrive with an innate freedom, but society and its institutions bind us. The question is which chains are worth keeping." },
+    { tone: 'neutral',    text: "The heart has its reasons of which reason knows nothing.", author: "Blaise Pascal", year: "1670", source: "Pensées", meaning: "Some forms of knowing — faith, intuition, love — operate outside pure logic, and are no less true for it." },
+    { tone: 'neutral',    text: "Whereof one cannot speak, thereof one must be silent.", author: "Ludwig Wittgenstein", year: "1921", source: "Tractatus Logico-Philosophicus", meaning: "Language has limits. Some truths can only be shown — by how you live — not said." },
+    { tone: 'generative', text: "Do not spoil what you have by desiring what you have not.", author: "Epicurus", year: "c. 300 BC", source: "Letters", meaning: "The present is already full. Craving what's absent is how you ruin what's already here." },
+    { tone: 'generative', text: "Happiness depends upon ourselves.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Flourishing is a matter of character and action, not circumstance. It's built, not given." },
+    { tone: 'heavy',      text: "God is dead.", author: "Friedrich Nietzsche", year: "1882", source: "The Gay Science", meaning: "With the collapse of shared religious belief, we must create our own values. A challenge, not a celebration." },
+    { tone: 'heavy',      text: "Hell is other people.", author: "Jean-Paul Sartre", year: "1944", source: "No Exit", meaning: "We can't escape being seen by others, and their judgment shapes our sense of self. Sometimes unbearably." },
+    { tone: 'neutral',    text: "The only true wisdom is in knowing you know nothing.", author: "Socrates", year: "c. 399 BC", source: "Plato's Apology", meaning: "Real wisdom begins with admitting the limits of what you know. Certainty is often the enemy of understanding." },
+    { tone: 'neutral',    text: "Man is the measure of all things.", author: "Protagoras", year: "c. 450 BC", source: "via Plato", meaning: "Truth is relative to the observer. There is no view from nowhere — every perspective is situated." },
+    { tone: 'generative', text: "It is not death that a man should fear, but he should fear never beginning to live.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Mortality isn't the real tragedy. The real tragedy is arriving at death without ever fully showing up." },
+    { tone: 'generative', text: "Virtue is its own reward.", author: "Cicero", year: "c. 45 BC", source: "De Finibus", meaning: "Acting well isn't a transaction for future gain. Doing the right thing is already the thing worth doing." },
+    { tone: 'generative', text: "A man who views the world the same at fifty as he did at twenty has wasted thirty years of his life.", author: "Muhammad Ali", year: "1975", source: "interview (often cited as philosophical)", meaning: "Change is growth. Holding the same shape for decades isn't constancy — it's stagnation." },
+    { tone: 'neutral',    text: "One cannot step in the same river twice.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Reality is flux. The world you returned to isn't the one you left." },
+    { tone: 'generative', text: "To be is to do.", author: "Jean-Paul Sartre", year: "1943", source: "paraphrase of Being and Nothingness", meaning: "You are not your intentions or self-image. You are the sum of what you actually do." },
   ];
 
   const WORDS = [
@@ -4173,13 +4219,33 @@
 
   let currentUser = null;
   let syncStatus = sb ? 'signed-out' : 'disabled'; // signed-out | syncing | synced | offline | error | disabled
-  let lastSyncAt = null;
+  const LAST_SYNC_KEY = 'caprisun.lastSyncAt';
+  let lastSyncAt = (() => {
+    try {
+      const raw = localStorage.getItem(LAST_SYNC_KEY);
+      return raw ? new Date(raw) : null;
+    } catch { return null; }
+  })();
   let pushTimer = null;
+  const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 
   function setSyncStatus(s) {
     syncStatus = s;
-    if (s === 'synced') lastSyncAt = new Date();
+    if (s === 'synced') {
+      lastSyncAt = new Date();
+      try { localStorage.setItem(LAST_SYNC_KEY, lastSyncAt.toISOString()); } catch {}
+    }
     renderSyncSection();
+    renderSyncStaleBanner();
+  }
+
+  // True only when the user is signed in and hasn't actually completed a
+  // round-trip with the cloud in over 24 hours. Without sign-in we never
+  // warn — there's no shared state to be stale against.
+  function isSyncStale() {
+    if (!sb || !currentUser) return false;
+    if (!lastSyncAt) return true;
+    return (Date.now() - lastSyncAt.getTime()) > STALE_AFTER_MS;
   }
 
   function schedulePush() {
@@ -4259,6 +4325,36 @@
         currentUser = null;
         setSyncStatus('signed-out');
       }
+    });
+  }
+
+  // Cheap hedge against the last-writer-wins merge model: if this device
+  // hasn't pulled from the cloud in >24h, show a banner above the chain
+  // so the user sees the foot-gun before editing. Doesn't block edits;
+  // a "Pull now" button triggers a fresh round-trip.
+  function renderSyncStaleBanner() {
+    const slot = document.getElementById('sync-stale-slot');
+    if (!slot) return;
+    if (!isSyncStale()) {
+      slot.innerHTML = '';
+      return;
+    }
+    const last = lastSyncAt ? timeAgo(lastSyncAt) : 'never';
+    slot.innerHTML = `
+      <div class="sync-stale-banner">
+        <div class="ssb-text">
+          <p class="ssb-eyebrow">This device may be stale</p>
+          <p class="ssb-line">Last synced ${last}. Edits made here could overwrite newer changes from another device.</p>
+        </div>
+        <button type="button" id="sync-stale-pull">Pull now</button>
+      </div>
+    `;
+    const btn = slot.querySelector('#sync-stale-pull');
+    if (btn) btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Pulling…';
+      await pullFromCloud();
+      renderSyncStaleBanner();
     });
   }
 
@@ -4512,9 +4608,16 @@
     return `Stage ${s + 1} of ${SRS_INTERVALS.length}`;
   }
 
+  // Mon/Tue draw from the generative-only pool; the rest of the week draws
+  // from the full pool. Same seed → same quote on the same day, so the
+  // splash and the home-page tile stay in sync.
   function pickQuoteForDate(date) {
     const seed = daySeed(date);
-    return QUOTES[seed % QUOTES.length];
+    const dow = date.getDay(); // 0=Sun, 1=Mon, 2=Tue
+    const pool = (dow === 1 || dow === 2)
+      ? QUOTES.filter((q) => q.tone === 'generative')
+      : QUOTES;
+    return pool[seed % pool.length];
   }
 
   function pickWordForDate(date) {
@@ -6364,6 +6467,24 @@
     const byteLength = new Blob([JSON.stringify(state)]).size;
     const kb = (byteLength / 1024).toFixed(1);
 
+    // Be honest about where this notification will actually fire. The
+    // Notification Triggers API (TimestampTrigger) is Chromium-desktop only;
+    // everywhere else we fall back to in-page setTimeout, which only fires
+    // when the app is already open Sunday afternoon — exactly the case the
+    // reminder is meant for. Don't oversell it.
+    const canSchedule = ('serviceWorker' in navigator) && ('TimestampTrigger' in window);
+    const notifPermission = (typeof Notification !== 'undefined') ? Notification.permission : 'unsupported';
+    let reliabilityHint;
+    if (notifPermission === 'unsupported') {
+      reliabilityHint = 'This browser doesn\'t support notifications.';
+    } else if (notifPermission === 'denied') {
+      reliabilityHint = 'Notifications are blocked in this browser. Enable them in site settings to receive the reminder.';
+    } else if (canSchedule) {
+      reliabilityHint = 'Scheduled in advance — fires reliably on Chromium desktop browsers (Chrome, Edge, Brave).';
+    } else {
+      reliabilityHint = 'Best-effort on this browser: only fires while the app is open Sunday afternoon. iOS PWA, Safari, and Firefox don\'t support scheduled notifications yet.';
+    }
+
     openSheet(`
       <h2>Settings</h2>
       <p class="subtle">Small for now. More later, only if they earn their place.</p>
@@ -6395,7 +6516,8 @@
           <input type="checkbox" id="notif-sunday" ${state.notify && state.notify.sundaySeal ? 'checked' : ''} style="margin-top:3px" />
           <span style="display:flex;flex-direction:column;gap:3px">
             <strong style="font-family:'Fraunces',Georgia,serif;font-size:14px;color:var(--ink)">Sunday seal · 6 PM</strong>
-            <span class="subtle" style="margin:0">A single weekly notification: <em>"It's Sunday. Time to seal the week."</em> No daily nudges, no streak guilt — just the one reminder for the keystone ritual.</span>
+            <span class="subtle" style="margin:0">A single weekly nudge: <em>"It's Sunday. Time to seal the week."</em> No daily reminders, no streak guilt — just this one.</span>
+            <span class="subtle" style="margin:6px 0 0;font-size:11px;color:var(--ink-faint)">${reliabilityHint}</span>
           </span>
         </label>
       </div>
@@ -7110,28 +7232,6 @@
       }
     }
 
-    const todayISO = toISODate(new Date());
-    const prior = state.quizResults[todayISO];
-    const quiz = pickQuizForDate(new Date());
-    const quizTile = document.getElementById('open-quiz');
-    const qzp = document.getElementById('quiz-preview');
-    if (!qzp || !quizTile) return;
-
-    // Clear old badge
-    const oldBadge = quizTile.querySelector('.mbadge');
-    if (oldBadge) oldBadge.remove();
-
-    if (prior) {
-      qzp.textContent = `Capital of ${quiz.country}`;
-      quizTile.classList.add('answered');
-      const badge = document.createElement('span');
-      badge.className = 'mbadge' + (prior.correct ? '' : ' wrong');
-      badge.textContent = prior.correct ? 'Answered correctly' : 'Answered';
-      quizTile.appendChild(badge);
-    } else {
-      qzp.textContent = `Capital of ${quiz.country}?`;
-      quizTile.classList.remove('answered');
-    }
   }
 
   // --- Review (spaced repetition) -----------------------------------------
@@ -9775,6 +9875,7 @@
 
   function renderAll() {
     renderHeader();
+    renderSyncStaleBanner();
     renderMorningRitual();
     renderChecklist();
     renderTodos();
@@ -9796,7 +9897,6 @@
   document.getElementById('open-guide').addEventListener('click', openGuide);
   document.getElementById('open-quote').addEventListener('click', () => openQuote());
   document.getElementById('open-word').addEventListener('click', () => openWord());
-  document.getElementById('open-quiz').addEventListener('click', openQuiz);
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
   document.getElementById('open-workouts').addEventListener('click', openWorkouts);
   document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
