@@ -1761,18 +1761,8 @@
   }
   .quiz-result strong { color: var(--ink); font-weight: 500; }
 
-  /* Practice block */
-  .practice-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-faint);
-    margin: 0 0 8px;
-  }
-  .practice-count { color: var(--ink-soft); letter-spacing: 0.08em; }
+  /* Used by the quiz typed-input mode. (Other practice classes were
+     removed when the 5x drill was cut.) */
   .practice-input {
     width: 100%;
     padding: 12px 14px;
@@ -1791,52 +1781,6 @@
     margin: 8px 0 0;
     font-style: italic;
   }
-  .practice-bar {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
-    margin: 10px 0 0;
-  }
-  .practice-bar span {
-    height: 4px;
-    border-radius: 2px;
-    background: var(--border);
-  }
-  .practice-bar span.on { background: var(--green-soft); }
-  .practice-complete {
-    margin-top: 12px;
-    padding: 14px 16px;
-    border-radius: var(--radius);
-    background: var(--green-deep);
-    color: var(--bg);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .practice-complete .check-circle {
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: var(--bg);
-    color: var(--green-deep);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .practice-complete .label {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 15px;
-  }
-  .practice-complete .reset {
-    margin-left: auto;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.7;
-    color: var(--bg);
-  }
-  .practice-complete .reset:hover { opacity: 1; }
 
   /* Archive */
   .archive-list {
@@ -4131,11 +4075,15 @@
    *   quoteDeck      { [quote]: { stage, nextReview, lastReview, firstSeen,
    *                               personalNote, usedInWild,
    *                               history: [{ date, rating }] } }
-   *   wordPractice   { 'YYYY-MM-DD': 0..5 }                              5x daily drill counter
-   *   quotePractice  { 'YYYY-MM-DD': 0..5 }
-   *   wordWriting    { [word]: { text, savedAt } }                       free-form writing about a word
    *   seenWords      { [word]: 'YYYY-MM-DD' }                            last shown date
    *   seenQuotes     { [quote]: 'YYYY-MM-DD' }
+   *
+   * Removed in cleanup: state.wordPractice, state.quotePractice (5x typing
+   * drill) and state.wordWriting (free-form writing) — three parallel
+   * learning systems collapsed to one. The deck entry is now the active
+   * production step. Old saved blobs may still carry these keys; load()
+   * migrates wordWriting into wordDeck.personalSentence on first run and
+   * leaves the rest as inert legacy data.
    *
    *   quizStats      { gamesPlayed, questionsSeen, questionsCorrect, bestScore,
    *                    lastScore, lastPlayedAt, byCategory: { [cat]: { seen, correct } } }
@@ -4170,9 +4118,6 @@
     customHabits: [],
     wordDeck: {},
     quoteDeck: {},
-    wordPractice: {},
-    quotePractice: {},
-    wordWriting: {},
     seenWords: {},
     seenQuotes: {},
     quizStats: {
@@ -4203,8 +4148,33 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultState();
-      return { ...defaultState(), ...JSON.parse(raw) };
+      const merged = { ...defaultState(), ...JSON.parse(raw) };
+      return migrateState(merged);
     } catch { return defaultState(); }
+  }
+
+  // One-shot migrations for shapes we've simplified. Each migration is
+  // idempotent and runs before the app is rendered. Don't delete entries
+  // here even when the data is dead; old saved blobs may still carry them
+  // and removing them on read would mean we never have a chance to recover.
+  function migrateState(s) {
+    // Fold legacy state.wordWriting (the standalone "Practice 2 · Write
+    // about it" textarea) into the corresponding deck entry's
+    // personalSentence — only when the deck entry exists and its
+    // personalSentence is empty, so we never clobber a sentence the user
+    // has already chosen as their deck-add line.
+    if (s.wordWriting && s.wordDeck) {
+      for (const word in s.wordWriting) {
+        const w = s.wordWriting[word];
+        const entry = s.wordDeck[word];
+        if (!entry) continue;
+        if (entry.personalSentence && entry.personalSentence.trim()) continue;
+        const text = (w && typeof w.text === 'string') ? w.text.trim() : '';
+        if (!text) continue;
+        entry.personalSentence = text;
+      }
+    }
+    return s;
   }
   function saveLocal() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
@@ -6693,17 +6663,6 @@
 
   // --- Moment: quote & quiz ------------------------------------------------
 
-  // Normalize strings for practice matching: collapse whitespace, lowercase,
-  // strip most punctuation so small differences don't block the drill.
-  function normalizePractice(s) {
-    return (s || '')
-      .toLowerCase()
-      .replace(/[""''‘’“”]/g, '')
-      .replace(/[.,;:!?—\-–()\[\]{}"']/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
   function openQuote(opts) {
     const isToday = !opts || !opts.dateISO;
     const dateISO = isToday ? toISODate(new Date()) : opts.dateISO;
@@ -6718,15 +6677,6 @@
     const deckEntry = state.quoteDeck[q.text];
     const deckHTML = isToday ? renderQuoteDeckSection(q, deckEntry) : '';
 
-    const practiceCount = state.quotePractice[dateISO] || 0;
-    const practiceHTML = isToday ? renderPracticeBlock({
-      target: q.text,
-      count: practiceCount,
-      placeholder: 'Type the quote. Press enter after each attempt.',
-      label: 'Practice writing',
-      longForm: q.text.length > 80,
-    }) : '';
-
     openSheet(`
       <h2>Quote of the day</h2>
       <p class="subtle">${subtitle}</p>
@@ -6735,26 +6685,13 @@
       <p class="quote-meaning-label">What it means</p>
       <p class="quote-meaning">${q.meaning}</p>
       ${deckHTML}
-      ${practiceHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
       </div>
     `);
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
-    if (isToday) {
-      wireQuoteDeckSection(q);
-      wirePractice({
-        target: q.text,
-        getCount: () => state.quotePractice[dateISO] || 0,
-        setCount: (n) => {
-          if (n > 0) state.quotePractice[dateISO] = n;
-          else delete state.quotePractice[dateISO];
-          save();
-        },
-        onChange: renderMomentTiles,
-      });
-    }
+    if (isToday) wireQuoteDeckSection(q);
   }
 
   function renderQuoteDeckSection(q, entry) {
@@ -6778,8 +6715,8 @@
     }
     return `
       <div class="sheet-section">
-        <p class="sheet-section-label">Make it yours</p>
-        <p class="capture-help">Write one line about how this quote lands for you <em>right now</em> — something specific to your life this week. Personal connection is the glue.</p>
+        <p class="sheet-section-label">Write one line about it</p>
+        <p class="capture-help">How does this land for you <em>right now</em> — something specific to your life this week? The note is the deck entry. One real line sticks; passive re-reading fades.</p>
         <textarea class="capture-input" id="q-note" placeholder="What does this bring up for you?"></textarea>
         <p class="capture-warn" id="q-warn"></p>
         <div class="sheet-actions" style="margin-top:8px">
@@ -6830,19 +6767,6 @@
 
     const deckEntry = state.wordDeck[w.word];
     const deckHTML = isToday ? renderWordDeckSection(w, deckEntry) : '';
-
-    const practiceCount = state.wordPractice[dateISO] || 0;
-    const practiceHTML = renderPracticeBlock({
-      target: w.word,
-      count: practiceCount,
-      placeholder: 'Type the word. Press enter after each.',
-      label: 'Practice 1 · Type 5 times',
-      longForm: false,
-    });
-
-    const writingEntry = state.wordWriting[w.word];
-    const writingHTML = renderWordWritingSection(w, writingEntry);
-
     const pastWordsHTML = isToday ? renderPastWordsSection(dateISO) : '';
 
     openSheet(`
@@ -6857,8 +6781,6 @@
       <p class="word-block-label">In a sentence</p>
       <p class="word-example">${w.example}</p>
       ${deckHTML}
-      ${practiceHTML}
-      ${writingHTML}
       ${pastWordsHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
@@ -6867,65 +6789,7 @@
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
 
     if (isToday) wireWordDeckSection(w);
-
-    wirePractice({
-      target: w.word,
-      getCount: () => state.wordPractice[dateISO] || 0,
-      setCount: (n) => {
-        if (n > 0) state.wordPractice[dateISO] = n;
-        else delete state.wordPractice[dateISO];
-        save();
-      },
-      onChange: renderMomentTiles,
-    });
-
-    wireWordWriting(w);
     wirePastWords();
-  }
-
-  function renderWordWritingSection(w, entry) {
-    const text = entry?.text || '';
-    const savedNote = entry
-      ? `<span class="practice-count">Saved ${fmt.shortDate(entry.savedAt.slice(0, 10))}</span>`
-      : '';
-    return `
-      <div class="sheet-section">
-        <p class="practice-label"><span>Practice 2 · Write about it</span>${savedNote}</p>
-        <textarea class="practice-input" id="word-writing-input" rows="4" placeholder="What does &quot;${w.word}&quot; bring up for you? When might you use it? What does it remind you of?">${escapeHTML(text)}</textarea>
-        <div class="sheet-actions" style="margin-top:8px">
-          <button class="btn btn-primary" id="word-writing-save">${entry ? 'Update' : 'Save'}</button>
-          ${entry ? `<button class="btn btn-ghost" id="word-writing-clear">Clear</button>` : ''}
-        </div>
-        <p class="practice-hint">Two or three lines is plenty — make it personal so it sticks.</p>
-      </div>
-    `;
-  }
-
-  function wireWordWriting(w) {
-    const input = sheet.querySelector('#word-writing-input');
-    const saveBtn = sheet.querySelector('#word-writing-save');
-    const clearBtn = sheet.querySelector('#word-writing-clear');
-    if (!input || !saveBtn) return;
-    saveBtn.addEventListener('click', () => {
-      const text = (input.value || '').trim();
-      if (text.length < 4) {
-        input.style.borderColor = 'var(--terracotta)';
-        setTimeout(() => { input.style.borderColor = ''; }, 400);
-        return;
-      }
-      state.wordWriting[w.word] = { text, savedAt: new Date().toISOString() };
-      save();
-      saveBtn.textContent = 'Saved';
-      setTimeout(() => { saveBtn.textContent = 'Update'; }, 900);
-    });
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        delete state.wordWriting[w.word];
-        save();
-        input.value = '';
-        clearBtn.style.display = 'none';
-      });
-    }
   }
 
   function renderPastWordsSection(todayISO) {
@@ -6944,8 +6808,8 @@
     const rows = items.map(({ iso, date, w }) => {
       const def = (w.definition || '').replace(/\.$/, '');
       const short = def.length > 80 ? def.slice(0, 80).trim() + '…' : def;
-      const writing = state.wordWriting[w.word];
-      const badge = writing ? `<span class="abadge">Written about</span>` : '';
+      const inDeck = !!state.wordDeck[w.word];
+      const badge = inDeck ? `<span class="abadge">In deck</span>` : '';
       return `
         <button class="archive-item" data-past-word-iso="${iso}">
           <span class="aleft">
@@ -6958,7 +6822,7 @@
     }).join('');
     return `
       <div class="sheet-section">
-        <p class="sheet-section-label">Past words · tap to practice</p>
+        <p class="sheet-section-label">Past words</p>
         <div class="archive-list">${rows}</div>
       </div>
     `;
@@ -6995,8 +6859,8 @@
     }
     return `
       <div class="sheet-section">
-        <p class="sheet-section-label">Make it yours</p>
-        <p class="capture-help">Write one sentence using <em>${w.word}</em> that's true about your own life this week. Personal connection is what makes words stick — passive reading fades fast, active production locks in.</p>
+        <p class="sheet-section-label">Write one good sentence</p>
+        <p class="capture-help">Use <em>${w.word}</em> in a line that's true about your own life this week. The sentence is the deck entry — active production beats rote re-reading, and one personal sentence sticks longer than fifty repetitions of the dictionary one.</p>
         <textarea class="capture-input" id="w-sentence" placeholder="e.g. Roberta's thesis deadline has made her schedule quite ${w.word.toLowerCase()} this month."></textarea>
         <p class="capture-warn" id="w-warn"></p>
         <div class="sheet-actions" style="margin-top:8px">
@@ -7040,98 +6904,6 @@
         setTimeout(() => openWord(), 120);
       });
     }
-  }
-
-  function renderPracticeBlock({ target, count, placeholder, label, longForm }) {
-    const segs = new Array(5).fill(0).map((_, i) => `<span class="${i < count ? 'on' : ''}"></span>`).join('');
-    if (count >= 5) {
-      return `
-        <div class="sheet-section">
-          <p class="practice-label"><span>${label}</span><span class="practice-count">5 / 5</span></p>
-          <div class="practice-bar">${segs}</div>
-          <div class="practice-complete">
-            <span class="check-circle">✓</span>
-            <span class="label">Complete. Well done.</span>
-            <button class="reset" id="practice-reset">Reset</button>
-          </div>
-        </div>
-      `;
-    }
-    const inputTag = longForm
-      ? `<textarea class="practice-input" id="practice-input" rows="3" placeholder="${placeholder}"></textarea>`
-      : `<input class="practice-input" id="practice-input" placeholder="${placeholder}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">`;
-    return `
-      <div class="sheet-section">
-        <p class="practice-label"><span>${label}</span><span class="practice-count">${count} / 5</span></p>
-        ${inputTag}
-        <div class="practice-bar">${segs}</div>
-        <p class="practice-hint">Write it out five times to commit it to memory.</p>
-      </div>
-    `;
-  }
-
-  function wirePractice({ target, getCount, setCount, onChange }) {
-    const normalizedTarget = normalizePractice(target);
-    const input = sheet.querySelector('#practice-input');
-    const countEl = sheet.querySelector('.practice-count');
-    const bar = sheet.querySelector('.practice-bar');
-    const resetBtn = sheet.querySelector('#practice-reset');
-
-    if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        setCount(0);
-        if (onChange) onChange();
-        // Refresh this sheet by reopening the current path — simplest:
-        closeSheet();
-      });
-    }
-    if (!input) return;
-
-    const submit = () => {
-      const val = normalizePractice(input.value);
-      if (!val) return;
-      if (val === normalizedTarget) {
-        const next = Math.min(5, getCount() + 1);
-        setCount(next);
-        input.value = '';
-        // Update bar + count inline
-        if (countEl) countEl.textContent = `${next} / 5`;
-        if (bar) {
-          [...bar.children].forEach((seg, i) => seg.classList.toggle('on', i < next));
-        }
-        if (next >= 5) {
-          // Swap the input area for the "complete" card
-          const section = input.closest('.sheet-section');
-          section.innerHTML = `
-            <p class="practice-label"><span>Practice writing</span><span class="practice-count">5 / 5</span></p>
-            <div class="practice-bar">${new Array(5).fill('<span class="on"></span>').join('')}</div>
-            <div class="practice-complete">
-              <span class="check-circle">✓</span>
-              <span class="label">Complete. Well done.</span>
-              <button class="reset" id="practice-reset">Reset</button>
-            </div>
-          `;
-          section.querySelector('#practice-reset').addEventListener('click', () => {
-            setCount(0);
-            if (onChange) onChange();
-            closeSheet();
-          });
-        }
-        if (onChange) onChange();
-      } else {
-        // Light feedback: brief border flash
-        input.style.borderColor = 'var(--terracotta)';
-        setTimeout(() => { input.style.borderColor = ''; }, 400);
-      }
-    };
-
-    input.addEventListener('keydown', (e) => {
-      // Enter submits; for textarea we require Ctrl/Cmd+Enter? Let plain Enter work.
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        submit();
-      }
-    });
   }
 
   function openQuiz() {
