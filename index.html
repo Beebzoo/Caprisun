@@ -953,6 +953,80 @@
     white-space: nowrap;
   }
 
+  /* Never-miss-twice: yesterday's planned gym wasn't logged */
+  .makeup-banner {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    background: var(--terracotta);
+    color: #FBF6E5;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .makeup-banner .mtitle {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+  }
+  .makeup-banner .msub {
+    margin: 0;
+    font-size: 12px;
+    font-style: italic;
+    color: rgba(251, 246, 229, 0.85);
+    letter-spacing: 0.02em;
+  }
+  .tile.makeup {
+    border-color: var(--terracotta);
+    box-shadow: 0 0 0 1px var(--terracotta), 0 1px 2px rgba(74, 56, 28, 0.04);
+  }
+  .tile.makeup .name {
+    color: var(--terracotta);
+  }
+
+  /* Week-8 anticipatory prompt — fires at week 6 */
+  .week8-banner {
+    margin: 0 0 12px;
+    padding: 14px 16px;
+    background: var(--green-deep);
+    color: #F8F1DD;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .week8-banner .w8-eyebrow {
+    margin: 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(248, 241, 221, 0.7);
+  }
+  .week8-banner .w8-title {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .week8-banner .w8-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .week8-banner button {
+    background: rgba(248, 241, 221, 0.14);
+    color: #F8F1DD;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .week8-banner button.primary {
+    background: #F8F1DD;
+    color: var(--green-deep);
+  }
+
   /* Today tiles */
   .tiles {
     display: grid;
@@ -3541,6 +3615,7 @@
 
     <section id="today-section">
       <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
+      <div id="today-banners"></div>
       <div class="tiles" id="tiles"></div>
       <button class="today-note-btn" id="today-note-btn">Leave a note for today…</button>
     </section>
@@ -3907,6 +3982,9 @@
     workoutPrefs: { muscleFilter: null, difficultyFilter: null },
     // Per-day gym session log — what you actually did, alongside the duration in `sessions`
     workoutLog: {},   // { [iso]: { split: 'upper'|'lower'|'full', exercises: [exerciseId, ...] } }
+    // Anticipatory week-8 plan — written at week 6
+    // { body: string, writtenAt: ISO, dismissedAtWeek: number | null }
+    week8: null,
     startDate: '2026-04-27',
   });
 
@@ -5193,6 +5271,30 @@
 
   // --- Rendering: today tiles ----------------------------------------------
 
+  // Returns the missed-yesterday split if yesterday was a planned gym day with
+  // no logged session — i.e. today is a make-up day.
+  function makeupGymInfo(today) {
+    const yesterday = addDays(today, -1);
+    const yISO = toISODate(yesterday);
+    const yPlan = PLAN_BY_DAY[yesterday.getDay()] || [];
+    if (!yPlan.includes('gym')) return null;
+    const yMins = state.sessions[yISO]?.gym || 0;
+    if (yMins > 0) return null;
+    if (yISO < (state.startDate || '')) return null;
+    const split = gymSplitForDate(yesterday);
+    return { iso: yISO, splitName: split ? split.name : 'Gym' };
+  }
+
+  // 1-indexed week count since startDate (Monday-anchored). Returns null pre-start.
+  function weekIndexSinceStart(date) {
+    if (!state.startDate) return null;
+    const start = startOfWeek(parseISO(state.startDate));
+    const cur = startOfWeek(date);
+    const days = Math.round((cur - start) / 86400000);
+    if (days < 0) return null;
+    return Math.floor(days / 7) + 1;
+  }
+
   function renderTiles() {
     if (isPreStart()) return;
     const today = new Date();
@@ -5200,6 +5302,22 @@
     const plan = PLAN_BY_DAY[today.getDay()] || [];
     const plannedNames = plan.map(k => ACTIVITIES.find(a => a.key === k)?.name).filter(Boolean);
     document.getElementById('plan-label').textContent = plannedNames.length ? `Plan: ${plannedNames.join(' · ')}` : '';
+
+    const banners = document.getElementById('today-banners');
+    if (banners) banners.innerHTML = '';
+
+    renderWeek8BannerInto(banners);
+    const makeup = makeupGymInfo(today);
+    const todayLoggedGym = (state.sessions[todayISO]?.gym || 0) > 0;
+    if (banners && makeup && !todayLoggedGym) {
+      const note = document.createElement('div');
+      note.className = 'makeup-banner';
+      note.innerHTML = `
+        <p class="mtitle">Yesterday's ${makeup.splitName.toLowerCase()} session didn't happen.</p>
+        <p class="msub">Never miss twice. Make today the make-up — even a short one keeps the chain.</p>
+      `;
+      banners.appendChild(note);
+    }
 
     const container = document.getElementById('tiles');
     container.innerHTML = '';
@@ -5210,14 +5328,15 @@
       const logged = mins > 0;
       const planned = plan.includes(act.key);
       const splitLabel = (act.key === 'gym' && todaySplit) ? todaySplit.name : null;
+      const isMakeupTile = act.key === 'gym' && !!makeup && !logged;
 
       const tile = document.createElement('button');
-      tile.className = 'tile' + (logged ? ' logged' : '');
+      tile.className = 'tile' + (logged ? ' logged' : '') + (isMakeupTile ? ' makeup' : '');
       tile.innerHTML = `
         ${planned ? '<span class="plan-dot" aria-label="planned for today"></span>' : ''}
         <div>
           <p class="name">${act.name}${splitLabel ? ` <span class="tile-split">· ${splitLabel}</span>` : ''}</p>
-          <p class="avg">Avg ${avgFor(act)} min</p>
+          <p class="avg">${isMakeupTile ? 'Make-up day' : `Avg ${avgFor(act)} min`}</p>
         </div>
         <div class="logged-row">
           <span class="duration-pill">${mins} min</span>
@@ -5227,6 +5346,68 @@
       tile.addEventListener('click', () => openLog(act, todayISO));
       container.appendChild(tile);
     }
+  }
+
+  // Surfaces a one-time prompt at week 6: two weeks before the historical wall.
+  // Returns true if a banner was drawn.
+  function renderWeek8BannerInto(slot) {
+    if (!slot) return false;
+    const wk = weekIndexSinceStart(new Date());
+    if (wk == null || wk < 6 || wk > 7) return false;
+    const w8 = state.week8;
+    if (w8 && w8.dismissedAtWeek != null) return false;
+
+    const banner = document.createElement('div');
+    banner.className = 'week8-banner';
+    const written = w8 && w8.body && w8.body.trim();
+    banner.innerHTML = `
+      <p class="w8-eyebrow">Week ${wk} · two weeks until the wall</p>
+      <p class="w8-title">${written
+        ? 'Your yellow-week plan is saved. Worth re-reading before week 8 hits.'
+        : 'Week 8 has been your historical failure point. Take 5 minutes now to write what a yellow-week version looks like — given what’s on the calendar.'}</p>
+      <div class="w8-actions">
+        <button class="primary" id="w8-open">${written ? 'Re-read it' : 'Write it'}</button>
+        <button id="w8-dismiss">Not now</button>
+      </div>
+    `;
+    slot.appendChild(banner);
+    banner.querySelector('#w8-open').addEventListener('click', () => openWeek8Sheet(wk));
+    banner.querySelector('#w8-dismiss').addEventListener('click', () => {
+      state.week8 = { ...(state.week8 || { body: '', writtenAt: null }), dismissedAtWeek: wk };
+      save();
+      renderTiles();
+    });
+    return true;
+  }
+
+  function openWeek8Sheet(wk) {
+    const existing = (state.week8 && state.week8.body) || '';
+    openSheet(`
+      <h2>A yellow-week plan</h2>
+      <p class="subtle">Week ${wk}. Two weeks until the historical wall. The point isn't to engineer a perfect week — it's to define what "good enough to keep the chain" looks like when things go sideways.</p>
+      <div class="sheet-section">
+        <p class="review-prompt">What threats are on the calendar for weeks 7–8?</p>
+        <p class="review-prompt">What does a yellow-week minimum look like (one gym, reading nights, sleep floor)?</p>
+        <p class="review-prompt">What's the one swap or shortcut you'll allow yourself before resorting to skipping?</p>
+        <textarea class="note-area" id="w8-body" style="min-height:160px" placeholder="Anything goes. The act of writing is the point.">${existing.replace(/</g, '&lt;')}</textarea>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Close</button>
+        <button class="btn btn-primary" id="save">Save</button>
+      </div>
+    `);
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    sheet.querySelector('#save').addEventListener('click', () => {
+      const body = (sheet.querySelector('#w8-body')?.value ?? '').trim();
+      state.week8 = {
+        body,
+        writtenAt: new Date().toISOString(),
+        dismissedAtWeek: state.week8?.dismissedAtWeek ?? null,
+      };
+      save();
+      closeSheet();
+      renderTiles();
+    });
   }
 
   // --- Overlay/sheet -------------------------------------------------------
