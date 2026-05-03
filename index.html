@@ -8832,10 +8832,43 @@
   }
 
   // Image path. Filename is the slug; folder has a space which we
-  // URL-encode so href stays valid. Returns the path to try; the <img>
-  // onerror handler swaps in the missing-image fallback.
+  // URL-encode so href stays valid. Tries common extensions in order
+  // (webp/gif/jpg/png) so the user doesn't have to standardise.
+  const WORKOUT_IMAGE_EXTS = ['webp', 'gif', 'jpg', 'png'];
   function workoutImagePath(slug, ext) {
-    return `Pics/Workout%20Pics/${slug}.${ext || 'jpg'}`;
+    return `Pics/Workout%20Pics/${slug}.${ext}`;
+  }
+  // Attach to an <img> element. Walks the extension list on each load
+  // failure; if none succeed, replaces the image with the "no image"
+  // fallback message. Cached results in WORKOUT_IMAGE_OK so we don't
+  // re-probe on subsequent opens of the same card.
+  const WORKOUT_IMAGE_OK = {};   // slug → resolved path
+  const WORKOUT_IMAGE_BAD = {};  // slug → true (all extensions failed)
+  function loadWorkoutImage(imgEl, slug) {
+    if (!imgEl || !slug) return;
+    if (WORKOUT_IMAGE_BAD[slug]) {
+      const parent = imgEl.parentElement;
+      if (parent) parent.innerHTML = '<p class="wt-image-missing">No image yet for this one.</p>';
+      return;
+    }
+    if (WORKOUT_IMAGE_OK[slug]) {
+      imgEl.src = WORKOUT_IMAGE_OK[slug];
+      return;
+    }
+    let i = 0;
+    const tryNext = () => {
+      if (i >= WORKOUT_IMAGE_EXTS.length) {
+        WORKOUT_IMAGE_BAD[slug] = true;
+        const parent = imgEl.parentElement;
+        if (parent) parent.innerHTML = '<p class="wt-image-missing">No image yet for this one.</p>';
+        return;
+      }
+      const ext = WORKOUT_IMAGE_EXTS[i++];
+      imgEl.src = workoutImagePath(slug, ext);
+    };
+    imgEl.onerror = tryNext;
+    imgEl.onload = () => { WORKOUT_IMAGE_OK[slug] = imgEl.src; };
+    tryNext();
   }
 
   // Day cursor for the workout sheet. Persisted in module scope so
@@ -8930,12 +8963,15 @@
       head.addEventListener('click', () => {
         const card = head.closest('.wt-exercise');
         if (!card) return;
+        const wasOpen = card.classList.contains('is-open');
         card.classList.toggle('is-open');
         // Lazy-load image only on first open to avoid pulling all 40 at once.
-        const img = card.querySelector('img[data-src]');
-        if (img && img.dataset.src) {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
+        if (!wasOpen) {
+          const img = card.querySelector('img[data-needs-load="1"]');
+          if (img) {
+            img.removeAttribute('data-needs-load');
+            loadWorkoutImage(img, card.dataset.slug);
+          }
         }
       });
     });
@@ -8976,7 +9012,6 @@
       return `<button type="button" class="wt-rep-box${on ? ' is-on' : ''}" data-slug="${slug}" data-reps="${n}" aria-pressed="${on}">${n}</button>`;
     }).join('');
     const hasAny = ticked.length > 0;
-    const imgSrc = workoutImagePath(slug, 'jpg');
     return `
       <div class="wt-exercise${hasAny ? ' has-any' : ''}" data-slug="${slug}">
         <div class="wt-exercise-head">
@@ -8984,8 +9019,7 @@
           <span class="wt-exercise-unit">${escapeHTML(ex.unit)}</span>
         </div>
         <div class="wt-exercise-image">
-          <img alt="${escapeHTML(ex.name)} cue" data-src="${imgSrc}"
-               onerror="this.parentElement.innerHTML='<p class=&quot;wt-image-missing&quot;>No image yet for this one.</p>';" />
+          <img alt="${escapeHTML(ex.name)} cue" data-needs-load="1" />
         </div>
         <div class="wt-exercise-reps">${boxes}</div>
       </div>
