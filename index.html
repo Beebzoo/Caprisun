@@ -914,6 +914,39 @@
 
   .section-label button:hover { color: var(--ink); }
 
+  /* Collapsible section header — currently used by the To-do list.
+     Click anywhere on the label to toggle the body; the chevron
+     mirrors the open/collapsed state. */
+  .section-label-toggle {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .section-label-toggle:hover .section-chevron { color: var(--terracotta); }
+  .section-label-right {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .section-chevron {
+    display: inline-block;
+    min-width: 12px;
+    text-align: center;
+    color: var(--ochre);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    transform: translateY(1px);
+    transition: color 0.15s ease;
+  }
+  .section-chevron::before { content: '−'; }
+  section.is-collapsed .section-chevron::before { content: '+'; }
+  section.is-collapsed .todo-body { display: none; }
+  /* When collapsed, drop the section's own bottom margin so adjacent
+     sections close up rather than leaving a stranded gap. */
+  section.is-collapsed { margin-bottom: 18px; }
+
   /* The chain */
   .chain {
     display: grid;
@@ -3954,20 +3987,28 @@
     </section>
 
     <section id="todo-section">
-      <p class="section-label"><span>To-do</span><span id="todo-summary"></span></p>
-      <div class="todo-add">
-        <input id="todo-text" type="text" maxlength="120" placeholder="Add a to-do (e.g. Call dentist)" />
-        <div class="todo-add-row">
-          <input id="todo-due" type="date" aria-label="Optional deadline" />
-          <button class="btn btn-primary todo-add-btn" id="todo-add-btn">Add</button>
+      <p class="section-label section-label-toggle" id="todo-label" role="button" tabindex="0" aria-controls="todo-body" aria-expanded="true">
+        <span>To-do</span>
+        <span class="section-label-right">
+          <span id="todo-summary"></span>
+          <span class="section-chevron" aria-hidden="true"></span>
+        </span>
+      </p>
+      <div class="todo-body" id="todo-body">
+        <div class="todo-add">
+          <input id="todo-text" type="text" maxlength="120" placeholder="Add a to-do (e.g. Call dentist)" />
+          <div class="todo-add-row">
+            <input id="todo-due" type="date" aria-label="Optional deadline" />
+            <button class="btn btn-primary todo-add-btn" id="todo-add-btn">Add</button>
+          </div>
         </div>
+        <div class="todo-list" id="todo-list"></div>
+        <details class="todo-done-toggle" id="todo-done-toggle" style="display:none">
+          <summary><span id="todo-done-summary">Done</span></summary>
+          <div class="todo-done-list" id="todo-done-list"></div>
+          <button class="btn btn-ghost todo-clear" id="todo-clear">Clear done</button>
+        </details>
       </div>
-      <div class="todo-list" id="todo-list"></div>
-      <details class="todo-done-toggle" id="todo-done-toggle" style="display:none">
-        <summary><span id="todo-done-summary">Done</span></summary>
-        <div class="todo-done-list" id="todo-done-list"></div>
-        <button class="btn btn-ghost todo-clear" id="todo-clear">Clear done</button>
-      </details>
     </section>
 
     <section id="moment-section">
@@ -5845,6 +5886,31 @@
         state.todos = (state.todos || []).filter((t) => !t.done);
         save();
         renderTodos();
+      });
+    }
+
+    // Collapsible to-do section. Preference is stored in localStorage so
+    // it persists across reloads but doesn't sync to other devices —
+    // collapse-state is a per-device preference, not data.
+    const COLLAPSE_KEY = 'caprisun.todo.collapsed';
+    const section = document.getElementById('todo-section');
+    const label   = document.getElementById('todo-label');
+    if (section && label) {
+      const startCollapsed = (() => {
+        try { return localStorage.getItem(COLLAPSE_KEY) === '1'; } catch { return false; }
+      })();
+      section.classList.toggle('is-collapsed', startCollapsed);
+      label.setAttribute('aria-expanded', String(!startCollapsed));
+
+      const toggle = () => {
+        const collapsed = !section.classList.contains('is-collapsed');
+        section.classList.toggle('is-collapsed', collapsed);
+        label.setAttribute('aria-expanded', String(!collapsed));
+        try { localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0'); } catch {}
+      };
+      label.addEventListener('click', toggle);
+      label.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
       });
     }
   }
