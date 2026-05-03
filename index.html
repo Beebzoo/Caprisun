@@ -4136,7 +4136,7 @@
     workoutPlanOrder: [],
     workoutPrefs: { muscleFilter: null, difficultyFilter: null },
     notify: { sundaySeal: false },
-    startDate: '2026-04-27',
+    startDate: '2026-05-04',
   });
 
   // Spaced repetition intervals (days). Stage 0 → review in 1 day, stage 5 → 30 days.
@@ -4173,6 +4173,20 @@
         if (!text) continue;
         entry.personalSentence = text;
       }
+    }
+
+    // Bump the placeholder startDate to actual launch day, but only when
+    // no real chain data exists yet — never clobber a user who has been
+    // logging against the old date. Idempotent: once startDate has moved
+    // off the placeholder this is a no-op.
+    if (s.startDate === '2026-04-27') {
+      const hasChainData =
+        Object.keys(s.sessions || {}).length > 0
+        || Object.keys(s.weekColors || {}).length > 0
+        || Object.keys(s.habits || {}).length > 0
+        || Object.keys(s.dayNotes || {}).length > 0
+        || Object.keys(s.weekNotes || {}).length > 0;
+      if (!hasChainData) s.startDate = '2026-05-04';
     }
     return s;
   }
