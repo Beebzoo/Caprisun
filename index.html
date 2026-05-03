@@ -298,7 +298,8 @@
     gap: 8px;
   }
   .todo-add input[type="date"] {
-    flex: 1;
+    margin-top: 8px;
+    width: 100%;
     padding: 10px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -310,7 +311,73 @@
     box-shadow: 0 1px 2px rgba(74, 56, 28, 0.04);
   }
   .todo-add input[type="date"]:focus { outline: none; border-color: var(--border-strong); color: var(--ink); }
-  .todo-add-btn { white-space: nowrap; }
+  .todo-add-btn { white-space: nowrap; width: 100%; }
+
+  .todo-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .todo-chips .chip {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    background: var(--surface);
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .todo-chips .chip:hover { border-color: var(--border-strong); color: var(--ink); }
+  .todo-chips .chip.active {
+    background: var(--green-deep);
+    color: #F8F1DD;
+    border-color: var(--green-deep);
+  }
+
+  .todo-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 10px;
+  }
+  .todo-filters .chip {
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--ink-faint);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .todo-filters .chip:hover { color: var(--ink-soft); border-color: var(--border-strong); }
+  .todo-filters .chip.active {
+    background: var(--green-deep);
+    color: #F8F1DD;
+    border-color: var(--green-deep);
+  }
+
+  .todo-item .ttags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-left: 4px;
+  }
+  .todo-item .ttag {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--green-leaf);
+    background: rgba(79, 122, 85, 0.10);
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
 
   .todo-list { display: grid; gap: 6px; }
   .todo-empty {
@@ -776,6 +843,42 @@
     gap: 6px;
   }
 
+  /* Slim pinned chain — header anchor */
+  .chain-pin {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    margin-top: 18px;
+  }
+  .chain-pin button {
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    background: var(--border);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .chain-pin button:hover:not(:disabled) { transform: translateY(-1px); }
+  .chain-pin button:disabled { cursor: default; }
+  .chain-pin button.deep   { background: var(--green-deep); }
+  .chain-pin button.soft   { background: var(--green-soft); }
+  .chain-pin button.ochre  { background: var(--ochre); }
+  .chain-pin button.terra  { background: var(--terracotta); }
+  .chain-pin button.blank  { background: var(--surface-2); }
+  .chain-pin button.pre-start { background: var(--surface-2); opacity: 0.45; }
+  .chain-pin button.current {
+    background: transparent;
+    border: 1px dashed var(--green-deep);
+  }
+  .chain-pin button.current.ready {
+    background: repeating-linear-gradient(
+      45deg,
+      transparent 0 4px,
+      rgba(45, 74, 62, 0.10) 4px 8px
+    );
+  }
+
   .week {
     aspect-ratio: 1 / 1.15;
     border-radius: 6px;
@@ -886,6 +989,63 @@
     font-size: 12px;
     color: var(--ink-soft);
     margin: 2px 0 0;
+  }
+
+  .tile .tile-split {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--green-leaf);
+    letter-spacing: 0.02em;
+  }
+
+  /* Gym log: exercise checklist */
+  .gym-exercise-list { display: grid; gap: 6px; }
+  .gym-exercise-row {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .gym-exercise-row:hover { border-color: var(--border-strong); }
+  .gym-exercise-row.checked { background: var(--surface-2); border-color: var(--green-soft); }
+  .gym-exercise-row .gtick {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    background: var(--bg);
+    position: relative;
+  }
+  .gym-exercise-row.checked .gtick {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+  }
+  .gym-exercise-row.checked .gtick::after {
+    content: '';
+    position: absolute;
+    left: 5px; top: 1px;
+    width: 5px; height: 10px;
+    border: solid #F8F1DD;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .gym-exercise-row .gname {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .gym-source-note {
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+    margin: 6px 0 0;
   }
 
   .tile .plan-dot {
@@ -1296,6 +1456,25 @@
     line-height: 1.4;
   }
   .note-area:focus { outline: none; border-color: var(--border-strong); }
+
+  .review-prompt {
+    margin: 12px 0 6px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .review-prompt:first-child { margin-top: 0; }
+  .review-archive {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
 
   .today-note-btn {
     margin-top: 12px;
@@ -3208,6 +3387,7 @@
     <header>
       <h1 class="day-name" id="day-name">Tuesday</h1>
       <div class="day-date" id="date"></div>
+      <div class="chain-pin" id="chain-pin" aria-label="The chain — last 8 weeks"></div>
       <p class="greeting">
         <span id="greeting">Good morning.</span>
         <span class="greet-icons" aria-hidden="true">
@@ -3297,11 +3477,24 @@
       <p class="section-label"><span>To-do</span><span id="todo-summary"></span></p>
       <div class="todo-add">
         <input id="todo-text" type="text" maxlength="120" placeholder="Add a to-do (e.g. Call dentist)" />
+        <div class="todo-chips" id="todo-when-chips" role="group" aria-label="When">
+          <button type="button" class="chip" data-when="today">Today</button>
+          <button type="button" class="chip" data-when="tomorrow">Tomorrow</button>
+          <button type="button" class="chip" data-when="week">This week</button>
+          <button type="button" class="chip" data-when="pick">Pick date…</button>
+        </div>
+        <input id="todo-due" type="date" aria-label="Pick deadline" style="display:none" />
+        <div class="todo-chips" id="todo-tag-chips" role="group" aria-label="Where">
+          <button type="button" class="chip" data-tag="centrum">@centrum</button>
+          <button type="button" class="chip" data-tag="thuis">@thuis</button>
+          <button type="button" class="chip" data-tag="uni">@uni</button>
+          <button type="button" class="chip" data-tag="gym">@gym</button>
+        </div>
         <div class="todo-add-row">
-          <input id="todo-due" type="date" aria-label="Optional deadline" />
           <button class="btn btn-primary todo-add-btn" id="todo-add-btn">Add</button>
         </div>
       </div>
+      <div class="todo-filters" id="todo-filters" style="display:none"></div>
       <div class="todo-list" id="todo-list"></div>
       <details class="todo-done-toggle" id="todo-done-toggle" style="display:none">
         <summary><span id="todo-done-summary">Done</span></summary>
@@ -3471,32 +3664,44 @@
     return streak;
   }
 
+  // tone: 'generative' (Mon/Tue) · 'reflective' (Thu/Sun) · 'heavy' (Wed) · 'light' (Fri/Sat)
   const QUOTES = [
-    { text: "The obstacle is the way.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Impediments to action become the path forward. What stands in the way, rightly met, reveals the way." },
-    { text: "The unexamined life is not worth living.", author: "Socrates", year: "399 BC", source: "Plato's Apology", meaning: "Living without reflection — without questioning your beliefs and choices — strips life of its real value. The asking is the living." },
-    { text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", year: "1889", source: "Twilight of the Idols", meaning: "Meaning makes suffering bearable. Comfort without purpose crushes us; purpose makes even hardship endurable." },
-    { text: "We suffer more often in imagination than in reality.", author: "Seneca", year: "c. 65 AD", source: "Letters from a Stoic", meaning: "The mind rehearses disasters that rarely arrive. Most of what you dread, you never actually live through." },
-    { text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Freedom sits in the response, not the circumstance. The world happens; how you meet it is yours." },
-    { text: "No man ever steps in the same river twice, for it's not the same river and he's not the same man.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Change is the one constant. The river has moved and so have you. Don't expect to find the same ground twice." },
-    { text: "I think, therefore I am.", author: "René Descartes", year: "1637", source: "Discourse on the Method", meaning: "The one thing you can't doubt is the fact that you're doubting. Your existence is certain even when everything else is in question." },
-    { text: "Man is condemned to be free.", author: "Jean-Paul Sartre", year: "1943", source: "Being and Nothingness", meaning: "We have no fixed nature. We are forever responsible for who we become — whether we want the responsibility or not." },
-    { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Before understanding the world, understand your own motives, patterns, and limits. Self-knowledge is the foundation." },
-    { text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus", year: "c. 108 AD", source: "Discourses", meaning: "Events are neutral. Your judgment of them is what creates suffering or acceptance." },
-    { text: "Man is born free, and everywhere he is in chains.", author: "Jean-Jacques Rousseau", year: "1762", source: "The Social Contract", meaning: "We arrive with an innate freedom, but society and its institutions bind us. The question is which chains are worth keeping." },
-    { text: "The heart has its reasons of which reason knows nothing.", author: "Blaise Pascal", year: "1670", source: "Pensées", meaning: "Some forms of knowing — faith, intuition, love — operate outside pure logic, and are no less true for it." },
-    { text: "Whereof one cannot speak, thereof one must be silent.", author: "Ludwig Wittgenstein", year: "1921", source: "Tractatus Logico-Philosophicus", meaning: "Language has limits. Some truths can only be shown — by how you live — not said." },
-    { text: "Do not spoil what you have by desiring what you have not.", author: "Epicurus", year: "c. 300 BC", source: "Letters", meaning: "The present is already full. Craving what's absent is how you ruin what's already here." },
-    { text: "Happiness depends upon ourselves.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Flourishing is a matter of character and action, not circumstance. It's built, not given." },
-    { text: "God is dead.", author: "Friedrich Nietzsche", year: "1882", source: "The Gay Science", meaning: "With the collapse of shared religious belief, we must create our own values. A challenge, not a celebration." },
-    { text: "Hell is other people.", author: "Jean-Paul Sartre", year: "1944", source: "No Exit", meaning: "We can't escape being seen by others, and their judgment shapes our sense of self. Sometimes unbearably." },
-    { text: "The only true wisdom is in knowing you know nothing.", author: "Socrates", year: "c. 399 BC", source: "Plato's Apology", meaning: "Real wisdom begins with admitting the limits of what you know. Certainty is often the enemy of understanding." },
-    { text: "Man is the measure of all things.", author: "Protagoras", year: "c. 450 BC", source: "via Plato", meaning: "Truth is relative to the observer. There is no view from nowhere — every perspective is situated." },
-    { text: "It is not death that a man should fear, but he should fear never beginning to live.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Mortality isn't the real tragedy. The real tragedy is arriving at death without ever fully showing up." },
-    { text: "Virtue is its own reward.", author: "Cicero", year: "c. 45 BC", source: "De Finibus", meaning: "Acting well isn't a transaction for future gain. Doing the right thing is already the thing worth doing." },
-    { text: "A man who views the world the same at fifty as he did at twenty has wasted thirty years of his life.", author: "Muhammad Ali", year: "1975", source: "interview (often cited as philosophical)", meaning: "Change is growth. Holding the same shape for decades isn't constancy — it's stagnation." },
-    { text: "One cannot step in the same river twice.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Reality is flux. The world you returned to isn't the one you left." },
-    { text: "To be is to do.", author: "Jean-Paul Sartre", year: "1943", source: "paraphrase of Being and Nothingness", meaning: "You are not your intentions or self-image. You are the sum of what you actually do." },
+    { tone: "generative", text: "The obstacle is the way.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Impediments to action become the path forward. What stands in the way, rightly met, reveals the way." },
+    { tone: "reflective", text: "The unexamined life is not worth living.", author: "Socrates", year: "399 BC", source: "Plato's Apology", meaning: "Living without reflection — without questioning your beliefs and choices — strips life of its real value. The asking is the living." },
+    { tone: "heavy",      text: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", year: "1889", source: "Twilight of the Idols", meaning: "Meaning makes suffering bearable. Comfort without purpose crushes us; purpose makes even hardship endurable." },
+    { tone: "reflective", text: "We suffer more often in imagination than in reality.", author: "Seneca", year: "c. 65 AD", source: "Letters from a Stoic", meaning: "The mind rehearses disasters that rarely arrive. Most of what you dread, you never actually live through." },
+    { tone: "generative", text: "You have power over your mind — not outside events. Realize this, and you will find strength.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Freedom sits in the response, not the circumstance. The world happens; how you meet it is yours." },
+    { tone: "reflective", text: "No man ever steps in the same river twice, for it's not the same river and he's not the same man.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Change is the one constant. The river has moved and so have you. Don't expect to find the same ground twice." },
+    { tone: "reflective", text: "I think, therefore I am.", author: "René Descartes", year: "1637", source: "Discourse on the Method", meaning: "The one thing you can't doubt is the fact that you're doubting. Your existence is certain even when everything else is in question." },
+    { tone: "heavy",      text: "Man is condemned to be free.", author: "Jean-Paul Sartre", year: "1943", source: "Being and Nothingness", meaning: "We have no fixed nature. We are forever responsible for who we become — whether we want the responsibility or not." },
+    { tone: "reflective", text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Before understanding the world, understand your own motives, patterns, and limits. Self-knowledge is the foundation." },
+    { tone: "generative", text: "It's not what happens to you, but how you react to it that matters.", author: "Epictetus", year: "c. 108 AD", source: "Discourses", meaning: "Events are neutral. Your judgment of them is what creates suffering or acceptance." },
+    { tone: "heavy",      text: "Man is born free, and everywhere he is in chains.", author: "Jean-Jacques Rousseau", year: "1762", source: "The Social Contract", meaning: "We arrive with an innate freedom, but society and its institutions bind us. The question is which chains are worth keeping." },
+    { tone: "light",      text: "The heart has its reasons of which reason knows nothing.", author: "Blaise Pascal", year: "1670", source: "Pensées", meaning: "Some forms of knowing — faith, intuition, love — operate outside pure logic, and are no less true for it." },
+    { tone: "reflective", text: "Whereof one cannot speak, thereof one must be silent.", author: "Ludwig Wittgenstein", year: "1921", source: "Tractatus Logico-Philosophicus", meaning: "Language has limits. Some truths can only be shown — by how you live — not said." },
+    { tone: "light",      text: "Do not spoil what you have by desiring what you have not.", author: "Epicurus", year: "c. 300 BC", source: "Letters", meaning: "The present is already full. Craving what's absent is how you ruin what's already here." },
+    { tone: "generative", text: "Happiness depends upon ourselves.", author: "Aristotle", year: "c. 340 BC", source: "Nicomachean Ethics", meaning: "Flourishing is a matter of character and action, not circumstance. It's built, not given." },
+    { tone: "heavy",      text: "God is dead.", author: "Friedrich Nietzsche", year: "1882", source: "The Gay Science", meaning: "With the collapse of shared religious belief, we must create our own values. A challenge, not a celebration." },
+    { tone: "heavy",      text: "Hell is other people.", author: "Jean-Paul Sartre", year: "1944", source: "No Exit", meaning: "We can't escape being seen by others, and their judgment shapes our sense of self. Sometimes unbearably." },
+    { tone: "reflective", text: "The only true wisdom is in knowing you know nothing.", author: "Socrates", year: "c. 399 BC", source: "Plato's Apology", meaning: "Real wisdom begins with admitting the limits of what you know. Certainty is often the enemy of understanding." },
+    { tone: "reflective", text: "Man is the measure of all things.", author: "Protagoras", year: "c. 450 BC", source: "via Plato", meaning: "Truth is relative to the observer. There is no view from nowhere — every perspective is situated." },
+    { tone: "generative", text: "It is not death that a man should fear, but he should fear never beginning to live.", author: "Marcus Aurelius", year: "c. 170 AD", source: "Meditations", meaning: "Mortality isn't the real tragedy. The real tragedy is arriving at death without ever fully showing up." },
+    { tone: "reflective", text: "Virtue is its own reward.", author: "Cicero", year: "c. 45 BC", source: "De Finibus", meaning: "Acting well isn't a transaction for future gain. Doing the right thing is already the thing worth doing." },
+    { tone: "generative", text: "A man who views the world the same at fifty as he did at twenty has wasted thirty years of his life.", author: "Muhammad Ali", year: "1975", source: "interview (often cited as philosophical)", meaning: "Change is growth. Holding the same shape for decades isn't constancy — it's stagnation." },
+    { tone: "reflective", text: "One cannot step in the same river twice.", author: "Heraclitus", year: "c. 500 BC", source: "Fragments", meaning: "Reality is flux. The world you returned to isn't the one you left." },
+    { tone: "generative", text: "To be is to do.", author: "Jean-Paul Sartre", year: "1943", source: "paraphrase of Being and Nothingness", meaning: "You are not your intentions or self-image. You are the sum of what you actually do." },
   ];
+
+  // Day-of-week → preferred quote tones, in priority order. Fall back to all quotes.
+  const QUOTE_TONE_BY_DAY = {
+    0: ['reflective', 'light'],          // Sunday — review register
+    1: ['generative'],                   // Monday — momentum
+    2: ['generative'],                   // Tuesday — keep moving
+    3: ['heavy'],                        // Wednesday — sit with the hard ones
+    4: ['reflective'],                   // Thursday
+    5: ['light', 'generative'],          // Friday — wind down
+    6: ['light', 'reflective'],          // Saturday
+  };
 
   const WORDS = [
     { word: "pusillanimity", pos: "noun", pron: "pew-sil-uh-NIM-ih-tee", definition: "Lack of courage; faintheartedness.", origin: "Latin pusillus (very small) + animus (mind, spirit).", example: "His pusillanimity in the face of the board's opposition surprised everyone who'd known him at university." },
@@ -3641,6 +3846,9 @@
     weekColors: {},
     dayNotes: {},
     weekNotes: {},
+    // Structured Sunday review answers, keyed by Monday ISO
+    // { [iso]: { threats, swaps, direction } } — separate from the free-form weekNotes
+    weekReview: {},
     habits: {},
     sleep: {},
     // Bedtime/wake-time pair, recorded the morning after.
@@ -3697,11 +3905,71 @@
     workoutPlans: {}, // { [planId]: { id, name, createdAt, updatedAt, exercises: [{id, sets, reps}] } }
     workoutPlanOrder: [], // array of planIds
     workoutPrefs: { muscleFilter: null, difficultyFilter: null },
+    // Per-day gym session log — what you actually did, alongside the duration in `sessions`
+    workoutLog: {},   // { [iso]: { split: 'upper'|'lower'|'full', exercises: [exerciseId, ...] } }
     startDate: '2026-04-27',
   });
 
+  // Mon = upper, Tue = lower, Fri = full. Anything else: gym is unscheduled.
+  const GYM_SPLIT_BY_DAY = { 1: 'upper', 2: 'lower', 5: 'full' };
+  const GYM_SPLITS = {
+    upper: {
+      name: 'Upper body',
+      defaults: [
+        { id: 'db-bench-press',                name: 'Dumbbell bench press' },
+        { id: 'db-bent-over-row',              name: 'Bent-over row' },
+        { id: 'db-shoulder-press',             name: 'Standing shoulder press' },
+        { id: 'db-bicep-curl',                 name: 'Bicep curl' },
+        { id: 'db-overhead-tricep-extension',  name: 'Overhead tricep extension' },
+      ],
+    },
+    lower: {
+      name: 'Lower body',
+      defaults: [
+        { id: 'db-goblet-squat',               name: 'Goblet squat' },
+        { id: 'db-romanian-deadlift',          name: 'Romanian deadlift' },
+        { id: 'db-walking-lunge',              name: 'Walking lunge' },
+        { id: 'db-calf-raise',                 name: 'Calf raise' },
+        { id: 'db-weighted-situp',             name: 'Weighted sit-up' },
+      ],
+    },
+    full: {
+      name: 'Full body',
+      defaults: [
+        { id: 'db-bench-press',                name: 'Dumbbell bench press' },
+        { id: 'db-goblet-squat',               name: 'Goblet squat' },
+        { id: 'db-bent-over-row',              name: 'Bent-over row' },
+        { id: 'db-shoulder-press',             name: 'Standing shoulder press' },
+        { id: 'db-weighted-situp',             name: 'Weighted sit-up' },
+      ],
+    },
+  };
+
+  function gymSplitForDate(date) {
+    const key = GYM_SPLIT_BY_DAY[date.getDay()];
+    return key ? { key, ...GYM_SPLITS[key] } : null;
+  }
+
+  // Last logged gym session matching this split (within ~21 days), if any.
+  function lastWorkoutForSplit(splitKey, beforeISO) {
+    const log = state.workoutLog || {};
+    const isos = Object.keys(log).filter(iso => iso < beforeISO).sort().reverse();
+    for (const iso of isos) {
+      if (log[iso]?.split === splitKey && (log[iso].exercises || []).length) return { iso, ...log[iso] };
+    }
+    return null;
+  }
+
   // Spaced repetition intervals (days). Stage 0 → review in 1 day, stage 5 → 30 days.
   const SRS_INTERVALS = [1, 2, 4, 8, 16, 30];
+
+  // Cap new-word introductions when the review queue is overloaded.
+  // Standard Anki-style practice: clear what's due before adding more.
+  const SRS_NEW_GATE_DUE = 10;
+
+  function totalDueCount() {
+    return dueDeckEntries(state.wordDeck).length + dueDeckEntries(state.quoteDeck).length;
+  }
 
   let state = load();
 
@@ -4007,6 +4275,11 @@
 
   function pickQuoteForDate(date) {
     const seed = daySeed(date);
+    const prefs = QUOTE_TONE_BY_DAY[date.getDay()] || [];
+    for (const tone of prefs) {
+      const matching = QUOTES.filter(q => q.tone === tone);
+      if (matching.length) return matching[seed % matching.length];
+    }
     return QUOTES[seed % QUOTES.length];
   }
 
@@ -4193,9 +4466,32 @@
 
   const WEEKS_SHOWN = 8;
 
+  function buildWeekButton(monday, { beforeStart, isRightmost, color, pre, slim }) {
+    const btn = document.createElement('button');
+    btn.className = slim ? '' : 'week';
+    if (beforeStart) {
+      btn.classList.add('pre-start');
+      btn.disabled = true;
+    } else if (isRightmost) {
+      btn.classList.add('current');
+      if (!pre && new Date().getDay() === 0) btn.classList.add('ready');
+      btn.addEventListener('click', () => openWeekReview(monday));
+    } else if (color) {
+      btn.classList.add(color);
+      btn.addEventListener('click', () => openWeekReview(monday));
+    } else {
+      btn.classList.add('blank');
+      btn.addEventListener('click', () => openWeekReview(monday));
+    }
+    btn.setAttribute('aria-label', `Week of ${monthShort(monday)} ${monday.getDate()}`);
+    return btn;
+  }
+
   function renderChain() {
     const chain = document.getElementById('chain');
+    const pin = document.getElementById('chain-pin');
     chain.innerHTML = '';
+    if (pin) pin.innerHTML = '';
     const thisMonday = startOfWeek(new Date());
     const startMonday = getStartMonday();
     const pre = isPreStart();
@@ -4207,27 +4503,9 @@
       const color = state.weekColors[iso];
       const isRightmost = i === 0;
       const beforeStart = monday < startMonday;
-
-      const btn = document.createElement('button');
-      btn.className = 'week';
-
-      if (beforeStart) {
-        btn.classList.add('pre-start');
-        btn.disabled = true;
-      } else if (isRightmost) {
-        btn.classList.add('current');
-        if (!pre && new Date().getDay() === 0) btn.classList.add('ready');
-        btn.addEventListener('click', () => openWeekReview(monday));
-      } else if (color) {
-        btn.classList.add(color);
-        btn.addEventListener('click', () => openWeekReview(monday));
-      } else {
-        btn.classList.add('blank');
-        btn.addEventListener('click', () => openWeekReview(monday));
-      }
-
-      btn.setAttribute('aria-label', `Week of ${monthShort(monday)} ${monday.getDate()}`);
-      chain.appendChild(btn);
+      const opts = { beforeStart, isRightmost, color, pre };
+      chain.appendChild(buildWeekButton(monday, { ...opts, slim: false }));
+      if (pin) pin.appendChild(buildWeekButton(monday, { ...opts, slim: true }));
     }
 
     // Left-edge label
@@ -4626,32 +4904,68 @@
     return { active, done };
   }
 
+  let todoFilter = null;
+
   function renderTodos() {
     const list = document.getElementById('todo-list');
     const summaryEl = document.getElementById('todo-summary');
     const doneToggle = document.getElementById('todo-done-toggle');
     const doneList = document.getElementById('todo-done-list');
     const doneSummary = document.getElementById('todo-done-summary');
+    const filtersEl = document.getElementById('todo-filters');
     if (!list) return;
 
     const { active, done } = sortedTodos(state.todos || []);
 
-    if (active.length === 0) {
-      list.innerHTML = `<div class="todo-empty">Nothing on the list. Add one above.</div>`;
+    const usedTags = Array.from(new Set(active.flatMap((t) => t.tags || []))).sort();
+    if (filtersEl) {
+      if (usedTags.length === 0) {
+        filtersEl.style.display = 'none';
+        filtersEl.innerHTML = '';
+        if (todoFilter !== null) todoFilter = null;
+      } else {
+        if (todoFilter && !usedTags.includes(todoFilter)) todoFilter = null;
+        filtersEl.style.display = '';
+        filtersEl.innerHTML = [
+          `<button type="button" class="chip${todoFilter === null ? ' active' : ''}" data-filter="">All</button>`,
+          ...usedTags.map((tg) =>
+            `<button type="button" class="chip${todoFilter === tg ? ' active' : ''}" data-filter="${tg}">@${tg}</button>`
+          ),
+        ].join('');
+        filtersEl.querySelectorAll('[data-filter]').forEach((el) => {
+          el.addEventListener('click', () => {
+            todoFilter = el.dataset.filter || null;
+            renderTodos();
+          });
+        });
+      }
+    }
+
+    const visible = todoFilter
+      ? active.filter((t) => (t.tags || []).includes(todoFilter))
+      : active;
+
+    if (visible.length === 0) {
+      list.innerHTML = active.length === 0
+        ? `<div class="todo-empty">Nothing on the list. Add one above.</div>`
+        : `<div class="todo-empty">Nothing tagged @${todoFilter}.</div>`;
     } else {
-      list.innerHTML = active.map((t) => {
+      list.innerHTML = visible.map((t) => {
         const status = todoStatus(t.due, false);
         const dueLabel = formatDue(t.due, status);
         const cls = ['todo-item'];
         if (status === 'overdue') cls.push('overdue');
         else if (status === 'today') cls.push('today-due');
+        const tagsHTML = (t.tags || []).length
+          ? `<span class="ttags">${(t.tags || []).map((tg) => `<span class="ttag">@${tg}</span>`).join('')}</span>`
+          : '';
         const dueHTML = dueLabel
           ? `<span class="tdue ${status === 'soon' || status === 'today' || status === 'overdue' ? status : ''}">${dueLabel}</span>`
           : '<span></span>';
         return `
           <div class="${cls.join(' ')}" data-id="${t.id}">
             <button class="ttick" data-action="toggle" aria-label="Mark done"></button>
-            <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+            <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}${tagsHTML}</span>
             ${dueHTML}
             <button class="trm" data-action="remove" aria-label="Remove">×</button>
           </div>
@@ -4710,6 +5024,35 @@
     renderTodos();
   }
 
+  function dueFromWhen(when) {
+    const today = new Date();
+    if (when === 'today') return toISODate(today);
+    if (when === 'tomorrow') return toISODate(addDays(today, 1));
+    if (when === 'week') {
+      // Sunday of the current week (week starts Monday).
+      const monday = startOfWeek(today);
+      return toISODate(addDays(monday, 6));
+    }
+    return null;
+  }
+
+  function selectedWhenChip() {
+    const el = document.querySelector('#todo-when-chips .chip.active');
+    return el ? el.dataset.when : null;
+  }
+
+  function selectedTagChips() {
+    return Array.from(document.querySelectorAll('#todo-tag-chips .chip.active'))
+      .map((el) => el.dataset.tag);
+  }
+
+  function clearTodoChipsAndDate() {
+    document.querySelectorAll('#todo-when-chips .chip.active').forEach((el) => el.classList.remove('active'));
+    document.querySelectorAll('#todo-tag-chips .chip.active').forEach((el) => el.classList.remove('active'));
+    const dueEl = document.getElementById('todo-due');
+    if (dueEl) { dueEl.value = ''; dueEl.style.display = 'none'; }
+  }
+
   function addTodoFromInputs() {
     const textEl = document.getElementById('todo-text');
     const dueEl = document.getElementById('todo-due');
@@ -4720,19 +5063,24 @@
       setTimeout(() => { textEl.style.borderColor = ''; }, 500);
       return;
     }
-    const due = (dueEl?.value || '').trim() || null;
+    const when = selectedWhenChip();
+    let due = null;
+    if (when === 'pick') due = (dueEl?.value || '').trim() || null;
+    else if (when) due = dueFromWhen(when);
+    const tags = selectedTagChips();
     if (!state.todos) state.todos = [];
     state.todos.push({
       id: `todo_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
       text,
       due,
+      tags,
       done: false,
       createdAt: new Date().toISOString(),
       doneAt: null,
     });
     save();
     textEl.value = '';
-    if (dueEl) dueEl.value = '';
+    clearTodoChipsAndDate();
     textEl.focus();
     renderTodos();
   }
@@ -4741,6 +5089,7 @@
     const addBtn = document.getElementById('todo-add-btn');
     const textEl = document.getElementById('todo-text');
     const clearBtn = document.getElementById('todo-clear');
+    const dueEl = document.getElementById('todo-due');
     if (addBtn) addBtn.addEventListener('click', addTodoFromInputs);
     if (textEl) {
       textEl.addEventListener('keydown', (e) => {
@@ -4754,6 +5103,28 @@
         renderTodos();
       });
     }
+    document.querySelectorAll('#todo-when-chips .chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const wasActive = chip.classList.contains('active');
+        document.querySelectorAll('#todo-when-chips .chip').forEach((c) => c.classList.remove('active'));
+        if (!wasActive) chip.classList.add('active');
+        if (dueEl) {
+          if (chip.dataset.when === 'pick' && !wasActive) {
+            dueEl.style.display = '';
+            dueEl.focus();
+            if (typeof dueEl.showPicker === 'function') {
+              try { dueEl.showPicker(); } catch {}
+            }
+          } else {
+            dueEl.style.display = 'none';
+            dueEl.value = '';
+          }
+        }
+      });
+    });
+    document.querySelectorAll('#todo-tag-chips .chip').forEach((chip) => {
+      chip.addEventListener('click', () => chip.classList.toggle('active'));
+    });
   }
 
   function renderChecklist() {
@@ -4833,17 +5204,19 @@
     const container = document.getElementById('tiles');
     container.innerHTML = '';
 
+    const todaySplit = gymSplitForDate(today);
     for (const act of ACTIVITIES) {
       const mins = state.sessions[todayISO]?.[act.key] || 0;
       const logged = mins > 0;
       const planned = plan.includes(act.key);
+      const splitLabel = (act.key === 'gym' && todaySplit) ? todaySplit.name : null;
 
       const tile = document.createElement('button');
       tile.className = 'tile' + (logged ? ' logged' : '');
       tile.innerHTML = `
         ${planned ? '<span class="plan-dot" aria-label="planned for today"></span>' : ''}
         <div>
-          <p class="name">${act.name}</p>
+          <p class="name">${act.name}${splitLabel ? ` <span class="tile-split">· ${splitLabel}</span>` : ''}</p>
           <p class="avg">Avg ${avgFor(act)} min</p>
         </div>
         <div class="logged-row">
@@ -4886,9 +5259,51 @@
     const avg = avgFor(activity);
     let value = current > 0 ? current : avg;
 
+    const split = activity.key === 'gym' ? gymSplitForDate(parseISO(dateISO)) : null;
+    const todayLog = split ? state.workoutLog?.[dateISO] : null;
+    const lastLog = split ? lastWorkoutForSplit(split.key, dateISO) : null;
+
+    let exerciseList = [];
+    let sourceNote = '';
+    if (split) {
+      if (todayLog && (todayLog.exercises || []).length) {
+        exerciseList = todayLog.exercises.map(id => {
+          const def = split.defaults.find(d => d.id === id);
+          return def || { id, name: id };
+        });
+        sourceNote = 'Saved from earlier today.';
+      } else if (lastLog) {
+        exerciseList = lastLog.exercises.map(id => {
+          const def = split.defaults.find(d => d.id === id);
+          return def || { id, name: id };
+        });
+        sourceNote = `From your last ${split.name.toLowerCase()} session · ${formatShortDate(lastLog.iso)}.`;
+      } else {
+        exerciseList = split.defaults.slice();
+        sourceNote = `Default ${split.name.toLowerCase()} starter — adjust as you go.`;
+      }
+    }
+    const checked = new Set(todayLog?.exercises || (lastLog ? [] : []));
+
+    const splitHTML = split ? `
+      <div class="sheet-section">
+        <p class="sheet-section-label">${split.name} · what did you do?</p>
+        <div class="gym-exercise-list" id="gym-exercises">
+          ${exerciseList.map(ex => `
+            <button type="button" class="gym-exercise-row${checked.has(ex.id) ? ' checked' : ''}" data-id="${ex.id}">
+              <span class="gtick"></span>
+              <span class="gname">${ex.name}</span>
+            </button>
+          `).join('')}
+        </div>
+        <p class="gym-source-note">${sourceNote}</p>
+      </div>
+    ` : '';
+
     openSheet(`
-      <h2>${activity.name}</h2>
+      <h2>${activity.name}${split ? ` · ${split.name}` : ''}</h2>
       <p class="subtle">${current > 0 ? `Logged ${current} min today. Adjust or remove.` : `Tap save to log your usual ${avg} min — or adjust first.`}</p>
+      ${splitHTML}
       <div class="sheet-section">
         <p class="sheet-section-label">Duration</p>
         <div class="stepper">
@@ -4904,6 +5319,16 @@
       ${current > 0 ? `<div class="sheet-actions"><button class="btn btn-danger-ghost" id="remove">Remove</button></div>` : ''}
     `);
 
+    if (split) {
+      sheet.querySelectorAll('.gym-exercise-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const id = row.dataset.id;
+          if (checked.has(id)) { checked.delete(id); row.classList.remove('checked'); }
+          else { checked.add(id); row.classList.add('checked'); }
+        });
+      });
+    }
+
     const valEl = sheet.querySelector('#val');
     const step = (delta) => { value = Math.max(0, value + delta); valEl.textContent = value; };
     sheet.querySelector('#dec').addEventListener('click', () => step(-5));
@@ -4913,6 +5338,14 @@
       if (!state.sessions[dateISO]) state.sessions[dateISO] = {};
       if (value <= 0) delete state.sessions[dateISO][activity.key];
       else state.sessions[dateISO][activity.key] = value;
+      if (split) {
+        if (!state.workoutLog) state.workoutLog = {};
+        if (value > 0 && checked.size > 0) {
+          state.workoutLog[dateISO] = { split: split.key, exercises: Array.from(checked) };
+        } else {
+          delete state.workoutLog[dateISO];
+        }
+      }
       save();
       renderTiles();
       closeSheet();
@@ -4921,8 +5354,9 @@
     if (remove) remove.addEventListener('click', () => {
       if (state.sessions[dateISO]) {
         delete state.sessions[dateISO][activity.key];
-        save();
       }
+      if (split && state.workoutLog) delete state.workoutLog[dateISO];
+      save();
       renderTiles();
       closeSheet();
     });
@@ -5052,6 +5486,7 @@
     }).join('');
 
     const weekNote = state.weekNotes[iso] || '';
+    const review = state.weekReview?.[iso] || {};
 
     const colorOptions = Object.entries(COLOR_META).map(([key, meta]) => {
       const selected = (existing || suggested) === key ? 'selected' : '';
@@ -5106,9 +5541,20 @@
       </div>
 
       <div class="sheet-section">
-        <p class="sheet-section-label">Note on the week</p>
-        <textarea class="note-area" id="week-note" placeholder="How did this week feel? What got in the way? What worked?">${weekNote.replace(/</g, '&lt;')}</textarea>
+        <p class="sheet-section-label">Looking ahead</p>
+        <p class="review-prompt">What's on the calendar next week that could threaten the chain?</p>
+        <textarea class="note-area" id="rv-threats" placeholder="Travel · big deadline · social pressure · a hard family thing.">${(review.threats || '').replace(/</g, '&lt;')}</textarea>
+        <p class="review-prompt">Any swaps that need to happen now?</p>
+        <textarea class="note-area" id="rv-swaps" placeholder="e.g. Move Friday gym to Thursday because of Roberta's parents.">${(review.swaps || '').replace(/</g, '&lt;')}</textarea>
+        <p class="review-prompt">One sentence — how do you feel about your direction?</p>
+        <textarea class="note-area" id="rv-direction" placeholder="Drift, momentum, off-course — say it plain.">${(review.direction || '').replace(/</g, '&lt;')}</textarea>
       </div>
+      ${weekNote ? `
+      <div class="sheet-section">
+        <p class="sheet-section-label">Earlier notes</p>
+        <p class="review-archive">${weekNote.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</p>
+      </div>
+      ` : ''}
 
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
@@ -5139,18 +5585,26 @@
         setTimeout(() => openDay(d, () => openWeekReview(monday)), 180);
       });
     });
+    const collectReview = () => {
+      const threats   = (sheet.querySelector('#rv-threats')?.value   ?? '').trim();
+      const swaps     = (sheet.querySelector('#rv-swaps')?.value     ?? '').trim();
+      const direction = (sheet.querySelector('#rv-direction')?.value ?? '').trim();
+      if (!state.weekReview) state.weekReview = {};
+      if (threats || swaps || direction) {
+        state.weekReview[iso] = { threats, swaps, direction };
+      } else {
+        delete state.weekReview[iso];
+      }
+    };
+
     sheet.querySelector('#cancel').addEventListener('click', () => {
-      const note = sheet.querySelector('#week-note')?.value ?? '';
-      if (note.trim()) state.weekNotes[iso] = note;
-      else delete state.weekNotes[iso];
+      collectReview();
       save();
       closeSheet();
     });
     sheet.querySelector('#save').addEventListener('click', () => {
       state.weekColors[iso] = chosen;
-      const note = sheet.querySelector('#week-note')?.value ?? '';
-      if (note.trim()) state.weekNotes[iso] = note;
-      else delete state.weekNotes[iso];
+      collectReview();
       save();
       renderChain();
       closeSheet();
@@ -5999,6 +6453,18 @@
         </div>
       `;
     }
+    const due = totalDueCount();
+    if (due >= SRS_NEW_GATE_DUE) {
+      return `
+        <div class="sheet-section">
+          <p class="sheet-section-label">Reviews first</p>
+          <p class="capture-help">You have <strong>${due}</strong> reviews due. Clear those before adding new words — otherwise the deck balloons and the queue becomes the reason you stop reviewing. Come back to <em>${w.word}</em> once you're caught up.</p>
+          <div class="sheet-actions" style="margin-top:8px">
+            <button class="btn btn-primary" id="w-go-review">Review now</button>
+          </div>
+        </div>
+      `;
+    }
     return `
       <div class="sheet-section">
         <p class="sheet-section-label">Make it yours</p>
@@ -6026,6 +6492,13 @@
       };
       wild.addEventListener('click', toggle);
       if (label) label.addEventListener('click', toggle);
+    }
+    const goReview = sheet.querySelector('#w-go-review');
+    if (goReview) {
+      goReview.addEventListener('click', () => {
+        closeSheet();
+        setTimeout(() => openReview(), 120);
+      });
     }
     const addBtn = sheet.querySelector('#w-add');
     if (addBtn) {
