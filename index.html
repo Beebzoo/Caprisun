@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Caprisun" />
 <link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="Pics/Meaple_Leaf_of_Canada.svg.png" />
+<link rel="apple-touch-icon" href="Pics/icons/apple-touch-icon.png" />
 <link rel="icon" type="image/png" href="Pics/Meaple_Leaf_of_Canada.svg.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -4580,13 +4580,16 @@
 
   // Mon/Tue draw from the generative-only pool; the rest of the week draws
   // from the full pool. Same seed → same quote on the same day, so the
-  // splash and the home-page tile stay in sync.
+  // splash and the home-page tile stay in sync. Empty-pool guard: if every
+  // generative quote ever got removed, fall back to the full list rather
+  // than crash the splash with seed % 0 → NaN.
   function pickQuoteForDate(date) {
     const seed = daySeed(date);
     const dow = date.getDay(); // 0=Sun, 1=Mon, 2=Tue
-    const pool = (dow === 1 || dow === 2)
+    let pool = (dow === 1 || dow === 2)
       ? QUOTES.filter((q) => q.tone === 'generative')
       : QUOTES;
+    if (!pool.length) pool = QUOTES;
     return pool[seed % pool.length];
   }
 
@@ -4982,6 +4985,15 @@
     const today = new Date();
     const todayISO = toISODate(today);
     const startBound = state.startDate;
+
+    // You can't have missed twice in a framework you haven't started yet.
+    // Suppress all "missed twice" prompts during the first 7 days; the
+    // habits need at least a week of real history before "two skipped in
+    // a row" carries any signal. Without this, day-1 launches would open
+    // with "Two nights without reading" — failing on the prompt's premise.
+    const startDate = parseISO(state.startDate);
+    const daysSinceStart = Math.floor((startOfDay(today) - startOfDay(startDate)) / 86400000);
+    if (daysSinceStart < 7) return;
     const dismissKeyFor = (kind) => `caprisun.missed.${kind}.dismissed.${todayISO}`;
     const isDismissed = (kind) => {
       try { return localStorage.getItem(dismissKeyFor(kind)) === '1'; } catch (e) { return false; }
@@ -6680,10 +6692,10 @@
     openSheet(`
       <h2>Quote of the day</h2>
       <p class="subtle">${subtitle}</p>
-      <p class="quote-body">"${q.text}"</p>
-      <p class="quote-attrib"><strong>${q.author}</strong> · ${q.year} · ${q.source}</p>
+      <p class="quote-body">"${escapeHTML(q.text)}"</p>
+      <p class="quote-attrib"><strong>${escapeHTML(q.author)}</strong> · ${escapeHTML(q.year)} · ${escapeHTML(q.source)}</p>
       <p class="quote-meaning-label">What it means</p>
-      <p class="quote-meaning">${q.meaning}</p>
+      <p class="quote-meaning">${escapeHTML(q.meaning)}</p>
       ${deckHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Close</button>
@@ -6772,14 +6784,14 @@
     openSheet(`
       <h2>Word of the day</h2>
       <p class="subtle">${subtitle}</p>
-      <p class="word-headline">${w.word}</p>
-      <p class="word-meta">${w.pos} · /${w.pron}/</p>
+      <p class="word-headline">${escapeHTML(w.word)}</p>
+      <p class="word-meta">${escapeHTML(w.pos)} · /${escapeHTML(w.pron)}/</p>
       <p class="word-block-label">Definition</p>
-      <p class="word-def">${w.definition}</p>
+      <p class="word-def">${escapeHTML(w.definition)}</p>
       <p class="word-block-label">Origin</p>
-      <p class="word-origin">${w.origin}</p>
+      <p class="word-origin">${escapeHTML(w.origin)}</p>
       <p class="word-block-label">In a sentence</p>
-      <p class="word-example">${w.example}</p>
+      <p class="word-example">${escapeHTML(w.example)}</p>
       ${deckHTML}
       ${pastWordsHTML}
       <div class="sheet-actions">
@@ -6813,8 +6825,8 @@
       return `
         <button class="archive-item" data-past-word-iso="${iso}">
           <span class="aleft">
-            <span class="adate">${fmtDate.format(date)} · ${w.pos}</span>
-            <span class="atext">${w.word} — ${escapeHTML(short)}</span>
+            <span class="adate">${fmtDate.format(date)} · ${escapeHTML(w.pos)}</span>
+            <span class="atext">${escapeHTML(w.word)} — ${escapeHTML(short)}</span>
           </span>
           ${badge}
         </button>
@@ -6860,8 +6872,8 @@
     return `
       <div class="sheet-section">
         <p class="sheet-section-label">Write one good sentence</p>
-        <p class="capture-help">Use <em>${w.word}</em> in a line that's true about your own life this week. The sentence is the deck entry — active production beats rote re-reading, and one personal sentence sticks longer than fifty repetitions of the dictionary one.</p>
-        <textarea class="capture-input" id="w-sentence" placeholder="e.g. Roberta's thesis deadline has made her schedule quite ${w.word.toLowerCase()} this month."></textarea>
+        <p class="capture-help">Use <em>${escapeHTML(w.word)}</em> in a line that's true about your own life this week. The sentence is the deck entry — active production beats rote re-reading, and one personal sentence sticks longer than fifty repetitions of the dictionary one.</p>
+        <textarea class="capture-input" id="w-sentence" placeholder="e.g. Roberta's thesis deadline has made her schedule quite ${escapeHTML(w.word.toLowerCase())} this month."></textarea>
         <p class="capture-warn" id="w-warn"></p>
         <div class="sheet-actions" style="margin-top:8px">
           <button class="btn btn-primary" id="w-add">Add to your deck</button>
@@ -7050,11 +7062,11 @@
         const w = WORDS.find(x => x.word === item.key);
         if (!w) { advance(); return; }
         body = `
-          <p class="review-prompt">${w.word}</p>
+          <p class="review-prompt">${escapeHTML(w.word)}</p>
           <p class="review-subprompt">What does this mean? Think it through, then reveal.</p>
           ${revealed ? `
             <div class="review-answer">
-              <p class="def">${w.definition}</p>
+              <p class="def">${escapeHTML(w.definition)}</p>
               <p class="meta">Your sentence</p>
               <p class="personal">${escapeHTML(item.entry.personalSentence || '—')}</p>
             </div>
@@ -7066,11 +7078,11 @@
         const q = QUOTES.find(x => x.text === item.key);
         if (!q) { advance(); return; }
         body = `
-          <p class="review-prompt" style="font-size:22px">"${q.text}"</p>
-          <p class="review-subprompt"><strong>${q.author}</strong> · ${q.year}. Does the idea still land?</p>
+          <p class="review-prompt" style="font-size:22px">"${escapeHTML(q.text)}"</p>
+          <p class="review-subprompt"><strong>${escapeHTML(q.author)}</strong> · ${escapeHTML(q.year)}. Does the idea still land?</p>
           ${revealed ? `
             <div class="review-answer">
-              <p class="def">${q.meaning}</p>
+              <p class="def">${escapeHTML(q.meaning)}</p>
               <p class="meta">Your note</p>
               <p class="personal">${escapeHTML(item.entry.personalNote || '—')}</p>
             </div>
@@ -7173,14 +7185,14 @@
           </div>
           <button class="archive-item" data-iso="${iso}" data-kind="quote">
             <span class="aleft">
-              <span class="adate"><span class="akind">Quote</span>${q.author}</span>
+              <span class="adate"><span class="akind">Quote</span>${escapeHTML(q.author)}</span>
               <span class="atext">"${escapeHTML(quotePreview)}"</span>
             </span>
           </button>
           <button class="archive-item" data-iso="${iso}" data-kind="word">
             <span class="aleft">
-              <span class="adate"><span class="akind">Word</span>${w.pos}</span>
-              <span class="atext">${w.word} — ${escapeHTML(wordText)}</span>
+              <span class="adate"><span class="akind">Word</span>${escapeHTML(w.pos)}</span>
+              <span class="atext">${escapeHTML(w.word)} — ${escapeHTML(wordText)}</span>
             </span>
           </button>
         </div>
@@ -7238,8 +7250,8 @@
           return `
             <button class="archive-item" data-iso="${iso}">
               <span class="aleft">
-                <span class="adate">${fmtDate.format(parseISO(iso))} · ${q.author}</span>
-                <span class="atext">"${preview}"</span>
+                <span class="adate">${fmtDate.format(parseISO(iso))} · ${escapeHTML(q.author)}</span>
+                <span class="atext">"${escapeHTML(preview)}"</span>
               </span>
               ${badge}
             </button>
@@ -7259,8 +7271,8 @@
           return `
             <button class="archive-item" data-iso="${iso}">
               <span class="aleft">
-                <span class="adate">${fmtDate.format(parseISO(iso))} · ${w.pos}</span>
-                <span class="atext">${w.word} — ${w.definition.replace(/\.$/, '')}</span>
+                <span class="adate">${fmtDate.format(parseISO(iso))} · ${escapeHTML(w.pos)}</span>
+                <span class="atext">${escapeHTML(w.word)} — ${escapeHTML(w.definition.replace(/\.$/, ''))}</span>
               </span>
               ${badge}
             </button>
