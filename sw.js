@@ -1,6 +1,6 @@
 // Caprisun service worker — offline cache for the daily ritual app.
 // Bump CACHE_VERSION whenever the app shell changes so stale assets get evicted.
-const CACHE_VERSION = 'caprisun-v13';
+const CACHE_VERSION = 'caprisun-v14';
 
 const APP_SHELL = [
   './',
