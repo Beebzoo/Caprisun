@@ -4049,52 +4049,86 @@
 
   // --- State ---------------------------------------------------------------
 
+  /**
+   * The complete persisted state shape, in one place. Everything in this
+   * object is JSON-serialised and stored in localStorage under STORAGE_KEY,
+   * and round-tripped through Supabase when sync is enabled. New keys must
+   * be added with sensible defaults so old saved blobs still hydrate cleanly
+   * (load() merges via spread).
+   *
+   * Date keys are ISO strings of the form 'YYYY-MM-DD' (local-day) unless
+   * the field is explicitly a timestamp, in which case it's full ISO.
+   *
+   * Shape (with example values):
+   *
+   *   sessions       { 'YYYY-MM-DD': { gym: 45, yoga: 30, meditation: 10, reading: 22 } }
+   *   weekColors     { 'YYYY-MM-DD' (Monday): 'deep' | 'soft' | 'ochre' | 'terra' }
+   *   dayColors      { 'YYYY-MM-DD': 'deep' | 'soft' | 'ochre' | 'terra' }
+   *   dayNotes       { 'YYYY-MM-DD': string }
+   *   weekNotes      { 'YYYY-MM-DD' (Monday): string }
+   *   habits         { 'YYYY-MM-DD': { teeth: true, shower: true, ... } }
+   *   sleep          { 'YYYY-MM-DD': number (hours, e.g. 7.5) }
+   *   sleepTimes     { 'YYYY-MM-DD': { bed: 'HH:MM', wake: 'HH:MM' } }   recorded the morning after
+   *   morningPlan    { 'YYYY-MM-DD': string }                            short note about today
+   *   priorities     { 'YYYY-MM-DD': [{text, done}, {text, done}, {text, done}] }   today's three
+   *   mood           { 'YYYY-MM-DD': 1..5 }                              1=drained, 5=great
+   *   drinks         { 'YYYY-MM-DD': { drank: false } | { drank: true, until: 'HH:MM', count: N } }
+   *   flowers        { 'YYYY-MM-DD' (Wednesday): 'yes' | 'no' }
+   *
+   *   todos          [ { id, text, due, done, createdAt, doneAt } ]
+   *   thoughts       [ { id, createdAt (ISO timestamp), text, updatedAt? } ]
+   *   customHabits   [ { id: 'custom_xxx', name } ]
+   *
+   *   wordDeck       { [word]:  { stage, nextReview, lastReview, firstSeen,
+   *                               personalSentence, usedInWild,
+   *                               history: [{ date, rating }] } }
+   *   quoteDeck      { [quote]: { stage, nextReview, lastReview, firstSeen,
+   *                               personalNote, usedInWild,
+   *                               history: [{ date, rating }] } }
+   *   wordPractice   { 'YYYY-MM-DD': 0..5 }                              5x daily drill counter
+   *   quotePractice  { 'YYYY-MM-DD': 0..5 }
+   *   wordWriting    { [word]: { text, savedAt } }                       free-form writing about a word
+   *   seenWords      { [word]: 'YYYY-MM-DD' }                            last shown date
+   *   seenQuotes     { [quote]: 'YYYY-MM-DD' }
+   *
+   *   quizStats      { gamesPlayed, questionsSeen, questionsCorrect, bestScore,
+   *                    lastScore, lastPlayedAt, byCategory: { [cat]: { seen, correct } } }
+   *   quizSeen       { [questionId]: 'YYYY-MM-DD' }
+   *   quizResults    { [day or sessionId]: ... }                         legacy per-game results
+   *   quizPrefs      { mode: 'choice' | 'type' | 'mixed', category: string | null }
+   *
+   *   workoutPlans      { [planId]: { id, name, createdAt, updatedAt,
+   *                                   exercises: [{ id, sets, reps }] } }
+   *   workoutPlanOrder  [planId]                                         display order
+   *   workoutPrefs      { muscleFilter: string | null, difficultyFilter: string | null }
+   *
+   *   notify         { sundaySeal: boolean }                             sole opt-in notification
+   *   startDate      'YYYY-MM-DD'                                        first Monday the chain is live
+   */
   const defaultState = () => ({
     sessions: {},
     weekColors: {},
+    dayColors: {},
     dayNotes: {},
     weekNotes: {},
     habits: {},
     sleep: {},
-    // Bedtime/wake-time pair, recorded the morning after.
-    // { [dateISO]: { bed: 'HH:MM', wake: 'HH:MM' } }
     sleepTimes: {},
-    // Short morning intention for today.
-    // { [dateISO]: string }
     morningPlan: {},
-    // To-do list (separate from today's three priorities — these
-    // can have deadlines and span days). Items: { id, text, due, done, createdAt, doneAt }
-    todos: [],
-    // Today's three priorities.
-    // { [dateISO]: [{text, done}, {text, done}, {text, done}] }
     priorities: {},
-    // Morning mood/energy 1..5 (1 = drained, 5 = great).
-    // { [dateISO]: number }
     mood: {},
-    // User-defined extra checklist items.
-    // [{ id: 'custom_xxx', name: '...' }]
+    drinks: {},
+    flowers: {},
+    todos: [],
+    thoughts: [],
     customHabits: [],
-    dayColors: {}, // key: YYYY-MM-DD, value: 'deep' | 'soft' | 'ochre' | 'terra'
-    quizResults: {},
-    seenQuotes: {},
-    seenWords: {},
-    // 5x drill counts (motor-memory) — independent of SRS deck
-    quotePractice: {}, // key: YYYY-MM-DD → number of completed repetitions (0..5)
-    wordPractice: {},  // key: YYYY-MM-DD → number of completed repetitions (0..5)
-    // Free-form writing about a word — keyed by the word string
-    // { [word]: { text, savedAt } }
-    wordWriting: {},
-    // SRS decks — keyed by word / quote text
-    // Each entry: { stage, nextReview, lastReview, firstSeen, personalSentence/personalNote, usedInWild, history: [{date, rating}] }
     wordDeck: {},
     quoteDeck: {},
-    // Drinks log — key: YYYY-MM-DD → null | { drank: false } | { drank: true, until: 'HH:MM', count: N }
-    drinks: {},
-    // Wednesday flowers — key: YYYY-MM-DD (Wednesday date) → 'yes' | 'no'
-    flowers: {},
-    // Free-form thoughts — array of { id, createdAt (ISO), text, updatedAt? }
-    thoughts: [],
-    // Trivia quiz — aggregate stats and per-question seen tracking
+    wordPractice: {},
+    quotePractice: {},
+    wordWriting: {},
+    seenWords: {},
+    seenQuotes: {},
     quizStats: {
       gamesPlayed: 0,
       questionsSeen: 0,
@@ -4102,16 +4136,14 @@
       bestScore: 0,
       lastScore: null,
       lastPlayedAt: null,
-      byCategory: {}, // { [cat]: { seen, correct } }
+      byCategory: {},
     },
-    quizSeen: {}, // { [questionId]: lastSeenISO }
-    quizPrefs: { mode: 'choice', category: null }, // remembered across sessions
-    // Workouts — user-created named plans and filter preferences
-    workoutPlans: {}, // { [planId]: { id, name, createdAt, updatedAt, exercises: [{id, sets, reps}] } }
-    workoutPlanOrder: [], // array of planIds
+    quizSeen: {},
+    quizResults: {},
+    quizPrefs: { mode: 'choice', category: null },
+    workoutPlans: {},
+    workoutPlanOrder: [],
     workoutPrefs: { muscleFilter: null, difficultyFilter: null },
-    // Notification preferences. Only one notification exists in the app:
-    // the Sunday 6pm "seal the week" reminder. Off by default.
     notify: { sundaySeal: false },
     startDate: '2026-04-27',
   });
@@ -4293,7 +4325,7 @@
         error: 'Sync error',
       })[syncStatus] || 'Signed in';
       body.innerHTML = `
-        <p class="subtle" style="margin:0 0 4px">Signed in as <strong>${(currentUser.email || '—').replace(/</g, '&lt;')}</strong></p>
+        <p class="subtle" style="margin:0 0 4px">Signed in as <strong>${escapeHTML(currentUser.email || '—')}</strong></p>
         <p class="subtle" style="margin:0 0 12px">${statusText}</p>
         <div class="sheet-actions" style="margin-top:0">
           <button class="btn btn-ghost" id="sync-signout">Sign out</button>
@@ -4333,6 +4365,65 @@
     const [y, m, d] = iso.split('-').map(Number);
     return new Date(y, m - 1, d);
   }
+
+  // The single HTML-escape helper for the whole app. Use this anywhere
+  // user-supplied text lands inside a template literal — both element bodies
+  // and attribute values. Coerces to string, so safe for nullable inputs.
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // The single source of truth for date / duration display. Every formatter
+  // in the app routes through here so that changing display style is a
+  // one-spot edit rather than a cross-file hunt.
+  const fmt = {
+    // 7.5 → "7h 30m" (or "7h" if exact). Returns "—" for invalid input.
+    sleep(h) {
+      if (!isFinite(h) || h <= 0) return '—';
+      const totalMin = Math.round(h * 60);
+      const hh = Math.floor(totalMin / 60);
+      const mm = totalMin % 60;
+      return mm === 0 ? `${hh}h` : `${hh}h ${mm}m`;
+    },
+    // ISO date "2026-05-05" → "5 May". Used for next-review labels and similar.
+    shortDate(iso) {
+      return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(parseISO(iso));
+    },
+    // ISO timestamp → "MON 5 MAY". Used for thought entries on the home page.
+    thoughtDate(iso) {
+      return new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+        .format(new Date(iso)).toUpperCase();
+    },
+    // ISO timestamp → relative time ("just now", "5 min ago", "3 days ago",
+    // or a "5 May" date once it's a week old). Used for workout-plan freshness.
+    planTimestamp(iso) {
+      if (!iso) return 'just now';
+      const then = new Date(iso);
+      const diff = Math.round((Date.now() - then.getTime()) / 1000);
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
+      const days = Math.floor(diff / 86400);
+      if (days < 7) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+      return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    },
+    // Todo deadline ISO + status flag → "Today", "Tomorrow", "3d overdue", etc.
+    due(due, status) {
+      if (!due) return '';
+      const dueDate = parseISO(due);
+      const today = new Date();
+      const days = daysBetween(today, dueDate);
+      if (status === 'overdue') {
+        const n = -days;
+        if (n === 1) return 'Yesterday';
+        return `${n}d overdue`;
+      }
+      if (status === 'today') return 'Today';
+      if (days === 1) return 'Tomorrow';
+      if (days <= 6) return `${days}d`;
+      return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(dueDate);
+    },
+  };
 
   function daysBetween(a, b) {
     const ms = startOfDay(b) - startOfDay(a);
@@ -4910,13 +5001,6 @@
     return (wakeMin - bedMin) / 60;
   }
 
-  function formatSleepHours(h) {
-    const whole = Math.floor(h);
-    const mins = Math.round((h - whole) * 60);
-    if (mins === 0) return `${whole}h`;
-    return `${whole}h ${mins}m`;
-  }
-
   function updateSleepSummary() {
     const bedEl = document.getElementById('bed-time');
     const wakeEl = document.getElementById('wake-time');
@@ -4928,7 +5012,7 @@
       summaryEl.textContent = 'Enter both times to see your sleep.';
     } else {
       summaryEl.classList.remove('placeholder');
-      summaryEl.innerHTML = `<strong>${formatSleepHours(hours)}</strong> of sleep`;
+      summaryEl.innerHTML = `<strong>${fmt.sleep(hours)}</strong> of sleep`;
     }
     updateSleepAvg();
   }
@@ -4945,7 +5029,7 @@
     }
     if (samples.length < 2) { el.textContent = ''; return; }
     const avg = samples.reduce((a, b) => a + b, 0) / samples.length;
-    el.textContent = `7-day avg: ${formatSleepHours(avg)} (${samples.length} night${samples.length === 1 ? '' : 's'})`;
+    el.textContent = `7-day avg: ${fmt.sleep(avg)} (${samples.length} night${samples.length === 1 ? '' : 's'})`;
   }
 
   function renderMorningRitual() {
@@ -4984,9 +5068,9 @@
           tagHTML = `<span class="${tagCls}">Kept ${doneCount} of ${total}</span>`;
         }
         const prioritiesHTML = total
-          ? `<ul class="readback-list">${yPriorities.map((p) => `<li class="${p.done ? 'done' : 'missed'}"><span class="rmark">${p.done ? '✓' : '✗'}</span>${p.text.replace(/</g, '&lt;')}</li>`).join('')}</ul>`
+          ? `<ul class="readback-list">${yPriorities.map((p) => `<li class="${p.done ? 'done' : 'missed'}"><span class="rmark">${p.done ? '✓' : '✗'}</span>${escapeHTML(p.text)}</li>`).join('')}</ul>`
           : '';
-        const planHTML = yPlan ? `<div class="readback-plan">${yPlan.replace(/</g, '&lt;')}</div>` : '';
+        const planHTML = yPlan ? `<div class="readback-plan">${escapeHTML(yPlan)}</div>` : '';
         readbackEl.style.display = '';
         readbackEl.innerHTML = `<div class="label-row"><span class="label">You'd planned</span>${tagHTML}</div>${prioritiesHTML}${planHTML}`;
       } else {
@@ -5158,23 +5242,6 @@
     return 'later';
   }
 
-  function formatDue(due, status) {
-    if (!due) return '';
-    const dueDate = parseISO(due);
-    const today = new Date();
-    const days = daysBetween(today, dueDate);
-    if (status === 'overdue') {
-      const n = -days;
-      if (n === 1) return 'Yesterday';
-      return `${n}d overdue`;
-    }
-    if (status === 'today') return 'Today';
-    if (days === 1) return 'Tomorrow';
-    if (days <= 6) return `${days}d`;
-    const fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
-    return fmt.format(dueDate);
-  }
-
   function sortedTodos(list) {
     const active = (list || []).filter((t) => !t.done).slice();
     const done = (list || []).filter((t) => t.done).slice();
@@ -5205,7 +5272,7 @@
     } else {
       list.innerHTML = active.map((t) => {
         const status = todoStatus(t.due, false);
-        const dueLabel = formatDue(t.due, status);
+        const dueLabel = fmt.due(t.due, status);
         const cls = ['todo-item'];
         if (status === 'overdue') cls.push('overdue');
         else if (status === 'today') cls.push('today-due');
@@ -5215,7 +5282,7 @@
         return `
           <div class="${cls.join(' ')}" data-id="${t.id}">
             <button class="ttick" data-action="toggle" aria-label="Mark done"></button>
-            <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+            <span class="ttext">${escapeHTML(t.text || '')}</span>
             ${dueHTML}
             <button class="trm" data-action="remove" aria-label="Remove">×</button>
           </div>
@@ -5243,7 +5310,7 @@
         doneList.innerHTML = done.map((t) => `
           <div class="todo-item done" data-id="${t.id}">
             <button class="ttick" data-action="toggle" aria-label="Reopen"></button>
-            <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+            <span class="ttext">${escapeHTML(t.text || '')}</span>
             <span></span>
             <button class="trm" data-action="remove" aria-label="Remove">×</button>
           </div>
@@ -5334,7 +5401,7 @@
       return `
         <button class="check-item ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
           <span class="tick"></span>
-          <span class="hname">${h.name.replace(/</g, '&lt;')}</span>
+          <span class="hname">${escapeHTML(h.name)}</span>
           ${streakHTML}
         </button>
       `;
@@ -5443,6 +5510,31 @@
     overlay.classList.add('open');
   }
 
+  // Factor out the repeated sheet.querySelector('#x').addEventListener('click', fn)
+  // boilerplate. Pass an object mapping selectors to handlers; the helper looks
+  // each one up under the sheet and silently skips missing nodes (so optional
+  // buttons like '#clear' don't need conditional wiring).
+  //
+  // Two value shapes per selector:
+  //   '#cancel': closeSheet                          // click handler
+  //   '#qty':   { event: 'input', handler: onChange } // single non-click event
+  //
+  // Returns the sheet element so you can still drop down to manual queries
+  // for anything more elaborate.
+  function wireSheet(handlers) {
+    for (const sel in handlers) {
+      const node = sheet.querySelector(sel);
+      if (!node) continue;
+      const spec = handlers[sel];
+      if (typeof spec === 'function') {
+        node.addEventListener('click', spec);
+      } else if (spec && typeof spec.handler === 'function') {
+        node.addEventListener(spec.event || 'click', spec.handler);
+      }
+    }
+    return sheet;
+  }
+
   // --- Log sheet -----------------------------------------------------------
 
   function openLog(activity, dateISO) {
@@ -5470,25 +5562,26 @@
 
     const valEl = sheet.querySelector('#val');
     const step = (delta) => { value = Math.max(0, value + delta); valEl.textContent = value; };
-    sheet.querySelector('#dec').addEventListener('click', () => step(-5));
-    sheet.querySelector('#inc').addEventListener('click', () => step(5));
-    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
-    sheet.querySelector('#save').addEventListener('click', () => {
-      if (!state.sessions[dateISO]) state.sessions[dateISO] = {};
-      if (value <= 0) delete state.sessions[dateISO][activity.key];
-      else state.sessions[dateISO][activity.key] = value;
-      save();
-      renderTiles();
-      closeSheet();
-    });
-    const remove = sheet.querySelector('#remove');
-    if (remove) remove.addEventListener('click', () => {
-      if (state.sessions[dateISO]) {
-        delete state.sessions[dateISO][activity.key];
+    wireSheet({
+      '#dec': () => step(-5),
+      '#inc': () => step(5),
+      '#cancel': closeSheet,
+      '#save': () => {
+        if (!state.sessions[dateISO]) state.sessions[dateISO] = {};
+        if (value <= 0) delete state.sessions[dateISO][activity.key];
+        else state.sessions[dateISO][activity.key] = value;
         save();
-      }
-      renderTiles();
-      closeSheet();
+        renderTiles();
+        closeSheet();
+      },
+      '#remove': () => {
+        if (state.sessions[dateISO]) {
+          delete state.sessions[dateISO][activity.key];
+          save();
+        }
+        renderTiles();
+        closeSheet();
+      },
     });
   }
 
@@ -5515,7 +5608,7 @@
       const c = habitCounts[h.key] || 0;
       return `
         <div class="summary-tile">
-          <p class="slabel">${h.name.replace(/</g, '&lt;')}</p>
+          <p class="slabel">${escapeHTML(h.name)}</p>
           <p class="svalue">${c}<small>/ 7 days</small></p>
         </div>
       `;
@@ -5671,7 +5764,7 @@
 
       <div class="sheet-section">
         <p class="sheet-section-label">Note on the week</p>
-        <textarea class="note-area" id="week-note" placeholder="How did this week feel? What got in the way? What worked?">${weekNote.replace(/</g, '&lt;')}</textarea>
+        <textarea class="note-area" id="week-note" placeholder="How did this week feel? What got in the way? What worked?">${escapeHTML(weekNote)}</textarea>
       </div>
 
       <div class="sheet-actions">
@@ -5703,28 +5796,26 @@
         setTimeout(() => openDay(d, () => openWeekReview(monday)), 180);
       });
     });
-    sheet.querySelector('#cancel').addEventListener('click', () => {
+    const persistWeekNote = () => {
       const note = sheet.querySelector('#week-note')?.value ?? '';
       if (note.trim()) state.weekNotes[iso] = note;
       else delete state.weekNotes[iso];
-      save();
-      closeSheet();
-    });
-    sheet.querySelector('#save').addEventListener('click', () => {
-      state.weekColors[iso] = chosen;
-      const note = sheet.querySelector('#week-note')?.value ?? '';
-      if (note.trim()) state.weekNotes[iso] = note;
-      else delete state.weekNotes[iso];
-      save();
-      renderChain();
-      closeSheet();
-    });
-    const clear = sheet.querySelector('#clear');
-    if (clear) clear.addEventListener('click', () => {
-      delete state.weekColors[iso];
-      save();
-      renderChain();
-      closeSheet();
+    };
+    wireSheet({
+      '#cancel': () => { persistWeekNote(); save(); closeSheet(); },
+      '#save': () => {
+        state.weekColors[iso] = chosen;
+        persistWeekNote();
+        save();
+        renderChain();
+        closeSheet();
+      },
+      '#clear': () => {
+        delete state.weekColors[iso];
+        save();
+        renderChain();
+        closeSheet();
+      },
     });
   }
 
@@ -5761,7 +5852,7 @@
     const habitChips = getAllHabits().map(h => `
       <button class="habit-chip ${habits[h.key] ? 'on' : ''}" data-habit="${h.key}">
         <span class="tick"></span>
-        <span>${h.name.replace(/</g, '&lt;')}</span>
+        <span>${escapeHTML(h.name)}</span>
       </button>
     `).join('');
 
@@ -5843,7 +5934,7 @@
 
       <div class="sheet-section">
         <p class="sheet-section-label">Note</p>
-        <textarea class="note-area" id="day-note" placeholder="A line or two. How it went, how it felt.">${note.replace(/</g, '&lt;')}</textarea>
+        <textarea class="note-area" id="day-note" placeholder="A line or two. How it went, how it felt.">${escapeHTML(note)}</textarea>
       </div>
 
       <div class="sheet-actions">
@@ -6087,7 +6178,7 @@
       lines.push(`## Week ${weekIdx} · ${range}`);
       lines.push('');
       lines.push(`- **Color:** ${colorLabel}`);
-      if (sleep) lines.push(`- **Sleep avg:** ${fmtSleepHM(sleep.avg)} (${sleep.days} night${sleep.days === 1 ? '' : 's'})`);
+      if (sleep) lines.push(`- **Sleep avg:** ${fmt.sleep(sleep.avg)} (${sleep.days} night${sleep.days === 1 ? '' : 's'})`);
       if (mood.total > 0) lines.push(`- **Mood avg:** ${mood.avg.toFixed(1)} / 5 (${mood.total} day${mood.total === 1 ? '' : 's'})`);
       lines.push(`- **Sessions:** ${sum.gymCount} gym · ${sum.yogaCount} yoga · ${sum.medCount} meditation · ${sum.readCount} reading`);
       lines.push('');
@@ -6114,7 +6205,7 @@
         const meta = [];
         if (parts.length) meta.push(parts.join(', '));
         if (typeof m === 'number') meta.push(`mood ${m}/5`);
-        if (typeof sl === 'number') meta.push(`sleep ${fmtSleepHM(sl)}`);
+        if (typeof sl === 'number') meta.push(`sleep ${fmt.sleep(sl)}`);
         if (dayColor) meta.push(COLOR_META[dayColor].label.toLowerCase());
         const metaStr = meta.length ? ` — ${meta.join(' · ')}` : '';
         lines.push(`- **${fullDayNames[i]} ${date.getDate()} ${monthShort(date)}**${metaStr}`);
@@ -6335,52 +6426,49 @@
     renderSyncSection();
     renderCustomHabitsList();
 
-    sheet.querySelector('#custom-habit-add').addEventListener('click', addCustomHabitFromInput);
-    sheet.querySelector('#custom-habit-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); addCustomHabitFromInput(); }
-    });
-
-    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
-    sheet.querySelector('#save-settings').addEventListener('click', () => {
-      const val = sheet.querySelector('#start-input').value;
-      if (val) state.startDate = val;
-      save();
-      renderAll();
-      closeSheet();
-    });
-    sheet.querySelector('#reset').addEventListener('click', () => {
-      if (!confirm('Erase all logged sessions, notes, colors, and decks? This cannot be undone.')) return;
-      state = defaultState();
-      save();
-      renderAll();
-      closeSheet();
-    });
-
-    sheet.querySelector('#export-btn').addEventListener('click', exportData);
-    sheet.querySelector('#export-md-btn').addEventListener('click', exportMarkdown);
-
-    const notifBox = sheet.querySelector('#notif-sunday');
-    if (notifBox) notifBox.addEventListener('change', () => setSundaySealEnabled(notifBox.checked));
-
-    const importBtn = sheet.querySelector('#import-btn');
     const fileInput = sheet.querySelector('#import-file');
-    importBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      try {
-        const data = await importDataFromFile(file);
-        const proceed = confirm('This will replace all your current data with the backup. Continue?');
-        if (!proceed) { fileInput.value = ''; return; }
-        state = { ...defaultState(), ...data };
+
+    wireSheet({
+      '#custom-habit-add': addCustomHabitFromInput,
+      '#custom-habit-input': { event: 'keydown', handler: (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addCustomHabitFromInput(); }
+      }},
+      '#cancel': closeSheet,
+      '#save-settings': () => {
+        const val = sheet.querySelector('#start-input').value;
+        if (val) state.startDate = val;
         save();
         renderAll();
         closeSheet();
-        setTimeout(() => alert('Backup restored.'), 180);
-      } catch (err) {
-        alert(err.message || 'Could not import that file.');
-        fileInput.value = '';
-      }
+      },
+      '#reset': () => {
+        if (!confirm('Erase all logged sessions, notes, colors, and decks? This cannot be undone.')) return;
+        state = defaultState();
+        save();
+        renderAll();
+        closeSheet();
+      },
+      '#export-btn': exportData,
+      '#export-md-btn': exportMarkdown,
+      '#notif-sunday': { event: 'change', handler: (e) => setSundaySealEnabled(e.target.checked) },
+      '#import-btn': () => fileInput.click(),
+      '#import-file': { event: 'change', handler: async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const data = await importDataFromFile(file);
+          const proceed = confirm('This will replace all your current data with the backup. Continue?');
+          if (!proceed) { fileInput.value = ''; return; }
+          state = { ...defaultState(), ...data };
+          save();
+          renderAll();
+          closeSheet();
+          setTimeout(() => alert('Backup restored.'), 180);
+        } catch (err) {
+          alert(err.message || 'Could not import that file.');
+          fileInput.value = '';
+        }
+      }},
     });
   }
 
@@ -6423,7 +6511,7 @@
     }
     list.innerHTML = items.map((h) => `
       <div class="custom-habit-row" data-id="${h.id}">
-        <span>${(h.name || '').replace(/</g, '&lt;')}</span>
+        <span>${escapeHTML(h.name || '')}</span>
         <button class="remove" data-id="${h.id}">Remove</button>
       </div>
     `).join('');
@@ -6550,14 +6638,14 @@
   function renderQuoteDeckSection(q, entry) {
     if (entry) {
       const dueLabel = entry.nextReview >= toISODate(new Date())
-        ? `Next review ${formatShortDate(entry.nextReview)}`
+        ? `Next review ${fmt.shortDate(entry.nextReview)}`
         : `Due today`;
       return `
         <div class="sheet-section">
           <p class="sheet-section-label">In your deck · ${stageLabel(entry.stage)}</p>
           <div class="deck-card">
             <div class="deck-meta"><span>Your note</span><span>${dueLabel}</span></div>
-            <p class="deck-sentence">${(entry.personalNote || '(no note)').replace(/</g, '&lt;')}</p>
+            <p class="deck-sentence">${escapeHTML(entry.personalNote || '(no note)')}</p>
             <div class="deck-wild-row">
               <span class="deck-wild ${entry.usedInWild ? 'on' : ''}" id="q-wild"></span>
               <span class="deck-wild-label ${entry.usedInWild ? 'on' : ''}" id="q-wild-label">I've put this idea to use this week</span>
@@ -6607,11 +6695,6 @@
         setTimeout(() => openQuote(), 120);
       });
     }
-  }
-
-  function formatShortDate(iso) {
-    const d = parseISO(iso);
-    return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(d);
   }
 
   function openWord(opts) {
@@ -6681,12 +6764,12 @@
   function renderWordWritingSection(w, entry) {
     const text = entry?.text || '';
     const savedNote = entry
-      ? `<span class="practice-count">Saved ${formatShortDate(entry.savedAt.slice(0, 10))}</span>`
+      ? `<span class="practice-count">Saved ${fmt.shortDate(entry.savedAt.slice(0, 10))}</span>`
       : '';
     return `
       <div class="sheet-section">
         <p class="practice-label"><span>Practice 2 · Write about it</span>${savedNote}</p>
-        <textarea class="practice-input" id="word-writing-input" rows="4" placeholder="What does &quot;${w.word}&quot; bring up for you? When might you use it? What does it remind you of?">${text.replace(/</g, '&lt;')}</textarea>
+        <textarea class="practice-input" id="word-writing-input" rows="4" placeholder="What does &quot;${w.word}&quot; bring up for you? When might you use it? What does it remind you of?">${escapeHTML(text)}</textarea>
         <div class="sheet-actions" style="margin-top:8px">
           <button class="btn btn-primary" id="word-writing-save">${entry ? 'Update' : 'Save'}</button>
           ${entry ? `<button class="btn btn-ghost" id="word-writing-clear">Clear</button>` : ''}
@@ -6745,7 +6828,7 @@
         <button class="archive-item" data-past-word-iso="${iso}">
           <span class="aleft">
             <span class="adate">${fmtDate.format(date)} · ${w.pos}</span>
-            <span class="atext">${w.word} — ${short.replace(/</g, '&lt;')}</span>
+            <span class="atext">${w.word} — ${escapeHTML(short)}</span>
           </span>
           ${badge}
         </button>
@@ -6772,14 +6855,14 @@
   function renderWordDeckSection(w, entry) {
     if (entry) {
       const dueLabel = entry.nextReview >= toISODate(new Date())
-        ? `Next review ${formatShortDate(entry.nextReview)}`
+        ? `Next review ${fmt.shortDate(entry.nextReview)}`
         : `Due today`;
       return `
         <div class="sheet-section">
           <p class="sheet-section-label">In your deck · ${stageLabel(entry.stage)}</p>
           <div class="deck-card">
             <div class="deck-meta"><span>Your sentence</span><span>${dueLabel}</span></div>
-            <p class="deck-sentence">${(entry.personalSentence || '(no sentence)').replace(/</g, '&lt;')}</p>
+            <p class="deck-sentence">${escapeHTML(entry.personalSentence || '(no sentence)')}</p>
             <div class="deck-wild-row">
               <span class="deck-wild ${entry.usedInWild ? 'on' : ''}" id="w-wild"></span>
               <span class="deck-wild-label ${entry.usedInWild ? 'on' : ''}" id="w-wild-label">I've used this word in the wild</span>
@@ -7021,7 +7104,7 @@
         reviewBtn.style.display = '';
         reviewBtn.classList.add('review-empty');
         const next = [earliestUpcoming(state.wordDeck), earliestUpcoming(state.quoteDeck)].filter(Boolean).sort()[0];
-        reviewPreview.textContent = next ? `All caught up · next on ${formatShortDate(next)}` : 'All caught up.';
+        reviewPreview.textContent = next ? `All caught up · next on ${fmt.shortDate(next)}` : 'All caught up.';
       } else {
         reviewBtn.style.display = 'none';
       }
@@ -7072,7 +7155,7 @@
         <p class="subtle">Spaced repetition keeps the good stuff from leaking out.</p>
         <div class="review-complete">
           <h3>All reviewed.</h3>
-          <p>${next ? `Next review on ${formatShortDate(next)}.` : 'Add a word or quote to your deck to begin.'}</p>
+          <p>${next ? `Next review on ${fmt.shortDate(next)}.` : 'Add a word or quote to your deck to begin.'}</p>
         </div>
         <div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Close</button></div>
       `);
@@ -7101,7 +7184,7 @@
             <div class="review-answer">
               <p class="def">${w.definition}</p>
               <p class="meta">Your sentence</p>
-              <p class="personal">${(item.entry.personalSentence || '—').replace(/</g, '&lt;')}</p>
+              <p class="personal">${escapeHTML(item.entry.personalSentence || '—')}</p>
             </div>
           ` : `
             <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show answer</button></div>
@@ -7117,7 +7200,7 @@
             <div class="review-answer">
               <p class="def">${q.meaning}</p>
               <p class="meta">Your note</p>
-              <p class="personal">${(item.entry.personalNote || '—').replace(/</g, '&lt;')}</p>
+              <p class="personal">${escapeHTML(item.entry.personalNote || '—')}</p>
             </div>
           ` : `
             <div class="sheet-actions"><button class="btn btn-primary" id="reveal">Show meaning</button></div>
@@ -7219,13 +7302,13 @@
           <button class="archive-item" data-iso="${iso}" data-kind="quote">
             <span class="aleft">
               <span class="adate"><span class="akind">Quote</span>${q.author}</span>
-              <span class="atext">"${quotePreview.replace(/</g, '&lt;')}"</span>
+              <span class="atext">"${escapeHTML(quotePreview)}"</span>
             </span>
           </button>
           <button class="archive-item" data-iso="${iso}" data-kind="word">
             <span class="aleft">
               <span class="adate"><span class="akind">Word</span>${w.pos}</span>
-              <span class="atext">${w.word} — ${wordText.replace(/</g, '&lt;')}</span>
+              <span class="atext">${w.word} — ${escapeHTML(wordText)}</span>
             </span>
           </button>
         </div>
@@ -7370,12 +7453,6 @@
       .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   }
 
-  function formatThoughtDate(iso) {
-    const d = new Date(iso);
-    return new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-      .format(d).toUpperCase();
-  }
-
   function renderThoughts() {
     const body = document.getElementById('thoughts-body');
     if (!body) return;
@@ -7387,8 +7464,8 @@
     } else {
       const items = shown.map(t => `
         <button class="thought-item" data-id="${t.id}">
-          <span class="tdate">${formatThoughtDate(t.createdAt)}</span>
-          <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+          <span class="tdate">${fmt.thoughtDate(t.createdAt)}</span>
+          <span class="ttext">${escapeHTML(t.text || '')}</span>
         </button>
       `).join('');
       const seeAll = list.length > 3
@@ -7420,7 +7497,7 @@
     openSheet(`
       <h2>${existing ? 'Thought' : 'New thought'}</h2>
       <p class="subtle">${dateStr}</p>
-      <textarea class="note-area" id="thought-text" style="min-height:200px" placeholder="What's on your mind? Not tied to today, not tied to the week — just a thought to keep.">${text.replace(/</g, '&lt;')}</textarea>
+      <textarea class="note-area" id="thought-text" style="min-height:200px" placeholder="What's on your mind? Not tied to today, not tied to the week — just a thought to keep.">${escapeHTML(text)}</textarea>
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Cancel</button>
         <button class="btn btn-primary" id="save">Save</button>
@@ -7467,8 +7544,8 @@
     const list = sortedThoughts();
     const items = list.map(t => `
       <button class="thought-item" data-id="${t.id}">
-        <span class="tdate">${formatThoughtDate(t.createdAt)}</span>
-        <span class="ttext">${(t.text || '').replace(/</g, '&lt;')}</span>
+        <span class="tdate">${fmt.thoughtDate(t.createdAt)}</span>
+        <span class="ttext">${escapeHTML(t.text || '')}</span>
       </button>
     `).join('');
 
@@ -7863,15 +7940,15 @@
             else if (opt === chosenOption) cls += ' wrong';
             else cls += ' muted';
           }
-          return `<button class="${cls}" data-opt="${opt.replace(/"/g, '&quot;')}"${revealed ? ' disabled' : ''}>${opt.replace(/</g, '&lt;')}</button>`;
+          return `<button class="${cls}" data-opt="${escapeHTML(opt)}"${revealed ? ' disabled' : ''}>${escapeHTML(opt)}</button>`;
         }).join('');
         interaction = `
           <div class="quiz-options">${opts}</div>
           ${revealed ? `
             <div class="quiz-a-reveal" style="margin-top:16px">
               <p class="alabel">Answer</p>
-              <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-              ${explain ? `<p class="anotes">${explain.replace(/</g, '&lt;')}</p>` : ''}
+              <p class="aans">${escapeHTML(q.answer)}</p>
+              ${explain ? `<p class="anotes">${escapeHTML(explain)}</p>` : ''}
             </div>
             <div class="sheet-actions"><button class="btn btn-primary" id="next">Next</button></div>
           ` : ''}
@@ -7890,10 +7967,10 @@
           interaction = `
             <div class="quiz-a-reveal">
               <p class="alabel">${typedMatched ? 'Your answer · correct' : 'You typed'}</p>
-              <p class="aans" style="color:${typedMatched ? 'var(--green-deep)' : 'var(--terracotta)'}">${typedValue.replace(/</g, '&lt;') || '—'}</p>
+              <p class="aans" style="color:${typedMatched ? 'var(--green-deep)' : 'var(--terracotta)'}">${escapeHTML(typedValue) || '—'}</p>
               <p class="alabel" style="margin-top:12px">Correct answer</p>
-              <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-              ${explain ? `<p class="anotes">${explain.replace(/</g, '&lt;')}</p>` : ''}
+              <p class="aans">${escapeHTML(q.answer)}</p>
+              ${explain ? `<p class="anotes">${escapeHTML(explain)}</p>` : ''}
             </div>
             ${!typedMatched ? `
               <div class="rating-row" style="grid-template-columns: 1fr 1fr; margin-bottom:10px">
@@ -7909,8 +7986,8 @@
         interaction = revealed ? `
           <div class="quiz-a-reveal">
             <p class="alabel">Answer</p>
-            <p class="aans">${q.answer.replace(/</g, '&lt;')}</p>
-            ${explain ? `<p class="anotes">${explain.replace(/</g, '&lt;')}</p>` : ''}
+            <p class="aans">${escapeHTML(q.answer)}</p>
+            ${explain ? `<p class="anotes">${escapeHTML(explain)}</p>` : ''}
           </div>
           <div class="rating-row" style="grid-template-columns: 1fr 1fr">
             <button class="rating-btn forgot" data-got="no">Didn't know</button>
@@ -7927,7 +8004,7 @@
         <div class="review-progress-bar" style="grid-template-columns: repeat(${batch.length}, 1fr);">${segs}</div>
 
         <span class="quiz-cat-tag">${catLabel}</span>
-        <p class="quiz-q">${q.question.replace(/</g, '&lt;')}</p>
+        <p class="quiz-q">${escapeHTML(q.question)}</p>
 
         ${interaction}
 
@@ -8046,8 +8123,8 @@
       <div class="score-item">
         <span class="sdot ${r.correct ? 'good' : 'bad'}"></span>
         <div>
-          <p class="sq" style="margin:0">${r.question.question.replace(/</g, '&lt;')}</p>
-          <p class="sa">${r.question.answer.replace(/</g, '&lt;')}</p>
+          <p class="sq" style="margin:0">${escapeHTML(r.question.question)}</p>
+          <p class="sa">${escapeHTML(r.question.answer)}</p>
         </div>
       </div>
     `).join('');
@@ -8434,7 +8511,7 @@
           <button class="archive-item plan-item" data-plan-id="${p.id}">
             <div class="aleft">
               <p class="atext">${escapeHTML(p.name)}</p>
-              <p class="adate">${p.exercises.length} move${p.exercises.length === 1 ? '' : 's'} · updated ${formatPlanTimestamp(p.updatedAt)}</p>
+              <p class="adate">${p.exercises.length} move${p.exercises.length === 1 ? '' : 's'} · updated ${fmt.planTimestamp(p.updatedAt)}</p>
             </div>
             <span class="plan-chev">›</span>
           </button>
@@ -8531,23 +8608,6 @@
     save();
   }
 
-  function formatPlanTimestamp(iso) {
-    if (!iso) return 'just now';
-    const then = new Date(iso);
-    const now = new Date();
-    const diff = Math.round((now - then) / 1000);
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
-    if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
-    const days = Math.floor(diff / 86400);
-    if (days < 7) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
-    return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  }
-
-  function escapeHTML(s) {
-    return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  }
-
   // --- Plan detail sheet ---------------------------------------------------
 
   function openPlanDetail(planId) {
@@ -8594,7 +8654,7 @@
     openSheet(`
       <p class="ex-eyebrow">Workout plan</p>
       <h2 id="plan-title">${escapeHTML(plan.name)}</h2>
-      <p class="subtle">${plan.exercises.length} move${plan.exercises.length === 1 ? '' : 's'} · updated ${formatPlanTimestamp(plan.updatedAt)} · <button class="inline-link" id="rename-plan">Rename</button></p>
+      <p class="subtle">${plan.exercises.length} move${plan.exercises.length === 1 ? '' : 's'} · updated ${fmt.planTimestamp(plan.updatedAt)} · <button class="inline-link" id="rename-plan">Rename</button></p>
 
       ${body}
 
@@ -9469,15 +9529,6 @@
     return renderDeck('Word deck', stats.word) + renderDeck('Quote deck', stats.quote);
   }
 
-  // Format an avg-hours number (e.g. 7.3) as "7h 18min".
-  function fmtSleepHM(h) {
-    if (!isFinite(h) || h <= 0) return '—';
-    const totalMin = Math.round(h * 60);
-    const hh = Math.floor(totalMin / 60);
-    const mm = totalMin % 60;
-    return mm === 0 ? `${hh}h` : `${hh}h ${mm}min`;
-  }
-
   // Compute up to three "insight cards" from existing data.
   // Each card requires a minimum sample size before showing.
   function computeInsightCards() {
@@ -9517,7 +9568,7 @@
         cards.push({
           kind: 'sleep',
           eyebrow: 'Sleep × week color',
-          line: `<strong>${labelHigh}</strong> weeks averaged ${fmtSleepHM(colorAvgs[high])} sleep. <strong>${labelLow}</strong> weeks averaged ${fmtSleepHM(colorAvgs[low])}.`,
+          line: `<strong>${labelHigh}</strong> weeks averaged ${fmt.sleep(colorAvgs[high])} sleep. <strong>${labelLow}</strong> weeks averaged ${fmt.sleep(colorAvgs[low])}.`,
           meta: `${nHigh} ${labelHigh.toLowerCase()} week${nHigh === 1 ? '' : 's'}, ${nLow} ${labelLow.toLowerCase()} week${nLow === 1 ? '' : 's'}.`,
         });
       }
