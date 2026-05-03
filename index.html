@@ -2580,6 +2580,64 @@
   }
   .sync-stale-banner button:disabled { opacity: 0.6; }
 
+  /* Monthly backup nudge — appears when 30+ days have passed without
+     an export. Less urgent than sync staleness, so ochre instead of
+     terracotta. Dismiss pushes the next nudge out by a week. */
+  .backup-nudge-banner {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--ochre);
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .backup-nudge-banner .bnb-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .backup-nudge-banner .bnb-eyebrow {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ochre);
+    font-weight: 600;
+  }
+  .backup-nudge-banner .bnb-line {
+    margin: 0;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .backup-nudge-banner .bnb-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    align-items: center;
+  }
+  .backup-nudge-banner .bnb-export {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--ochre);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 500;
+    border: 0;
+  }
+  .backup-nudge-banner .bnb-dismiss {
+    padding: 6px 8px;
+    background: transparent;
+    color: var(--ink-faint);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 0;
+  }
+  .backup-nudge-banner .bnb-dismiss:hover { color: var(--ink-soft); }
+
   /* "Missed twice" prompts — gentle reminders when a habit has been
      missed two times in a row (defend the slot before it's three). */
   .missed-prompt {
@@ -2748,233 +2806,184 @@
   }
   .cat-chip.on .ccount { color: rgba(245, 241, 232, 0.7); }
 
-  /* Workouts */
-  .muscle-tag {
-    display: inline-block;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-right: 6px;
-  }
-  .ex-diff {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    color: var(--ink-soft);
-    background: var(--surface);
-    white-space: nowrap;
-  }
-  .ex-diff-beginner { color: var(--green-deep); border-color: var(--green-soft); }
-  .ex-diff-intermediate { color: var(--ochre); border-color: var(--ochre); }
-  .ex-diff-advanced { color: var(--terracotta); border-color: var(--terracotta); }
-  .ex-eyebrow {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-faint);
-    margin-bottom: 4px;
-  }
-  .works-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 4px;
-  }
-  .works-chip {
-    font-size: 12px;
-    padding: 5px 10px;
-    border-radius: 999px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--ink-soft);
-  }
-  .works-chip-primary {
-    background: var(--green-deep);
-    border-color: var(--green-deep);
-    color: var(--bg);
-  }
-  .howto-steps {
-    margin: 4px 0 0;
-    padding-left: 20px;
-  }
-  .howto-steps li {
-    margin-bottom: 8px;
-    line-height: 1.5;
-    color: var(--ink);
-  }
-  .howto-steps li:last-child { margin-bottom: 0; }
-  .ex-what, .ex-tips {
-    line-height: 1.5;
-    color: var(--ink);
-    margin: 4px 0 0;
-  }
-  .ex-tips { color: var(--ink-soft); font-size: 14px; }
-  .workout-item .atext { white-space: normal; }
-  .workout-item .adate { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 4px; }
-
-  .body-diagram {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin: 6px 0 18px;
-  }
-  .body-diagram svg { width: 100%; max-width: 130px; height: auto; }
-  .body-diagram .silhouette {
-    fill: var(--surface-2);
-    stroke: var(--border);
-    stroke-width: 1;
-    pointer-events: none;
-  }
-  .muscle {
-    fill: var(--surface-2);
-    stroke: var(--border);
-    stroke-width: 1;
-    transition: fill .15s, stroke .15s;
-    cursor: pointer;
-  }
-  .muscle:hover { stroke: var(--border-strong); }
-  .muscle.active { fill: var(--green-soft); stroke: var(--green-deep); }
-  .muscle.active.primary { fill: var(--green-deep); }
-  .muscle.filter-on { stroke: var(--ink); stroke-width: 2; }
-  .body-diagram-caption {
-    text-align: center;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--ink-faint);
-    margin: -10px 0 14px;
-  }
-
-  /* Plans */
-  .plan-item .plan-chev,
-  .plan-pick-item .plan-chev {
-    font-size: 22px;
-    color: var(--ink-faint);
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .pick-mode-banner {
+  /* Workouts — daily rep-progression tracker.
+     Each exercise is a row with 10 small rep-milestone boxes (10..100);
+     ticking a box logs that you hit that many reps on the selected day.
+     Auto-save on every tick. */
+  .wt-day-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    padding: 10px 14px;
-    background: var(--green-deep);
-    color: var(--bg);
-    border-radius: var(--radius);
-    margin-bottom: 14px;
-    font-size: 13px;
+    gap: 8px;
+    padding: 6px 0 14px;
   }
-  .pick-mode-banner strong { font-weight: 600; }
-  .pick-mode-banner button {
-    background: transparent;
-    border: 1px solid rgba(245, 241, 232, 0.35);
-    color: var(--bg);
-    padding: 4px 10px;
+  .wt-day-nav button {
+    width: 32px; height: 32px;
     border-radius: 999px;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-  }
-  .pick-mode-banner button:hover { background: rgba(245, 241, 232, 0.1); }
-  .pick-add-chip {
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: var(--green-deep);
-    color: var(--bg);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-size: 16px;
+    line-height: 1;
     flex-shrink: 0;
   }
-  .workout-item-picking { border-color: var(--green-soft); }
-  .inline-link {
+  .wt-day-nav button:hover { border-color: var(--border-strong); color: var(--ink); }
+  .wt-day-nav button:disabled { opacity: 0.35; cursor: default; }
+  .wt-day-label {
+    flex: 1;
+    text-align: center;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .wt-day-label .wt-day-rel {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--green-leaf);
+    margin-bottom: 2px;
+  }
+  .wt-day-picker {
+    border: 0;
     background: transparent;
-    border: none;
-    padding: 0;
-    color: var(--green-deep);
-    text-decoration: underline;
-    cursor: pointer;
     font: inherit;
+    color: var(--ink);
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    padding: 0;
   }
-  .plan-ex-list {
-    display: grid;
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .plan-ex-row {
+
+  .wt-group { margin-top: 18px; }
+  .wt-group:first-of-type { margin-top: 8px; }
+  .wt-group-header {
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    color: #F8F1DD;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .wt-group-header strong {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .wt-group-header .wt-group-sub {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.85;
+  }
+  .wt-group.push .wt-group-header  { background: var(--green-leaf); }
+  .wt-group.pull .wt-group-header  { background: #2C5282; }
+  .wt-group.legs .wt-group-header  { background: var(--ochre); }
+  .wt-group.core .wt-group-header  { background: var(--terracotta); }
+
+  .wt-exercises {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .wt-exercise {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    padding: 10px 12px;
+    transition: border-color 0.15s ease;
   }
-  .plan-ex-main {
-    flex: 1;
-    min-width: 0;
+  .wt-exercise:hover { border-color: var(--border-strong); }
+  .wt-exercise.has-any { border-color: rgba(45, 74, 62, 0.35); }
+  .wt-exercise-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    cursor: pointer;
   }
-  .plan-ex-name {
+  .wt-exercise-name {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 14px;
     color: var(--ink);
-    margin-bottom: 6px;
+    flex: 1;
+    line-height: 1.3;
   }
-  .plan-ex-inputs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .wt-exercise-unit {
     font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--ink-faint);
-  }
-  .plan-ex-inputs label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .plan-ex-inputs input {
-    width: 44px;
-    padding: 4px 6px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--bg);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    text-align: center;
-    text-transform: none;
-    letter-spacing: normal;
-  }
-  .plan-ex-inputs input:focus { outline: none; border-color: var(--green-deep); }
-  .plan-ex-times { color: var(--ink-faint); font-size: 14px; letter-spacing: 0; }
-  .plan-ex-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    font-style: italic;
     flex-shrink: 0;
   }
-  .plan-ex-btn {
-    width: 26px;
-    height: 22px;
-    padding: 0;
+  .wt-exercise-image {
+    display: none;
+    margin: 8px 0 4px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface-2);
+    text-align: center;
+  }
+  .wt-exercise.is-open .wt-exercise-image { display: block; }
+  .wt-exercise-image img {
+    max-width: 100%;
+    max-height: 240px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .wt-exercise-image .wt-image-missing {
+    padding: 18px 12px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+  .wt-exercise-reps {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .wt-rep-box {
+    aspect-ratio: 1 / 1;
     border: 1px solid var(--border);
     border-radius: 6px;
-    background: var(--bg);
-    color: var(--ink-soft);
-    font-size: 13px;
-    line-height: 1;
+    background: var(--surface-2);
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    padding: 0;
   }
-  .plan-ex-btn:hover:not(:disabled) { border-color: var(--border-strong); color: var(--ink); }
-  .plan-ex-btn:disabled { opacity: 0.35; cursor: default; }
-  .plan-ex-remove { color: var(--terracotta); border-color: var(--border); }
-  .plan-ex-remove:hover { border-color: var(--terracotta); }
+  .wt-rep-box:hover { border-color: var(--border-strong); }
+  .wt-rep-box:active { transform: scale(0.92); }
+  .wt-rep-box.is-on {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: #F8F1DD;
+  }
+  .wt-summary {
+    margin: 10px 0 14px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: center;
+    font-style: italic;
+  }
+  .wt-summary strong { color: var(--ink); font-style: normal; }
 
   /* Stats */
   .stats-sub {
@@ -3382,6 +3391,69 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
+
+  /* Wearable sparklines — small line charts for sleep score, readiness,
+     resting HR. Auto-scale to the data so flat ranges still show signal. */
+  .wearable-spark {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .wearable-spark-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .wearable-spark-head strong {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .wearable-spark-stats {
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .wearable-spark-svg {
+    width: 100%;
+    height: 64px;
+    display: block;
+    margin: 4px 0 6px;
+  }
+  .spark-line {
+    fill: none;
+    stroke: var(--green-leaf);
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .spark-area {
+    fill: rgba(107, 143, 113, 0.12);
+    stroke: none;
+  }
+  .spark-dot { fill: var(--green-leaf); }
+  .wearable-spark-foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+  .wearable-spark-empty {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+  }
+  .wearable-spark-empty strong { font-style: normal; color: var(--ink); }
 
   /* Trivia bars */
   .act-bar.act-quiz { background: var(--green-deep); }
@@ -3878,6 +3950,7 @@
     </header>
 
     <div id="sync-stale-slot"></div>
+    <div id="backup-nudge-slot"></div>
 
     <section id="chain-section">
       <p class="section-label">
@@ -4395,10 +4468,7 @@
    *   quizResults    { [day or sessionId]: ... }                         legacy per-game results
    *   quizPrefs      { mode: 'choice' | 'type' | 'mixed', category: string | null }
    *
-   *   workoutPlans      { [planId]: { id, name, createdAt, updatedAt,
-   *                                   exercises: [{ id, sets, reps }] } }
-   *   workoutPlanOrder  [planId]                                         display order
-   *   workoutPrefs      { muscleFilter: string | null, difficultyFilter: string | null }
+   *   workoutLog     { 'YYYY-MM-DD': { [slug]: number[] } }               per-day rep-milestones ticked
    *
    *   notify         { sundaySeal: boolean }                             sole opt-in notification
    *   startDate      'YYYY-MM-DD'                                        first Monday the chain is live
@@ -4439,9 +4509,7 @@
     quizSeen: {},
     quizResults: {},
     quizPrefs: { mode: 'choice', category: null },
-    workoutPlans: {},
-    workoutPlanOrder: [],
-    workoutPrefs: { muscleFilter: null, difficultyFilter: null },
+    workoutLog: {},
     notify: { sundaySeal: false, morning: true },
     startDate: '2026-05-04',
   });
@@ -4654,6 +4722,73 @@
       btn.textContent = 'Pulling…';
       await pullFromCloud();
       renderSyncStaleBanner();
+    });
+  }
+
+  // --- Monthly backup nudge ----------------------------------------------
+  // Reminds the user to export a copy of their data once a month. The
+  // bar for showing it: the framework has been live ≥30 days AND the
+  // user hasn't exported (JSON or markdown) in the last 30 days.
+  // "Later" pushes the next nudge out by a week, not back to zero —
+  // the smell is data-loss risk, not just a forgotten task.
+
+  const LAST_EXPORT_KEY = 'caprisun.lastExportAt';
+  const BACKUP_NUDGE_DAYS = 30;
+
+  function getLastExportAt() {
+    try {
+      const raw = localStorage.getItem(LAST_EXPORT_KEY);
+      return raw ? new Date(raw) : null;
+    } catch { return null; }
+  }
+  function setLastExportAt(d) {
+    try { localStorage.setItem(LAST_EXPORT_KEY, (d || new Date()).toISOString()); } catch {}
+  }
+
+  function renderBackupNudge() {
+    const slot = document.getElementById('backup-nudge-slot');
+    if (!slot) return;
+    if (isPreStart()) { slot.innerHTML = ''; return; }
+
+    // Don't nag in the first month — there's nothing meaningful to back up yet.
+    const startD = parseISO(state.startDate);
+    const daysSinceStart = Math.floor((startOfDay(new Date()) - startOfDay(startD)) / 86400000);
+    if (daysSinceStart < BACKUP_NUDGE_DAYS) { slot.innerHTML = ''; return; }
+
+    const last = getLastExportAt();
+    const daysSinceExport = last
+      ? Math.floor((Date.now() - last.getTime()) / 86400000)
+      : null;
+    if (daysSinceExport !== null && daysSinceExport < BACKUP_NUDGE_DAYS) {
+      slot.innerHTML = '';
+      return;
+    }
+
+    const line = last
+      ? `It's been ${daysSinceExport} days since your last export.`
+      : `You haven't exported a backup yet.`;
+
+    slot.innerHTML = `
+      <div class="backup-nudge-banner">
+        <div class="bnb-text">
+          <p class="bnb-eyebrow">Save a copy</p>
+          <p class="bnb-line">${line} Cheap insurance against a corrupted profile or a bad sync.</p>
+        </div>
+        <div class="bnb-actions">
+          <button type="button" class="bnb-dismiss">Later</button>
+          <button type="button" class="bnb-export">Export</button>
+        </div>
+      </div>
+    `;
+    slot.querySelector('.bnb-export').addEventListener('click', () => {
+      exportData();
+    });
+    slot.querySelector('.bnb-dismiss').addEventListener('click', () => {
+      // Pretend export was 23 days ago so the next nudge fires in 7 days.
+      const future = new Date();
+      future.setDate(future.getDate() - (BACKUP_NUDGE_DAYS - 7));
+      setLastExportAt(future);
+      renderBackupNudge();
     });
   }
 
@@ -6688,6 +6823,8 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    setLastExportAt(new Date());
+    if (typeof renderBackupNudge === 'function') renderBackupNudge();
   }
 
   // Build a chronological markdown digest of every sealed week, including
@@ -6785,6 +6922,21 @@
             lines.push(`  - [${mark}] ${p.text.trim()}`);
           }
         }
+
+        // Workout log — exercises hit that day with the rep counts ticked.
+        const workoutDay = (state.workoutLog && state.workoutLog[dIso]) || {};
+        const workoutEntries = Object.keys(workoutDay)
+          .map(slug => {
+            const ex = WORKOUT_EXERCISES.find(e => workoutSlug(e.name) === slug);
+            const reps = (workoutDay[slug] || []).slice().sort((a, b) => a - b);
+            return ex && reps.length
+              ? `  - ${ex.name}: ${reps.join(', ')} ${ex.unit}`
+              : null;
+          })
+          .filter(Boolean);
+        if (workoutEntries.length) {
+          for (const ln of workoutEntries) lines.push(ln);
+        }
       }
       lines.push('');
     }
@@ -6803,6 +6955,8 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    setLastExportAt(new Date());
+    if (typeof renderBackupNudge === 'function') renderBackupNudge();
   }
 
   // --- Sunday 6 PM "seal the week" reminder -------------------------------
@@ -8606,677 +8760,252 @@
     });
   }
 
-  // --- Workouts ------------------------------------------------------------
 
-  let exercisesCache = null;
-  let exercisesLoading = null;
+  // --- Workouts (daily rep-progression tracker) ----------------------------
 
-  function loadExercises() {
-    if (exercisesCache) return Promise.resolve(exercisesCache);
-    if (exercisesLoading) return exercisesLoading;
-    exercisesLoading = fetch('exercises.json')
-      .then(r => { if (!r.ok) throw new Error('Could not load exercises'); return r.json(); })
-      .then(data => { exercisesCache = data; return data; })
-      .catch(err => { exercisesLoading = null; throw err; });
-    return exercisesLoading;
-  }
-
-  const MUSCLE_LABEL = {
-    'chest': 'Chest',
-    'front-delts': 'Front delts',
-    'side-delts': 'Side delts',
-    'rear-delts': 'Rear delts',
-    'traps': 'Traps',
-    'upper-back': 'Upper back',
-    'lats': 'Lats',
-    'lower-back': 'Lower back',
-    'biceps': 'Biceps',
-    'triceps': 'Triceps',
-    'forearms': 'Forearms',
-    'core': 'Core',
-    'obliques': 'Obliques',
-    'glutes': 'Glutes',
-    'quads': 'Quads',
-    'hamstrings': 'Hamstrings',
-    'calves': 'Calves',
-  };
-
-  const MUSCLE_ORDER = [
-    'chest', 'upper-back', 'lats', 'traps',
-    'front-delts', 'side-delts', 'rear-delts',
-    'biceps', 'triceps', 'forearms',
-    'core', 'obliques', 'lower-back',
-    'glutes', 'quads', 'hamstrings', 'calves',
+  const WORKOUT_GROUPS = [
+    { key: 'push', label: 'PUSH', sub: 'Chest, Shoulders, Triceps' },
+    { key: 'pull', label: 'PULL', sub: 'Back, Biceps' },
+    { key: 'legs', label: 'LEGS', sub: 'Quads, Hamstrings, Glutes' },
+    { key: 'core', label: 'CORE', sub: 'Abs, Lower Back' },
   ];
 
-  const DIFFICULTY_LABEL = {
-    beginner: 'Beginner',
-    intermediate: 'Intermediate',
-    advanced: 'Advanced',
-  };
+  // Within each group, exercises run hardest → easiest (matches the
+  // source spreadsheet). Adding/reordering here changes the UI.
+  const WORKOUT_EXERCISES = [
+    // PUSH
+    { group: 'push', name: 'Dumbbell Floor / Bench Press', unit: 'reps' },
+    { group: 'push', name: 'Dumbbell Shoulder Press',      unit: 'reps' },
+    { group: 'push', name: 'Arnold Press',                 unit: 'reps' },
+    { group: 'push', name: 'Pike Push-ups',                unit: 'reps' },
+    { group: 'push', name: 'Push-ups',                     unit: 'reps' },
+    { group: 'push', name: 'Dumbbell Chest Flyes',         unit: 'reps' },
+    { group: 'push', name: 'Overhead Tricep Extension',    unit: 'reps' },
+    { group: 'push', name: 'Dumbbell Lateral Raises',      unit: 'reps' },
+    { group: 'push', name: 'Tricep Kickbacks',             unit: 'reps' },
+    { group: 'push', name: 'Dumbbell Front Raises',        unit: 'reps' },
+    // PULL
+    { group: 'pull', name: 'Dumbbell Deadlifts',           unit: 'reps' },
+    { group: 'pull', name: 'Renegade Rows',                unit: 'reps each' },
+    { group: 'pull', name: 'Bent-over Dumbbell Rows',      unit: 'reps' },
+    { group: 'pull', name: 'Single-Arm Dumbbell Rows',     unit: 'reps each' },
+    { group: 'pull', name: 'Dumbbell Pullovers',           unit: 'reps' },
+    { group: 'pull', name: 'Reverse Flyes',                unit: 'reps' },
+    { group: 'pull', name: 'Hammer Curls',                 unit: 'reps' },
+    { group: 'pull', name: 'Dumbbell Bicep Curls',         unit: 'reps' },
+    { group: 'pull', name: 'Zottman Curls',                unit: 'reps' },
+    { group: 'pull', name: 'Concentration Curls',          unit: 'reps each' },
+    // LEGS
+    { group: 'legs', name: 'Bulgarian Split Squats',        unit: 'reps each' },
+    { group: 'legs', name: 'Goblet Squats',                 unit: 'reps' },
+    { group: 'legs', name: 'Dumbbell Lunges',               unit: 'reps each' },
+    { group: 'legs', name: 'Romanian Deadlifts',            unit: 'reps' },
+    { group: 'legs', name: 'Single-Leg Romanian Deadlifts', unit: 'reps each' },
+    { group: 'legs', name: 'Step-ups (with dumbbells)',     unit: 'reps each' },
+    { group: 'legs', name: 'Sumo Squats',                   unit: 'reps' },
+    { group: 'legs', name: 'Curtsy Lunges',                 unit: 'reps each' },
+    { group: 'legs', name: 'Weighted Glute Bridges',        unit: 'reps' },
+    { group: 'legs', name: 'Dumbbell Calf Raises',          unit: 'reps' },
+    // CORE
+    { group: 'core', name: 'V-ups',                         unit: 'reps' },
+    { group: 'core', name: 'Leg Raises',                    unit: 'reps' },
+    { group: 'core', name: 'Side Plank',                    unit: 'seconds each' },
+    { group: 'core', name: 'Plank',                         unit: 'seconds' },
+    { group: 'core', name: 'Mountain Climbers',             unit: 'reps' },
+    { group: 'core', name: 'Bicycle Crunches',              unit: 'reps' },
+    { group: 'core', name: 'Russian Twists (weighted)',     unit: 'reps' },
+    { group: 'core', name: 'Dead Bug',                      unit: 'reps' },
+    { group: 'core', name: 'Crunches',                      unit: 'reps' },
+    { group: 'core', name: 'Superman',                      unit: 'reps' },
+  ];
 
-  function difficultyBadge(d) {
-    return `<span class="ex-diff ex-diff-${d}">${DIFFICULTY_LABEL[d] || d}</span>`;
+  const WORKOUT_REP_STEPS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+  // Slug used for the state key and the image filename. Must be stable
+  // across renames; if you rename an exercise, update the slug-bearing
+  // entry in state.workoutLog manually (or write a migration).
+  function workoutSlug(name) {
+    return name.toLowerCase()
+      .replace(/[\(\)\/]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
-  function renderBodyDiagram() {
-    // Stylised silhouette + interactive muscle shapes. viewBox 100x240 per figure.
-    const silhouette = `
-      <g class="silhouette">
-        <circle cx="50" cy="22" r="14"/>
-        <rect x="45" y="34" width="10" height="8"/>
-        <path d="M22 46 Q24 42 30 42 L70 42 Q76 42 78 46 L74 132 L26 132 Z"/>
-        <rect x="12" y="44" rx="6" ry="6" width="14" height="58"/>
-        <rect x="10" y="100" rx="6" ry="6" width="14" height="50"/>
-        <rect x="74" y="44" rx="6" ry="6" width="14" height="58"/>
-        <rect x="76" y="100" rx="6" ry="6" width="14" height="50"/>
-        <rect x="26" y="132" rx="8" ry="8" width="20" height="54"/>
-        <rect x="54" y="132" rx="8" ry="8" width="20" height="54"/>
-        <rect x="28" y="184" rx="6" ry="6" width="18" height="50"/>
-        <rect x="54" y="184" rx="6" ry="6" width="18" height="50"/>
-      </g>
-    `;
-    const front = `
-      <svg viewBox="0 0 100 240" class="figure figure-front" aria-label="Front body">
-        ${silhouette}
-        <ellipse class="muscle" data-muscle="front-delts" cx="26" cy="48" rx="7" ry="6"/>
-        <ellipse class="muscle" data-muscle="front-delts" cx="74" cy="48" rx="7" ry="6"/>
-        <rect class="muscle" data-muscle="chest" x="28" y="52" rx="4" ry="4" width="20" height="18"/>
-        <rect class="muscle" data-muscle="chest" x="52" y="52" rx="4" ry="4" width="20" height="18"/>
-        <ellipse class="muscle" data-muscle="biceps" cx="19" cy="68" rx="5" ry="14"/>
-        <ellipse class="muscle" data-muscle="biceps" cx="81" cy="68" rx="5" ry="14"/>
-        <ellipse class="muscle" data-muscle="forearms" cx="17" cy="120" rx="6" ry="18"/>
-        <ellipse class="muscle" data-muscle="forearms" cx="83" cy="120" rx="6" ry="18"/>
-        <rect class="muscle" data-muscle="core" x="38" y="74" rx="3" ry="3" width="24" height="34"/>
-        <ellipse class="muscle" data-muscle="obliques" cx="32" cy="94" rx="4" ry="12"/>
-        <ellipse class="muscle" data-muscle="obliques" cx="68" cy="94" rx="4" ry="12"/>
-        <ellipse class="muscle" data-muscle="quads" cx="36" cy="156" rx="9" ry="22"/>
-        <ellipse class="muscle" data-muscle="quads" cx="64" cy="156" rx="9" ry="22"/>
-      </svg>
-    `;
-    const back = `
-      <svg viewBox="0 0 100 240" class="figure figure-back" aria-label="Back body">
-        ${silhouette}
-        <path class="muscle" data-muscle="traps" d="M30 44 Q50 54 70 44 L66 58 L50 55 L34 58 Z"/>
-        <ellipse class="muscle" data-muscle="rear-delts" cx="26" cy="50" rx="7" ry="6"/>
-        <ellipse class="muscle" data-muscle="rear-delts" cx="74" cy="50" rx="7" ry="6"/>
-        <rect class="muscle" data-muscle="upper-back" x="34" y="58" rx="3" ry="3" width="32" height="22"/>
-        <path class="muscle" data-muscle="lats" d="M28 64 L38 64 L42 98 Q38 102 32 100 Z"/>
-        <path class="muscle" data-muscle="lats" d="M62 64 L72 64 L68 100 Q62 102 58 98 Z"/>
-        <ellipse class="muscle" data-muscle="triceps" cx="19" cy="68" rx="5" ry="14"/>
-        <ellipse class="muscle" data-muscle="triceps" cx="81" cy="68" rx="5" ry="14"/>
-        <ellipse class="muscle" data-muscle="forearms" cx="17" cy="120" rx="6" ry="18"/>
-        <ellipse class="muscle" data-muscle="forearms" cx="83" cy="120" rx="6" ry="18"/>
-        <rect class="muscle" data-muscle="lower-back" x="40" y="104" rx="3" ry="3" width="20" height="22"/>
-        <ellipse class="muscle" data-muscle="glutes" cx="36" cy="142" rx="10" ry="10"/>
-        <ellipse class="muscle" data-muscle="glutes" cx="64" cy="142" rx="10" ry="10"/>
-        <ellipse class="muscle" data-muscle="hamstrings" cx="36" cy="166" rx="8" ry="16"/>
-        <ellipse class="muscle" data-muscle="hamstrings" cx="64" cy="166" rx="8" ry="16"/>
-        <ellipse class="muscle" data-muscle="calves" cx="37" cy="208" rx="7" ry="18"/>
-        <ellipse class="muscle" data-muscle="calves" cx="63" cy="208" rx="7" ry="18"/>
-      </svg>
-    `;
-    return `<div class="body-diagram">${front}${back}</div>`;
+  // Image path. Filename is the slug; folder has a space which we
+  // URL-encode so href stays valid. Returns the path to try; the <img>
+  // onerror handler swaps in the missing-image fallback.
+  function workoutImagePath(slug, ext) {
+    return `Pics/Workout%20Pics/${slug}.${ext || 'jpg'}`;
   }
 
-  function highlightMuscles(root, primary, secondary) {
-    if (!root) return;
-    root.querySelectorAll('.muscle.active').forEach(el => el.classList.remove('active', 'primary'));
-    (secondary || []).forEach(m => {
-      root.querySelectorAll(`.muscle[data-muscle="${m}"]`).forEach(el => el.classList.add('active'));
-    });
-    (primary || []).forEach(m => {
-      root.querySelectorAll(`.muscle[data-muscle="${m}"]`).forEach(el => el.classList.add('active', 'primary'));
-    });
-  }
+  // Day cursor for the workout sheet. Persisted in module scope so
+  // navigating prev/next survives until the sheet closes.
+  let workoutDayISO = null;
 
-  function applyFilterHighlight(root, muscleKey) {
-    if (!root) return;
-    root.querySelectorAll('.muscle.filter-on').forEach(el => el.classList.remove('filter-on'));
-    if (muscleKey) {
-      root.querySelectorAll(`.muscle[data-muscle="${muscleKey}"]`).forEach(el => el.classList.add('filter-on'));
-    }
-  }
-
-  function exerciseMatchesFilters(ex, muscleFilter, diffFilter) {
-    if (muscleFilter) {
-      const hits = ex.primary.includes(muscleFilter) || ex.secondary.includes(muscleFilter);
-      if (!hits) return false;
-    }
-    if (diffFilter && ex.difficulty !== diffFilter) return false;
-    return true;
-  }
-
-  // Tab + pick-mode state survives sheet re-renders but resets when the app reloads.
-  let workoutTab = 'browse';
-  let workoutPickMode = null; // planId or null
-
-  function openWorkouts(opts) {
-    if (opts && opts.tab) workoutTab = opts.tab;
+  function openWorkouts() {
+    workoutDayISO = toISODate(new Date());
     openSheet(`
       <h2>Workouts</h2>
-      <p class="subtle">Dumbbell and bench. Pick a muscle, learn a move.</p>
-      <div class="archive-tabs" id="workout-tabs">
-        <button class="archive-tab ${workoutTab === 'browse' ? 'active' : ''}" data-tab="browse">Browse</button>
-        <button class="archive-tab ${workoutTab === 'plans' ? 'active' : ''}" data-tab="plans">My plans</button>
-      </div>
-      <div id="workouts-body">
-        <p class="subtle">Loading exercises…</p>
+      <p class="subtle">Tick what you did today. Each box is a set at that rep count. Tap an exercise name for the cue card.</p>
+      <div id="workout-tracker-body"></div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="cancel">Done</button>
       </div>
     `);
-    const tabsEl = sheet.querySelector('#workout-tabs');
-    tabsEl.addEventListener('click', (e) => {
-      const t = e.target.closest('.archive-tab');
-      if (!t) return;
-      workoutTab = t.dataset.tab;
-      openWorkouts();
-    });
-    loadExercises()
-      .then(renderWorkoutsBody)
-      .catch(err => {
-        const body = document.getElementById('workouts-body');
-        if (body) {
-          body.innerHTML = `<p class="subtle" style="color:var(--terracotta)">${(err && err.message) || 'Could not load exercises.'}</p>
-            <div class="sheet-actions"><button class="btn btn-ghost" id="cancel">Close</button></div>`;
-          body.querySelector('#cancel').addEventListener('click', closeSheet);
-        }
-      });
+    renderWorkoutTrackerBody();
+    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
   }
 
-  function renderWorkoutsBody() {
-    const body = document.getElementById('workouts-body');
+  function renderWorkoutTrackerBody() {
+    const body = document.getElementById('workout-tracker-body');
     if (!body) return;
-    if (workoutTab === 'plans') {
-      renderPlansBody(body);
-    } else {
-      renderBrowseBody(body);
-    }
-  }
+    const iso = workoutDayISO;
+    const todayISO = toISODate(new Date());
+    const dayLog = (state.workoutLog && state.workoutLog[iso]) || {};
+    const totalTicks = Object.values(dayLog).reduce((n, arr) => n + (arr ? arr.length : 0), 0);
 
-  function renderBrowseBody(body) {
-    const prefs = state.workoutPrefs || { muscleFilter: null, difficultyFilter: null };
-    let muscleFilter = prefs.muscleFilter || null;
-    let diffFilter = prefs.difficultyFilter || null;
-    const pickPlan = workoutPickMode ? state.workoutPlans[workoutPickMode] : null;
+    const startISO = state.startDate;
+    const canPrev = iso > startISO;
+    const canNext = iso < todayISO;
 
-    const renderMuscleChips = () => `
-      <button class="cat-chip ${muscleFilter === null ? 'on' : ''}" data-muscle="">
-        All muscles<span class="ccount">${exercisesCache.length} moves</span>
-      </button>
-      ${MUSCLE_ORDER.map(m => {
-        const count = exercisesCache.filter(e => e.primary.includes(m) || e.secondary.includes(m)).length;
-        if (count === 0) return '';
-        return `
-          <button class="cat-chip ${muscleFilter === m ? 'on' : ''}" data-muscle="${m}">
-            ${MUSCLE_LABEL[m]}<span class="ccount">${count} moves</span>
-          </button>
-        `;
-      }).join('')}
-    `;
+    const fmtFull = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const dateLabel = fmtFull.format(parseISO(iso));
+    let relLabel = 'Logging';
+    if (iso === todayISO) relLabel = 'Today';
+    else if (iso === toISODate(addDays(new Date(), -1))) relLabel = 'Yesterday';
 
-    const renderDiffChips = () => {
-      const diffs = [
-        { key: null, label: 'All levels' },
-        { key: 'beginner', label: 'Beginner' },
-        { key: 'intermediate', label: 'Intermediate' },
-        { key: 'advanced', label: 'Advanced' },
-      ];
-      return diffs.map(d => `
-        <button class="cat-chip ${diffFilter === d.key ? 'on' : ''}" data-diff="${d.key === null ? '' : d.key}">
-          ${d.label}
-        </button>
-      `).join('');
-    };
-
-    const renderList = () => {
-      const filtered = exercisesCache.filter(e => exerciseMatchesFilters(e, muscleFilter, diffFilter));
-      if (filtered.length === 0) {
-        return `<p class="archive-empty">No exercises match that combination.</p>`;
-      }
-      const rightSide = pickPlan
-        ? `<span class="pick-add-chip">Add</span>`
-        : '';
-      return `<div class="archive-list">${filtered.map(ex => `
-        <button class="archive-item workout-item ${pickPlan ? 'workout-item-picking' : ''}"
-          data-id="${ex.id}"
-          data-muscles-primary="${ex.primary.join(' ')}"
-          data-muscles-secondary="${ex.secondary.join(' ')}">
-          <div class="aleft">
-            <p class="atext">${ex.name}</p>
-            <p class="adate">
-              ${ex.primary.map(m => `<span class="muscle-tag">${MUSCLE_LABEL[m]}</span>`).join('')}
-            </p>
-          </div>
-          ${pickPlan ? rightSide : difficultyBadge(ex.difficulty)}
-        </button>
-      `).join('')}</div>`;
-    };
-
-    const banner = pickPlan ? `
-      <div class="pick-mode-banner">
-        <span>Adding to <strong>"${escapeHTML(pickPlan.name)}"</strong></span>
-        <button id="cancel-pick">Cancel</button>
-      </div>
-    ` : '';
-
-    body.innerHTML = `
-      ${banner}
-      ${renderBodyDiagram()}
-      <p class="body-diagram-caption">${pickPlan ? 'Tap an exercise to add it' : 'Tap a muscle to filter · hover a move to preview'}</p>
-
-      <p class="sheet-section-label">Muscle</p>
-      <div class="cat-grid" id="muscle-grid">${renderMuscleChips()}</div>
-
-      <p class="sheet-section-label" style="margin-top:18px">Difficulty</p>
-      <div class="cat-grid" id="diff-grid">${renderDiffChips()}</div>
-
-      <p class="sheet-section-label" style="margin-top:18px">Exercises</p>
-      <div id="workout-list">${renderList()}</div>
-
-      <div class="sheet-actions" style="margin-top:18px">
-        <button class="btn btn-ghost" id="cancel">Close</button>
-      </div>
-    `;
-
-    const diagramEl = body.querySelector('.body-diagram');
-    const muscleGrid = body.querySelector('#muscle-grid');
-    const diffGrid = body.querySelector('#diff-grid');
-    const listEl = body.querySelector('#workout-list');
-
-    applyFilterHighlight(diagramEl, muscleFilter);
-
-    const persistPrefs = () => {
-      state.workoutPrefs = { muscleFilter, difficultyFilter: diffFilter };
-      save();
-    };
-
-    muscleGrid.addEventListener('click', (e) => {
-      const chip = e.target.closest('.cat-chip');
-      if (!chip) return;
-      muscleFilter = chip.dataset.muscle || null;
-      muscleGrid.innerHTML = renderMuscleChips();
-      listEl.innerHTML = renderList();
-      applyFilterHighlight(diagramEl, muscleFilter);
-      persistPrefs();
-    });
-    diffGrid.addEventListener('click', (e) => {
-      const chip = e.target.closest('.cat-chip');
-      if (!chip) return;
-      diffFilter = chip.dataset.diff || null;
-      diffGrid.innerHTML = renderDiffChips();
-      listEl.innerHTML = renderList();
-      persistPrefs();
-    });
-    listEl.addEventListener('click', (e) => {
-      const item = e.target.closest('.workout-item');
-      if (!item) return;
-      if (pickPlan) {
-        addExerciseToPlan(pickPlan.id, item.dataset.id);
-        const planId = pickPlan.id;
-        workoutPickMode = null;
-        openPlanDetail(planId);
-      } else {
-        openExerciseDetail(item.dataset.id);
-      }
-    });
-
-    diagramEl.addEventListener('click', (e) => {
-      const shape = e.target.closest('.muscle');
-      if (!shape) return;
-      const m = shape.dataset.muscle;
-      muscleFilter = (muscleFilter === m) ? null : m;
-      muscleGrid.innerHTML = renderMuscleChips();
-      listEl.innerHTML = renderList();
-      applyFilterHighlight(diagramEl, muscleFilter);
-      persistPrefs();
-    });
-
-    // Hover preview: highlight the exercise's muscles on the diagram.
-    let hoveredItem = null;
-    listEl.addEventListener('mouseover', (e) => {
-      const item = e.target.closest('.workout-item');
-      if (!item || item === hoveredItem) return;
-      hoveredItem = item;
-      const prim = (item.dataset.musclesPrimary || '').split(' ').filter(Boolean);
-      const sec = (item.dataset.musclesSecondary || '').split(' ').filter(Boolean);
-      highlightMuscles(diagramEl, prim, sec);
-    });
-    listEl.addEventListener('mouseleave', () => {
-      hoveredItem = null;
-      highlightMuscles(diagramEl, [], []);
-    });
-
-    if (pickPlan) {
-      body.querySelector('#cancel-pick').addEventListener('click', () => {
-        const planId = pickPlan.id;
-        workoutPickMode = null;
-        openPlanDetail(planId);
-      });
-    }
-    body.querySelector('#cancel').addEventListener('click', closeSheet);
-  }
-
-  function renderPlansBody(body) {
-    const plans = (state.workoutPlanOrder || [])
-      .map(id => state.workoutPlans[id])
-      .filter(Boolean);
-
-    const list = plans.length === 0
-      ? `<p class="archive-empty">No plans yet. Build one to save the moves you actually do.</p>`
-      : `<div class="archive-list">${plans.map(p => `
-          <button class="archive-item plan-item" data-plan-id="${p.id}">
-            <div class="aleft">
-              <p class="atext">${escapeHTML(p.name)}</p>
-              <p class="adate">${p.exercises.length} move${p.exercises.length === 1 ? '' : 's'} · updated ${fmt.planTimestamp(p.updatedAt)}</p>
-            </div>
-            <span class="plan-chev">›</span>
-          </button>
-        `).join('')}</div>`;
-
-    body.innerHTML = `
-      <div id="plans-list">${list}</div>
-      <div class="sheet-actions" style="margin-top:18px">
-        <button class="btn btn-ghost" id="cancel">Close</button>
-        <button class="btn btn-primary" id="new-plan">New plan</button>
-      </div>
-    `;
-
-    body.querySelector('#plans-list').addEventListener('click', (e) => {
-      const item = e.target.closest('.plan-item');
-      if (!item) return;
-      openPlanDetail(item.dataset.planId);
-    });
-    body.querySelector('#new-plan').addEventListener('click', () => {
-      const name = (prompt('Name this plan', 'Push day') || '').trim();
-      if (!name) return;
-      const id = createPlan(name);
-      openPlanDetail(id);
-    });
-    body.querySelector('#cancel').addEventListener('click', closeSheet);
-  }
-
-  // --- Plan mutations ------------------------------------------------------
-
-  function createPlan(name) {
-    const id = 'plan-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1000).toString(36);
-    const now = new Date().toISOString();
-    if (!state.workoutPlans) state.workoutPlans = {};
-    if (!Array.isArray(state.workoutPlanOrder)) state.workoutPlanOrder = [];
-    state.workoutPlans[id] = {
-      id,
-      name,
-      createdAt: now,
-      updatedAt: now,
-      exercises: [],
-    };
-    state.workoutPlanOrder.unshift(id);
-    save();
-    return id;
-  }
-
-  function deletePlan(planId) {
-    if (!state.workoutPlans || !state.workoutPlans[planId]) return;
-    delete state.workoutPlans[planId];
-    state.workoutPlanOrder = (state.workoutPlanOrder || []).filter(id => id !== planId);
-    save();
-  }
-
-  function renamePlan(planId, newName) {
-    const plan = state.workoutPlans && state.workoutPlans[planId];
-    if (!plan) return;
-    plan.name = newName;
-    plan.updatedAt = new Date().toISOString();
-    save();
-  }
-
-  function addExerciseToPlan(planId, exerciseId) {
-    const plan = state.workoutPlans && state.workoutPlans[planId];
-    if (!plan) return;
-    plan.exercises.push({ id: exerciseId, sets: 3, reps: 10 });
-    plan.updatedAt = new Date().toISOString();
-    save();
-  }
-
-  function removeExerciseFromPlan(planId, index) {
-    const plan = state.workoutPlans && state.workoutPlans[planId];
-    if (!plan) return;
-    plan.exercises.splice(index, 1);
-    plan.updatedAt = new Date().toISOString();
-    save();
-  }
-
-  function updateExerciseInPlan(planId, index, patch) {
-    const plan = state.workoutPlans && state.workoutPlans[planId];
-    if (!plan || !plan.exercises[index]) return;
-    Object.assign(plan.exercises[index], patch);
-    plan.updatedAt = new Date().toISOString();
-    save();
-  }
-
-  function moveExerciseInPlan(planId, index, direction) {
-    const plan = state.workoutPlans && state.workoutPlans[planId];
-    if (!plan) return;
-    const target = index + direction;
-    if (target < 0 || target >= plan.exercises.length) return;
-    const list = plan.exercises;
-    [list[index], list[target]] = [list[target], list[index]];
-    plan.updatedAt = new Date().toISOString();
-    save();
-  }
-
-  // --- Plan detail sheet ---------------------------------------------------
-
-  function openPlanDetail(planId) {
-    const plan = state.workoutPlans && state.workoutPlans[planId];
-    if (!plan) { workoutTab = 'plans'; openWorkouts(); return; }
-    // Load exercises so we can look up names; if already cached it resolves immediately.
-    loadExercises().then(() => renderPlanDetailSheet(planId));
-  }
-
-  function renderPlanDetailSheet(planId) {
-    const plan = state.workoutPlans[planId];
-    if (!plan) return;
-
-    const rows = plan.exercises.map((entry, i) => {
-      const ex = exercisesCache.find(e => e.id === entry.id);
-      const name = ex ? ex.name : '(exercise no longer available)';
+    const groupsHTML = WORKOUT_GROUPS.map(g => {
+      const exercises = WORKOUT_EXERCISES.filter(e => e.group === g.key);
+      const rows = exercises.map(ex => renderWorkoutExercise(ex, dayLog[workoutSlug(ex.name)] || [])).join('');
       return `
-        <div class="plan-ex-row" data-index="${i}">
-          <div class="plan-ex-main">
-            <p class="plan-ex-name">${escapeHTML(name)}</p>
-            <div class="plan-ex-inputs">
-              <label>Sets
-                <input type="number" min="1" max="20" step="1" value="${entry.sets}" data-field="sets"/>
-              </label>
-              <span class="plan-ex-times">×</span>
-              <label>Reps
-                <input type="number" min="1" max="100" step="1" value="${entry.reps}" data-field="reps"/>
-              </label>
-            </div>
+        <div class="wt-group ${g.key}">
+          <div class="wt-group-header">
+            <strong>${g.label}</strong>
+            <span class="wt-group-sub">${escapeHTML(g.sub)} · hardest → easiest</span>
           </div>
-          <div class="plan-ex-actions">
-            <button class="plan-ex-btn" data-action="up" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>↑</button>
-            <button class="plan-ex-btn" data-action="down" aria-label="Move down" ${i === plan.exercises.length - 1 ? 'disabled' : ''}>↓</button>
-            <button class="plan-ex-btn plan-ex-remove" data-action="remove" aria-label="Remove">×</button>
-          </div>
+          <div class="wt-exercises">${rows}</div>
         </div>
       `;
     }).join('');
 
-    const body = plan.exercises.length === 0
-      ? `<p class="archive-empty">No moves yet. Tap "Add exercise" to start.</p>`
-      : `<div class="plan-ex-list">${rows}</div>`;
-
-    openSheet(`
-      <p class="ex-eyebrow">Workout plan</p>
-      <h2 id="plan-title">${escapeHTML(plan.name)}</h2>
-      <p class="subtle">${plan.exercises.length} move${plan.exercises.length === 1 ? '' : 's'} · updated ${fmt.planTimestamp(plan.updatedAt)} · <button class="inline-link" id="rename-plan">Rename</button></p>
-
-      ${body}
-
-      <div class="sheet-actions" style="margin-top:18px">
-        <button class="btn btn-ghost" id="back">Back</button>
-        <button class="btn btn-primary" id="add-exercise">Add exercise</button>
+    body.innerHTML = `
+      <div class="wt-day-nav">
+        <button type="button" id="wt-prev" ${canPrev ? '' : 'disabled'} aria-label="Previous day">‹</button>
+        <label class="wt-day-label">
+          <span class="wt-day-rel">${relLabel}</span>
+          <input type="date" class="wt-day-picker" id="wt-day-input" value="${iso}" min="${startISO}" max="${todayISO}" />
+          <span style="display:block;font-size:11px;color:var(--ink-faint);margin-top:2px">${escapeHTML(dateLabel)}</span>
+        </label>
+        <button type="button" id="wt-next" ${canNext ? '' : 'disabled'} aria-label="Next day">›</button>
       </div>
-      <div class="sheet-actions">
-        <button class="btn btn-danger-ghost" id="delete-plan">Delete plan</button>
+      <div class="wt-summary">
+        ${totalTicks > 0
+          ? `<strong>${totalTicks}</strong> set${totalTicks === 1 ? '' : 's'} logged on this day.`
+          : `Nothing logged on this day yet.`}
       </div>
-    `);
+      ${groupsHTML}
+    `;
 
-    sheet.querySelector('#rename-plan').addEventListener('click', () => {
-      const next = (prompt('Rename plan', plan.name) || '').trim();
-      if (!next || next === plan.name) return;
-      renamePlan(planId, next);
-      renderPlanDetailSheet(planId);
+    // Wire day navigation.
+    const prevBtn = body.querySelector('#wt-prev');
+    const nextBtn = body.querySelector('#wt-next');
+    const dayInput = body.querySelector('#wt-day-input');
+    if (prevBtn) prevBtn.addEventListener('click', () => {
+      const d = addDays(parseISO(workoutDayISO), -1);
+      const newISO = toISODate(d);
+      if (newISO >= startISO) { workoutDayISO = newISO; renderWorkoutTrackerBody(); }
+    });
+    if (nextBtn) nextBtn.addEventListener('click', () => {
+      const d = addDays(parseISO(workoutDayISO), 1);
+      const newISO = toISODate(d);
+      if (newISO <= todayISO) { workoutDayISO = newISO; renderWorkoutTrackerBody(); }
+    });
+    if (dayInput) dayInput.addEventListener('change', (e) => {
+      const v = e.target.value;
+      if (v && v >= startISO && v <= todayISO) { workoutDayISO = v; renderWorkoutTrackerBody(); }
     });
 
-    const listEl = sheet.querySelector('.plan-ex-list');
-    if (listEl) {
-      listEl.addEventListener('click', (e) => {
-        const btn = e.target.closest('.plan-ex-btn');
-        if (!btn) return;
-        const row = btn.closest('.plan-ex-row');
-        const idx = Number(row.dataset.index);
-        const action = btn.dataset.action;
-        if (action === 'up') moveExerciseInPlan(planId, idx, -1);
-        else if (action === 'down') moveExerciseInPlan(planId, idx, 1);
-        else if (action === 'remove') {
-          if (!confirm('Remove this exercise from the plan?')) return;
-          removeExerciseFromPlan(planId, idx);
+    // Wire exercise expand toggles.
+    body.querySelectorAll('.wt-exercise-head').forEach(head => {
+      head.addEventListener('click', () => {
+        const card = head.closest('.wt-exercise');
+        if (!card) return;
+        card.classList.toggle('is-open');
+        // Lazy-load image only on first open to avoid pulling all 40 at once.
+        const img = card.querySelector('img[data-src]');
+        if (img && img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
         }
-        renderPlanDetailSheet(planId);
       });
-      listEl.addEventListener('change', (e) => {
-        const input = e.target.closest('input[data-field]');
-        if (!input) return;
-        const row = input.closest('.plan-ex-row');
-        const idx = Number(row.dataset.index);
-        const field = input.dataset.field;
-        let val = parseInt(input.value, 10);
-        if (isNaN(val) || val < 1) val = 1;
-        if (field === 'sets' && val > 20) val = 20;
-        if (field === 'reps' && val > 100) val = 100;
-        input.value = val;
-        updateExerciseInPlan(planId, idx, { [field]: val });
-      });
-    }
+    });
 
-    sheet.querySelector('#back').addEventListener('click', () => {
-      workoutTab = 'plans';
-      openWorkouts();
-    });
-    sheet.querySelector('#add-exercise').addEventListener('click', () => {
-      workoutPickMode = planId;
-      workoutTab = 'browse';
-      openWorkouts();
-    });
-    sheet.querySelector('#delete-plan').addEventListener('click', () => {
-      if (!confirm(`Delete "${plan.name}"? This can't be undone.`)) return;
-      deletePlan(planId);
-      workoutTab = 'plans';
-      openWorkouts();
+    // Wire rep-box ticks.
+    body.querySelectorAll('.wt-rep-box').forEach(box => {
+      box.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const slug = box.dataset.slug;
+        const reps = Number(box.dataset.reps);
+        if (!slug || !reps) return;
+        toggleWorkoutRep(workoutDayISO, slug, reps);
+        // In-place update so we don't re-render and lose scroll position.
+        const isOn = box.classList.toggle('is-on');
+        // Update the parent card's "any logged" indicator + summary count.
+        const card = box.closest('.wt-exercise');
+        if (card) {
+          const cardLog = (state.workoutLog[workoutDayISO] || {})[slug] || [];
+          card.classList.toggle('has-any', cardLog.length > 0);
+        }
+        const summary = body.querySelector('.wt-summary');
+        if (summary) {
+          const total = Object.values(state.workoutLog[workoutDayISO] || {})
+            .reduce((n, arr) => n + (arr ? arr.length : 0), 0);
+          summary.innerHTML = total > 0
+            ? `<strong>${total}</strong> set${total === 1 ? '' : 's'} logged on this day.`
+            : `Nothing logged on this day yet.`;
+        }
+      });
     });
   }
 
-  function openPlanPicker(exerciseId) {
-    const plans = (state.workoutPlanOrder || [])
-      .map(id => state.workoutPlans[id])
-      .filter(Boolean);
-
-    const list = plans.length === 0
-      ? `<p class="archive-empty">No plans yet. Create one below.</p>`
-      : `<div class="archive-list">${plans.map(p => `
-          <button class="archive-item plan-pick-item" data-plan-id="${p.id}">
-            <div class="aleft">
-              <p class="atext">${escapeHTML(p.name)}</p>
-              <p class="adate">${p.exercises.length} move${p.exercises.length === 1 ? '' : 's'}</p>
-            </div>
-            <span class="plan-chev">+</span>
-          </button>
-        `).join('')}</div>`;
-
-    openSheet(`
-      <p class="ex-eyebrow">Add to plan</p>
-      <h2>Pick a plan</h2>
-      <p class="subtle">Adds with 3 sets of 10 by default.</p>
-
-      ${list}
-
-      <div class="sheet-actions" style="margin-top:18px">
-        <button class="btn btn-ghost" id="back">Back</button>
-        <button class="btn btn-primary" id="new-plan">New plan</button>
+  function renderWorkoutExercise(ex, ticked) {
+    const slug = workoutSlug(ex.name);
+    const tickedSet = new Set(ticked);
+    const boxes = WORKOUT_REP_STEPS.map(n => {
+      const on = tickedSet.has(n);
+      return `<button type="button" class="wt-rep-box${on ? ' is-on' : ''}" data-slug="${slug}" data-reps="${n}" aria-pressed="${on}">${n}</button>`;
+    }).join('');
+    const hasAny = ticked.length > 0;
+    const imgSrc = workoutImagePath(slug, 'jpg');
+    return `
+      <div class="wt-exercise${hasAny ? ' has-any' : ''}" data-slug="${slug}">
+        <div class="wt-exercise-head">
+          <span class="wt-exercise-name">${escapeHTML(ex.name)}</span>
+          <span class="wt-exercise-unit">${escapeHTML(ex.unit)}</span>
+        </div>
+        <div class="wt-exercise-image">
+          <img alt="${escapeHTML(ex.name)} cue" data-src="${imgSrc}"
+               onerror="this.parentElement.innerHTML='<p class=&quot;wt-image-missing&quot;>No image yet for this one.</p>';" />
+        </div>
+        <div class="wt-exercise-reps">${boxes}</div>
       </div>
-    `);
-
-    sheet.querySelectorAll('.plan-pick-item').forEach(el => {
-      el.addEventListener('click', () => {
-        const planId = el.dataset.planId;
-        addExerciseToPlan(planId, exerciseId);
-        openPlanDetail(planId);
-      });
-    });
-    sheet.querySelector('#back').addEventListener('click', () => openExerciseDetail(exerciseId));
-    sheet.querySelector('#new-plan').addEventListener('click', () => {
-      const name = (prompt('Name this plan', 'Push day') || '').trim();
-      if (!name) return;
-      const planId = createPlan(name);
-      addExerciseToPlan(planId, exerciseId);
-      openPlanDetail(planId);
-    });
+    `;
   }
 
-  function openExerciseDetail(id) {
-    const ex = exercisesCache && exercisesCache.find(e => e.id === id);
-    if (!ex) return;
-
-    const primary = ex.primary.map(m => `<span class="works-chip works-chip-primary">${MUSCLE_LABEL[m]}</span>`).join('');
-    const secondary = ex.secondary.map(m => `<span class="works-chip">${MUSCLE_LABEL[m]}</span>`).join('');
-    const steps = ex.howTo.map(s => `<li>${s}</li>`).join('');
-
-    const pickPlan = workoutPickMode ? state.workoutPlans[workoutPickMode] : null;
-    const primaryAction = pickPlan
-      ? `<button class="btn btn-primary" id="add-to-this-plan">Add to "${escapeHTML(pickPlan.name)}"</button>`
-      : `<button class="btn btn-primary" id="add-to-plan">Add to plan…</button>`;
-
-    openSheet(`
-      <p class="ex-eyebrow">${ex.category}</p>
-      <h2>${ex.name}</h2>
-      <p class="subtle">${difficultyBadge(ex.difficulty)} · ${ex.equipment.map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(' + ')}</p>
-
-      ${renderBodyDiagram()}
-
-      <p class="sheet-section-label">Works</p>
-      <div class="works-chips">${primary}${secondary}</div>
-
-      <p class="sheet-section-label" style="margin-top:16px">How to</p>
-      <ol class="howto-steps">${steps}</ol>
-
-      <p class="sheet-section-label" style="margin-top:16px">What it builds</p>
-      <p class="ex-what">${ex.what}</p>
-
-      ${ex.tips ? `
-        <p class="sheet-section-label" style="margin-top:16px">Tips</p>
-        <p class="ex-tips">${ex.tips}</p>
-      ` : ''}
-
-      <div class="sheet-actions" style="margin-top:18px">
-        <button class="btn btn-ghost" id="back">Back</button>
-        ${primaryAction}
-      </div>
-    `);
-    highlightMuscles(sheet.querySelector('.body-diagram'), ex.primary, ex.secondary);
-    sheet.querySelector('#back').addEventListener('click', openWorkouts);
-    if (pickPlan) {
-      sheet.querySelector('#add-to-this-plan').addEventListener('click', () => {
-        addExerciseToPlan(pickPlan.id, ex.id);
-        const planId = pickPlan.id;
-        workoutPickMode = null;
-        openPlanDetail(planId);
-      });
-    } else {
-      sheet.querySelector('#add-to-plan').addEventListener('click', () => openPlanPicker(ex.id));
-    }
+  function toggleWorkoutRep(iso, slug, reps) {
+    if (!state.workoutLog) state.workoutLog = {};
+    if (!state.workoutLog[iso]) state.workoutLog[iso] = {};
+    const day = state.workoutLog[iso];
+    const arr = day[slug] || [];
+    const idx = arr.indexOf(reps);
+    if (idx >= 0) arr.splice(idx, 1);
+    else { arr.push(reps); arr.sort((a, b) => a - b); }
+    if (arr.length) day[slug] = arr;
+    else delete day[slug];
+    if (Object.keys(day).length === 0) delete state.workoutLog[iso];
+    save();
   }
+
 
   // --- Stats ---------------------------------------------------------------
 
@@ -9755,196 +9484,6 @@
     return { daily, drinkDays, dryDays, drinkCount, tracked, dryStreak, days };
   }
 
-  function computeWorkoutStats() {
-    const plans = Object.values(state.workoutPlans || {});
-    let moves = 0;
-    const muscles = new Set();
-    for (const p of plans) {
-      moves += (p.exercises || []).length;
-      if (!exercisesCache) continue;
-      for (const entry of (p.exercises || [])) {
-        const ex = exercisesCache.find(e => e.id === entry.id);
-        if (!ex) continue;
-        for (const m of ex.primary) muscles.add(m);
-        for (const m of ex.secondary) muscles.add(m);
-      }
-    }
-    return { plansCount: plans.length, moves, muscles: [...muscles] };
-  }
-
-  function computeDeckStats() {
-    const stageCount = (deck) => {
-      const c = new Array(SRS_INTERVALS.length).fill(0);
-      for (const entry of Object.values(deck || {})) {
-        const s = Math.min(Math.max(0, entry.stage || 0), c.length - 1);
-        c[s] += 1;
-      }
-      return c;
-    };
-    const wordArr = Object.values(state.wordDeck || {});
-    const quoteArr = Object.values(state.quoteDeck || {});
-    return {
-      word:  { total: wordArr.length,  stages: stageCount(state.wordDeck) },
-      quote: { total: quoteArr.length, stages: stageCount(state.quoteDeck) },
-    };
-  }
-
-  // --- Batch 6 renderers ---------------------------------------------------
-
-  function renderHabitSection(stats) {
-    const rows = stats.map(h => {
-      const squares = h.daily.map(state => {
-        return `<span class="habit-sq habit-${state}"></span>`;
-      }).join('');
-      const rateStr = h.rate !== null ? `${h.rate}%` : '—';
-      return `
-        <div class="habit-row">
-          <div class="habit-head">
-            <span class="habit-name">${h.name}</span>
-            <span class="habit-rate">${rateStr} <small>${h.done}/${h.total}</small></span>
-          </div>
-          <div class="habit-strip">${squares}</div>
-        </div>
-      `;
-    }).join('');
-    return `<div class="habit-list">${rows}</div>`;
-  }
-
-  function renderSleepChart(stats) {
-    const { series, avg } = stats;
-    if (series.length === 0) return '<p class="archive-empty">No sleep logged yet.</p>';
-    const chartH = 120;
-    const barW = 10, gap = 2;
-    const svgW = series.length * (barW + gap) - gap;
-    const svgH = chartH + 20;
-    const max = 12; // y-axis ceiling in hours
-    const target = 8;
-    const targetY = chartH - (target / max) * chartH;
-
-    const bars = series.map((p, i) => {
-      const x = i * (barW + gap);
-      if (p.hours === null) {
-        return `<rect class="sleep-empty" x="${x}" y="${chartH - 1}" width="${barW}" height="1"/>`;
-      }
-      const h = Math.min(p.hours, max) / max * chartH;
-      const y = chartH - h;
-      let cls = 'sleep-bar';
-      if (p.hours >= 7.5) cls += ' sleep-good';
-      else if (p.hours >= 6) cls += ' sleep-ok';
-      else cls += ' sleep-low';
-      return `<rect class="${cls}" x="${x}" y="${y}" width="${barW}" height="${h}" rx="1"/>`;
-    }).join('');
-
-    return `
-      <svg class="sleep-chart" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet">
-        <line class="sleep-target" x1="0" y1="${targetY}" x2="${svgW}" y2="${targetY}"/>
-        <line class="sleep-axis" x1="0" y1="${chartH + 0.5}" x2="${svgW}" y2="${chartH + 0.5}"/>
-        ${bars}
-        <text class="sleep-target-label" x="${svgW}" y="${targetY - 3}" text-anchor="end">8h target</text>
-      </svg>
-      <p class="stats-sub" style="margin-top:6px">Average: ${avg.toFixed(1)}h across ${stats.count} logged night${stats.count === 1 ? '' : 's'}.</p>
-    `;
-  }
-
-  function renderQuizSection(stats) {
-    const overall = stats.seen > 0 ? Math.round((stats.correct / stats.seen) * 100) : null;
-    const tiles = `
-      <div class="summary-grid stats-summary">
-        <div class="summary-tile">
-          <p class="slabel">Games</p>
-          <p class="svalue">${stats.games}</p>
-        </div>
-        <div class="summary-tile">
-          <p class="slabel">Best round</p>
-          <p class="svalue">${stats.best}<small>/10</small></p>
-        </div>
-        <div class="summary-tile wide">
-          <p class="slabel">Lifetime accuracy</p>
-          <p class="svalue">${overall !== null ? overall + '%' : '—'}<small>${stats.correct}/${stats.seen}</small></p>
-        </div>
-      </div>
-    `;
-    const hasSeen = stats.rows.some(r => r.seen > 0);
-    const rows = !hasSeen
-      ? `<p class="archive-empty">Play a round to start this chart.</p>`
-      : stats.rows.map(r => {
-          const rateW = r.rate !== null ? r.rate : 0;
-          return `
-            <div class="act-row">
-              <span class="act-label">${r.label}</span>
-              <div class="act-bar-wrap">
-                <div class="act-bar act-quiz" style="width: ${rateW}%;"></div>
-              </div>
-              <span class="act-val">${r.rate !== null ? r.rate + '%' : '—'}<small>${r.correct}/${r.seen}</small></span>
-            </div>
-          `;
-        }).join('');
-    return tiles + `<div class="act-rows" style="margin-top:12px">${rows}</div>`;
-  }
-
-  function renderDrinkSection(stats) {
-    const dailyBars = stats.daily.map((d, i) => {
-      let cls = 'drink-cell drink-none';
-      if (d.drank === true) cls = 'drink-cell drink-on';
-      else if (d.drank === false) cls = 'drink-cell drink-dry';
-      return `<span class="${cls}" title="${d.iso}"></span>`;
-    }).join('');
-    return `
-      <div class="summary-grid stats-summary">
-        <div class="summary-tile">
-          <p class="slabel">Dry streak</p>
-          <p class="svalue">${stats.dryStreak}<small>day${stats.dryStreak === 1 ? '' : 's'}</small></p>
-        </div>
-        <div class="summary-tile">
-          <p class="slabel">Drink days · 30d</p>
-          <p class="svalue">${stats.drinkDays}<small>of ${stats.tracked}</small></p>
-        </div>
-        <div class="summary-tile wide">
-          <p class="slabel">Drinks · 30d</p>
-          <p class="svalue">${stats.drinkCount}</p>
-        </div>
-      </div>
-      <div class="drink-strip">${dailyBars}</div>
-      <p class="stats-sub" style="margin-top:6px">Each mark is a day. Filled = drank, outlined = dry, blank = untracked.</p>
-    `;
-  }
-
-  function renderWorkoutStatsSection(stats) {
-    const coverageCount = stats.muscles.length;
-    const totalMuscles = MUSCLE_ORDER.length;
-    const musclePills = MUSCLE_ORDER
-      .filter(m => stats.muscles.includes(m))
-      .map(m => `<span class="works-chip works-chip-primary">${MUSCLE_LABEL[m]}</span>`)
-      .join('');
-    const missing = MUSCLE_ORDER
-      .filter(m => !stats.muscles.includes(m))
-      .map(m => `<span class="works-chip">${MUSCLE_LABEL[m]}</span>`)
-      .join('');
-    return `
-      <div class="summary-grid stats-summary">
-        <div class="summary-tile">
-          <p class="slabel">Plans</p>
-          <p class="svalue">${stats.plansCount}</p>
-        </div>
-        <div class="summary-tile">
-          <p class="slabel">Moves in plans</p>
-          <p class="svalue">${stats.moves}</p>
-        </div>
-        <div class="summary-tile wide">
-          <p class="slabel">Muscle coverage</p>
-          <p class="svalue">${coverageCount}<small>/ ${totalMuscles}</small></p>
-        </div>
-      </div>
-      ${stats.plansCount === 0
-        ? '<p class="archive-empty">Build a plan in Workouts to populate this.</p>'
-        : `
-          <p class="sheet-section-label" style="margin-top:14px">Covered</p>
-          <div class="works-chips">${musclePills || '<span class="stats-sub">Nothing yet.</span>'}</div>
-          <p class="sheet-section-label" style="margin-top:14px">Missing</p>
-          <div class="works-chips">${missing || '<span class="stats-sub">All muscles covered.</span>'}</div>
-        `}
-    `;
-  }
 
   function renderDeckSection(stats) {
     const renderDeck = (label, data) => {
@@ -10169,8 +9708,7 @@
       <p class="subtle">The chain, laid out in numbers.</p>
       <div id="stats-body"></div>
     `);
-    // Load exercises so workout muscle-coverage can render; if it fails, stats still works.
-    loadExercises().catch(() => {}).finally(renderStatsBody);
+    renderStatsBody();
   }
 
   function renderStatsBody() {
@@ -10230,14 +9768,20 @@
       <p class="sheet-section-label" style="margin-top:22px">Sleep · last 30 nights</p>
       ${renderSleepChart(computeSleepStats(30))}
 
+      ${(() => {
+        const sparks = renderWearableSparklines();
+        return sparks
+          ? `<p class="sheet-section-label" style="margin-top:22px">Wearable · last 30 days</p>
+             <p class="stats-sub">Sleep score, readiness, and resting HR. Empty days break the line; the trend arrow compares first to last logged value.</p>
+             ${sparks}`
+          : '';
+      })()}
+
       <p class="sheet-section-label" style="margin-top:22px">Trivia</p>
       ${renderQuizSection(computeQuizStats())}
 
       <p class="sheet-section-label" style="margin-top:22px">Drinks · last 30 days</p>
       ${renderDrinkSection(computeDrinkStats(30))}
-
-      <p class="sheet-section-label" style="margin-top:22px">Workouts</p>
-      ${renderWorkoutStatsSection(computeWorkoutStats())}
 
       <p class="sheet-section-label" style="margin-top:22px">Learning decks</p>
       <p class="stats-sub">SRS stage = how well a card has stuck. Stage 6 = mature.</p>
@@ -10275,6 +9819,7 @@
   function renderAll() {
     renderHeader();
     renderSyncStaleBanner();
+    renderBackupNudge();
     renderMorningRitual();
     renderChecklist();
     renderTodos();
