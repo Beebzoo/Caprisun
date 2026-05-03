@@ -715,6 +715,80 @@
   }
   .priority-notes-toggle[open] summary::before { content: '−'; }
 
+  /* Wearable metrics — optional Fitbit-style inputs (sleep score,
+     readiness, resting heart rate). Collapsed by default so the
+     ritual-card stays calm on days you don't log them. */
+  .wearable-toggle {
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .wearable-toggle summary {
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    padding: 6px 0;
+    list-style: none;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .wearable-toggle summary::-webkit-details-marker { display: none; }
+  .wearable-toggle summary::before {
+    content: '+';
+    color: var(--green-leaf);
+    font-size: 13px;
+    font-family: 'Fraunces', Georgia, serif;
+    transform: translateY(-1px);
+  }
+  .wearable-toggle[open] summary::before { content: '−'; }
+  .wearable-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .wearable-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .wearable-cell label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  .wearable-cell input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    text-align: center;
+  }
+  .wearable-cell input:focus { outline: none; border-color: var(--border-strong); }
+  .wearable-cell input::-webkit-outer-spin-button,
+  .wearable-cell input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .wearable-cell input[type="number"] { -moz-appearance: textfield; }
+  .wearable-hint {
+    margin: 8px 0 2px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
   .ritual-readback {
     margin: 2px 0 12px;
     padding: 12px 14px;
@@ -3802,6 +3876,26 @@
         </div>
         <div class="ritual-summary placeholder" id="sleep-summary">Enter both times to see your sleep.</div>
         <div class="ritual-sleep-avg" id="sleep-avg"></div>
+
+        <details class="wearable-toggle" id="wearable-toggle">
+          <summary>From your wearable</summary>
+          <div class="wearable-row">
+            <div class="wearable-cell">
+              <label for="sleep-score">Sleep score</label>
+              <input id="sleep-score" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="—" aria-label="Sleep score, 0 to 100" />
+            </div>
+            <div class="wearable-cell">
+              <label for="readiness-score">Readiness</label>
+              <input id="readiness-score" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="—" aria-label="Daily readiness, 0 to 100" />
+            </div>
+            <div class="wearable-cell">
+              <label for="rhr-score">Resting HR</label>
+              <input id="rhr-score" type="number" min="30" max="130" step="1" inputmode="numeric" placeholder="—" aria-label="Resting heart rate, beats per minute" />
+            </div>
+          </div>
+          <p class="wearable-hint">Optional — log when you check the watch. Sleep score and readiness drift week-to-week; resting HR moves slowest of all and reveals itself across months.</p>
+        </details>
+
         <div class="ritual-mood">
           <p class="ritual-mood-label">How did you wake up?</p>
           <div class="mood-dots" id="mood-dots">
@@ -4225,6 +4319,9 @@
    *   habits         { 'YYYY-MM-DD': { teeth: true, shower: true, ... } }
    *   sleep          { 'YYYY-MM-DD': number (hours, e.g. 7.5) }
    *   sleepTimes     { 'YYYY-MM-DD': { bed: 'HH:MM', wake: 'HH:MM' } }   recorded the morning after
+   *   sleepScore     { 'YYYY-MM-DD': 0..100 }                            wearable composite, e.g. Fitbit
+   *   readiness      { 'YYYY-MM-DD': 0..100 }                            daily readiness / recovery score
+   *   rhr            { 'YYYY-MM-DD': number (bpm) }                      resting heart rate, slow-trending
    *   morningPlan    { 'YYYY-MM-DD': string }                            short note about today
    *   priorities     { 'YYYY-MM-DD': [{text, done}, {text, done}, {text, done}] }   today's three
    *   mood           { 'YYYY-MM-DD': 1..5 }                              1=drained, 5=great
@@ -4274,6 +4371,9 @@
     habits: {},
     sleep: {},
     sleepTimes: {},
+    sleepScore: {},
+    readiness: {},
+    rhr: {},
     morningPlan: {},
     priorities: {},
     mood: {},
@@ -5350,6 +5450,25 @@
     if (wakeEl) wakeEl.value = times.wake || '';
     updateSleepSummary();
 
+    // Wearable inputs — populate, and auto-open the section when any
+    // value is logged for today so it's not hidden behind a click.
+    const wearableMap = [
+      { id: 'sleep-score',     bag: 'sleepScore' },
+      { id: 'readiness-score', bag: 'readiness' },
+      { id: 'rhr-score',       bag: 'rhr' },
+    ];
+    let anyWearable = false;
+    for (const { id, bag } of wearableMap) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const v = state[bag] && state[bag][todayISO];
+      const hasVal = (typeof v === 'number') && isFinite(v);
+      if (document.activeElement !== el) el.value = hasVal ? String(v) : '';
+      if (hasVal) anyWearable = true;
+    }
+    const wearToggle = document.getElementById('wearable-toggle');
+    if (wearToggle && anyWearable) wearToggle.setAttribute('open', '');
+
     const yEl = document.getElementById('yesterday-date');
     if (yEl) {
       const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -5448,6 +5567,34 @@
 
     if (bedEl) bedEl.addEventListener('change', saveSleepTimes);
     if (wakeEl) wakeEl.addEventListener('change', saveSleepTimes);
+
+    // Wearable metrics — persist on change. Empty / out-of-range clears
+    // the entry rather than storing NaN.
+    function wireWearable(elId, bag, min, max) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const persist = () => {
+        const todayISO = toISODate(new Date());
+        if (!state[bag]) state[bag] = {};
+        const raw = (el.value || '').trim();
+        if (raw === '') {
+          delete state[bag][todayISO];
+        } else {
+          const n = Number(raw);
+          if (!isFinite(n) || n < min || n > max) {
+            delete state[bag][todayISO];
+          } else {
+            state[bag][todayISO] = Math.round(n);
+          }
+        }
+        save();
+      };
+      el.addEventListener('change', persist);
+      el.addEventListener('blur', persist);
+    }
+    wireWearable('sleep-score',     'sleepScore', 0, 100);
+    wireWearable('readiness-score', 'readiness',  0, 100);
+    wireWearable('rhr-score',       'rhr',        30, 130);
 
     function debouncedSave(el, fn, savedId) {
       let timer;
@@ -6543,11 +6690,17 @@
         if (sessions.reading) parts.push(`Reading ${sessions.reading}m`);
         const m = state.mood[dIso];
         const sl = state.sleep[dIso];
+        const sScore = state.sleepScore && state.sleepScore[dIso];
+        const ready  = state.readiness  && state.readiness[dIso];
+        const rhrV   = state.rhr        && state.rhr[dIso];
         const dayColor = state.dayColors[dIso];
         const meta = [];
         if (parts.length) meta.push(parts.join(', '));
         if (typeof m === 'number') meta.push(`mood ${m}/5`);
         if (typeof sl === 'number') meta.push(`sleep ${fmt.sleep(sl)}`);
+        if (typeof sScore === 'number') meta.push(`score ${sScore}`);
+        if (typeof ready === 'number')  meta.push(`readiness ${ready}`);
+        if (typeof rhrV === 'number')   meta.push(`rhr ${rhrV}`);
         if (dayColor) meta.push(COLOR_META[dayColor].label.toLowerCase());
         const metaStr = meta.length ? ` — ${meta.join(' · ')}` : '';
         lines.push(`- **${fullDayNames[i]} ${date.getDate()} ${monthShort(date)}**${metaStr}`);
@@ -9807,6 +9960,49 @@
           eyebrow: 'Sleep × week color',
           line: `<strong>${labelHigh}</strong> weeks averaged ${fmt.sleep(colorAvgs[high])} sleep. <strong>${labelLow}</strong> weeks averaged ${fmt.sleep(colorAvgs[low])}.`,
           meta: `${nHigh} ${labelHigh.toLowerCase()} week${nHigh === 1 ? '' : 's'}, ${nLow} ${labelLow.toLowerCase()} week${nLow === 1 ? '' : 's'}.`,
+        });
+      }
+    }
+
+    // --- 1b. Sleep score by week color ---
+    // Same shape as the sleep-duration card, but uses the wearable
+    // composite score. A stronger signal than duration alone, since two
+    // 7.5-hour nights can produce very different scores.
+    const scoreByColor = { deep: [], soft: [], ochre: [], terra: [] };
+    for (let i = 0; i < weeksSinceStart; i++) {
+      const m = addDays(startMonday, i * 7);
+      const wIso = toISODate(m);
+      const color = state.weekColors[wIso];
+      if (!color || !scoreByColor[color]) continue;
+      const scores = [];
+      for (let d = 0; d < 7; d++) {
+        const dIso = toISODate(addDays(m, d));
+        const v = state.sleepScore && state.sleepScore[dIso];
+        if (typeof v === 'number' && isFinite(v)) scores.push(v);
+      }
+      if (scores.length >= 3) {
+        scoreByColor[color].push(scores.reduce((a, b) => a + b, 0) / scores.length);
+      }
+    }
+    const scoreAvgs = {};
+    for (const c of Object.keys(scoreByColor)) {
+      const arr = scoreByColor[c];
+      if (arr.length >= 2) scoreAvgs[c] = arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+    const haveScore = ordered.filter(c => scoreAvgs[c] != null);
+    if (haveScore.length >= 2) {
+      const high = haveScore[0];
+      const low  = haveScore[haveScore.length - 1];
+      if (high !== low) {
+        const lblHigh = COLOR_META[high].label;
+        const lblLow  = COLOR_META[low].label;
+        const nHigh = scoreByColor[high].length;
+        const nLow  = scoreByColor[low].length;
+        cards.push({
+          kind: 'sleep',
+          eyebrow: 'Sleep score × week color',
+          line: `<strong>${lblHigh}</strong> weeks averaged a sleep score of ${Math.round(scoreAvgs[high])}. <strong>${lblLow}</strong> weeks averaged ${Math.round(scoreAvgs[low])}.`,
+          meta: `${nHigh} ${lblHigh.toLowerCase()} week${nHigh === 1 ? '' : 's'}, ${nLow} ${lblLow.toLowerCase()} week${nLow === 1 ? '' : 's'}.`,
         });
       }
     }
