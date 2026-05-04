@@ -1291,6 +1291,25 @@
     letter-spacing: 0.04em;
   }
 
+  .stepper .value input.val-input {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: inherit;
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 3.2em;
+    text-align: center;
+    padding: 0;
+    -moz-appearance: textfield;
+  }
+  .stepper .value input.val-input::-webkit-outer-spin-button,
+  .stepper .value input.val-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   /* Color picker for week review */
   .color-grid {
     display: grid;
@@ -1582,6 +1601,23 @@
     color: var(--ink-faint);
     font-size: 10px;
     margin-left: 3px;
+  }
+  .mini-stepper .mval input.mv-input {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 15px;
+    color: inherit;
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 2.4em;
+    text-align: center;
+    padding: 0;
+    -moz-appearance: textfield;
+  }
+  .mini-stepper .mval input.mv-input::-webkit-outer-spin-button,
+  .mini-stepper .mval input.mv-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   /* Guide sheet */
@@ -6336,7 +6372,7 @@
         <p class="sheet-section-label">Duration</p>
         <div class="stepper">
           <button id="dec" aria-label="Decrease">−</button>
-          <span class="value"><span id="val">${value}</span><small>min</small></span>
+          <span class="value"><input id="val" class="val-input" type="number" inputmode="numeric" min="0" step="1" value="${value}"><small>min</small></span>
           <button id="inc" aria-label="Increase">+</button>
         </div>
       </div>
@@ -6348,12 +6384,21 @@
     `);
 
     const valEl = sheet.querySelector('#val');
-    const step = (delta) => { value = Math.max(0, value + delta); valEl.textContent = value; };
+    const readVal = () => {
+      const n = parseInt(valEl.value, 10);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+    const writeVal = (n) => { valEl.value = String(n); };
+    const step = (delta) => { value = Math.max(0, readVal() + delta); writeVal(value); };
+    valEl.addEventListener('input', () => { value = readVal(); });
+    valEl.addEventListener('blur', () => { value = readVal(); writeVal(value); });
+    valEl.addEventListener('focus', () => { valEl.select(); });
     wireSheet({
       '#dec': () => step(-5),
       '#inc': () => step(5),
       '#cancel': closeSheet,
       '#save': () => {
+        value = readVal();
         const wasLogged = (state.sessions[dateISO]?.[activity.key] || 0) > 0;
         if (!state.sessions[dateISO]) state.sessions[dateISO] = {};
         if (value <= 0) delete state.sessions[dateISO][activity.key];
@@ -6646,7 +6691,7 @@
           </span>
           <span class="mini-stepper">
             <button data-delta="-5" aria-label="Decrease">−</button>
-            <span class="mval"><span class="mv">${mins}</span><small>min</small></span>
+            <span class="mval"><input class="mv mv-input" type="number" inputmode="numeric" min="0" step="1" value="${mins}"><small>min</small></span>
             <button data-delta="5" aria-label="Increase">+</button>
           </span>
         </div>
@@ -6765,12 +6810,19 @@
     sheet.querySelectorAll('.day-activity-row').forEach(row => {
       const key = row.dataset.key;
       const mv = row.querySelector('.mv');
+      const readMv = () => {
+        const n = parseInt(mv.value, 10);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+      };
+      mv.addEventListener('input', () => { working[key] = readMv(); });
+      mv.addEventListener('blur', () => { working[key] = readMv(); mv.value = String(working[key]); });
+      mv.addEventListener('focus', () => { mv.select(); });
       row.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', () => {
           const delta = Number(btn.dataset.delta);
-          const next = Math.max(0, (working[key] || 0) + delta);
+          const next = Math.max(0, readMv() + delta);
           working[key] = next;
-          mv.textContent = next;
+          mv.value = String(next);
         });
       });
     });
