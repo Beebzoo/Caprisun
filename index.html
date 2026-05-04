@@ -8949,58 +8949,38 @@
   const WORKOUT_GROUPS = [
     { key: 'push', label: 'PUSH', sub: 'Chest, Shoulders, Triceps' },
     { key: 'pull', label: 'PULL', sub: 'Back, Biceps' },
-    { key: 'legs', label: 'LEGS', sub: 'Quads, Hamstrings, Glutes' },
+    { key: 'legs', label: 'LEGS', sub: 'Quads, Hamstrings, Glutes, Calves' },
     { key: 'core', label: 'CORE', sub: 'Abs, Lower Back' },
   ];
 
-  // Within each group, exercises run hardest → easiest (matches the
-  // source spreadsheet). `weighted: true` shows the 5/7/10 kg buttons;
-  // bodyweight moves (Push-ups, Plank, etc.) skip them.
+  // 6 / 6 / 4 / 4 across PPLC. Order within each group matches the
+  // source brief. `weighted: true` shows the 5/7/10 kg buttons;
+  // bodyweight moves (Push-ups, Plank, Side Plank) skip them.
   const WORKOUT_EXERCISES = [
-    // PUSH
-    { group: 'push', name: 'Dumbbell Floor / Bench Press', unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Dumbbell Shoulder Press',      unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Arnold Press',                 unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Pike Push-ups',                unit: 'reps',         weighted: false },
-    { group: 'push', name: 'Push-ups',                     unit: 'reps',         weighted: false },
-    { group: 'push', name: 'Dumbbell Chest Flyes',         unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Overhead Tricep Extension',    unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Dumbbell Lateral Raises',      unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Tricep Kickbacks',             unit: 'reps',         weighted: true  },
-    { group: 'push', name: 'Dumbbell Front Raises',        unit: 'reps',         weighted: true  },
-    // PULL
-    { group: 'pull', name: 'Dumbbell Deadlifts',           unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Renegade Rows',                unit: 'reps each',    weighted: true  },
-    { group: 'pull', name: 'Bent-over Dumbbell Rows',      unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Single-Arm Dumbbell Rows',     unit: 'reps each',    weighted: true  },
-    { group: 'pull', name: 'Dumbbell Pullovers',           unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Reverse Flyes',                unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Hammer Curls',                 unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Dumbbell Bicep Curls',         unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Zottman Curls',                unit: 'reps',         weighted: true  },
-    { group: 'pull', name: 'Concentration Curls',          unit: 'reps each',    weighted: true  },
-    // LEGS
-    { group: 'legs', name: 'Bulgarian Split Squats',        unit: 'reps each',   weighted: true  },
-    { group: 'legs', name: 'Goblet Squats',                 unit: 'reps',        weighted: true  },
-    { group: 'legs', name: 'Dumbbell Lunges',               unit: 'reps each',   weighted: true  },
-    { group: 'legs', name: 'Romanian Deadlifts',            unit: 'reps',        weighted: true  },
-    { group: 'legs', name: 'Single-Leg Romanian Deadlifts', unit: 'reps each',   weighted: true  },
-    { group: 'legs', name: 'Step-ups (with dumbbells)',     unit: 'reps each',   weighted: true  },
-    { group: 'legs', name: 'Sumo Squats',                   unit: 'reps',        weighted: true  },
-    { group: 'legs', name: 'Curtsy Lunges',                 unit: 'reps each',   weighted: true  },
-    { group: 'legs', name: 'Weighted Glute Bridges',        unit: 'reps',        weighted: true  },
-    { group: 'legs', name: 'Dumbbell Calf Raises',          unit: 'reps',        weighted: true  },
-    // CORE
-    { group: 'core', name: 'V-ups',                         unit: 'reps',        weighted: false },
-    { group: 'core', name: 'Leg Raises',                    unit: 'reps',        weighted: false },
-    { group: 'core', name: 'Side Plank',                    unit: 'seconds each', weighted: false },
-    { group: 'core', name: 'Plank',                         unit: 'seconds',     weighted: false },
-    { group: 'core', name: 'Mountain Climbers',             unit: 'reps',        weighted: false },
-    { group: 'core', name: 'Bicycle Crunches',              unit: 'reps',        weighted: false },
-    { group: 'core', name: 'Russian Twists (weighted)',     unit: 'reps',        weighted: true  },
-    { group: 'core', name: 'Dead Bug',                      unit: 'reps',        weighted: false },
-    { group: 'core', name: 'Crunches',                      unit: 'reps',        weighted: false },
-    { group: 'core', name: 'Superman',                      unit: 'reps',        weighted: false },
+    // PUSH — Chest, Shoulders, Triceps
+    { group: 'push', name: 'Push-ups',                     unit: 'reps',           weighted: false },
+    { group: 'push', name: 'Dumbbell Shoulder Press',      unit: 'reps',           weighted: true  },
+    { group: 'push', name: 'Dumbbell Lateral Raises',      unit: 'reps',           weighted: true  },
+    { group: 'push', name: 'Dumbbell Chest Flyes',         unit: 'reps',           weighted: true  },
+    { group: 'push', name: 'Overhead Tricep Extension',    unit: 'reps',           weighted: true  },
+    { group: 'push', name: 'Tricep Kickbacks',             unit: 'reps',           weighted: true  },
+    // PULL — Back, Biceps
+    { group: 'pull', name: 'Bent-over Dumbbell Rows',      unit: 'reps',           weighted: true  },
+    { group: 'pull', name: 'Single-Arm Dumbbell Rows',     unit: 'reps per arm',   weighted: true  },
+    { group: 'pull', name: 'Dumbbell Pullovers',           unit: 'reps',           weighted: true  },
+    { group: 'pull', name: 'Reverse Flyes',                unit: 'reps',           weighted: true  },
+    { group: 'pull', name: 'Hammer Curls',                 unit: 'reps',           weighted: true  },
+    { group: 'pull', name: 'Dumbbell Bicep Curls',         unit: 'reps',           weighted: true  },
+    // LEGS — Quads, Hamstrings, Glutes, Calves
+    { group: 'legs', name: 'Goblet Squats',                unit: 'reps',           weighted: true  },
+    { group: 'legs', name: 'Romanian Deadlifts',           unit: 'reps',           weighted: true  },
+    { group: 'legs', name: 'Step-ups (with dumbbells)',    unit: 'reps per leg',   weighted: true  },
+    { group: 'legs', name: 'Dumbbell Calf Raises',         unit: 'reps',           weighted: true  },
+    // CORE — Abs, Lower Back
+    { group: 'core', name: 'Plank',                        unit: 'seconds',        weighted: false },
+    { group: 'core', name: 'Side Plank',                   unit: 'seconds per side', weighted: false },
+    { group: 'core', name: 'Leg Raises',                   unit: 'reps',           weighted: false },
+    { group: 'core', name: 'Bicycle Crunches',             unit: 'reps',           weighted: false },
   ];
 
   const WORKOUT_REP_STEPS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
@@ -9011,31 +8991,22 @@
   // pattern. Slug → filename (with extension). Anything not in this
   // map falls back to the slug + ext-chain in loadWorkoutImage().
   const WORKOUT_IMAGE_FILENAMES = {
-    'arnold-press':                'arnold-press-2.webp',
-    'dumbbell-floor-bench-press':  'bench press.webp',
     'dumbbell-bicep-curls':        'Dumbbell Bicep Curls.webp',
     'dumbbell-calf-raises':        'Dumbbell Calf Raises.webp',
-    'dumbbell-front-raises':       'Dumbbell Front Raises.webp',
     'dumbbell-lateral-raises':     'Dumbbell Lateral Raises.webp',
-    'dumbbell-lunges':             'Dumbbell Lunges.webp',
     'dumbbell-pullovers':          'Dumbbell Pullovers.webp',
     'bent-over-dumbbell-rows':     'dumbbell-bent-over-row.webp',
     'dumbbell-chest-flyes':        'dumbell chest flyers.webp',
-    'dumbbell-deadlifts':          'dumbell deadlifts.webp',
     'dumbbell-shoulder-press':     'dumbell shoulder press.webp',
     'goblet-squats':               'Goblet Squats.webp',
     'hammer-curls':                'Hammer Curls.webp',
     'push-ups':                    'pushups.webp',
-    'renegade-rows':               'Renegade Rows.webp',
     'reverse-flyes':               'reverse-flys-schraegbank.webp',
     'romanian-deadlifts':          'Romanian Deadlifts.webp',
     'single-arm-dumbbell-rows':    'Single-Arm Dumbbell Rows.webp',
     'step-ups-with-dumbbells':     'Step-ups (with dumbbells).gif',
-    'sumo-squats':                 'Sumo Squats.webp',
     'overhead-tricep-extension':   'tricep extension.webp',
     'tricep-kickbacks':            'Tricep Kickbacks.webp',
-    'v-ups':                       'V-ups.webp',
-    'zottman-curls':               'zottman-curl.gif',
   };
 
   // Slug used for the state key and the image filename. Must be stable
