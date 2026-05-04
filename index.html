@@ -937,6 +937,31 @@
 
   .section-label button:hover { color: var(--ink); }
 
+  /* Daily-arc act delimiters. Each act of the page (this morning, on
+     the way, on the bus, at the desk, today, this evening, the chain)
+     gets a hairline separator and a small italic-ochre kicker, so a
+     long scroll still reads as a sequence of moments. Subtle by
+     design — they orient, they don't dominate. */
+  .act-header {
+    margin: 40px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .act-header.first {
+    margin-top: 24px;
+    padding-top: 0;
+    border-top: none;
+  }
+  .act-label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--ochre);
+    letter-spacing: 0;
+    margin: 0;
+  }
+
   /* Collapsible section header — currently used by the To-do list.
      Click anywhere on the label to toggle the body; the chevron
      mirrors the open/collapsed state. */
@@ -4229,22 +4254,8 @@
     <div id="sync-stale-slot"></div>
     <div id="backup-nudge-slot"></div>
 
-    <section id="chain-section">
-      <p class="section-label">
-        <span>The chain</span>
-        <button id="open-year">View year</button>
-      </p>
-      <div class="chain" id="chain"></div>
-      <div class="chain-legend">
-        <span id="chain-start-label">8 weeks ago</span>
-        <span>this week</span>
-      </div>
-      <div id="seal-slot"></div>
-      <div id="flowers-slot"></div>
-      <div id="week8-slot"></div>
-      <div id="missed-twice-slot"></div>
-    </section>
-
+    <!-- Act 1 — In bed / first moments -->
+    <div class="act-header first"><p class="act-label">This morning</p></div>
     <section id="morning-ritual-section">
       <p class="section-label"><span>Morning ritual</span></p>
 
@@ -4298,7 +4309,42 @@
       </p>
       <p class="ritual-readback" id="yesterday-plan-readback" style="display:none"></p>
       <textarea class="ritual-text" id="yesterday-recap" placeholder="A short recap — what you did, how it felt."></textarea>
+    </section>
 
+    <!-- Act 2 — Getting ready / commute start -->
+    <div class="act-header"><p class="act-label">On the way</p></div>
+    <section id="checklist-section">
+      <p class="section-label"><span>Checklist</span><span id="checklist-progress"></span></p>
+      <div class="checklist" id="checklist"></div>
+      <div class="checklist-celebrate" id="checklist-celebrate">
+        <span class="cc-icon">✓</span>
+        <span class="cc-label">Full house. Well done.</span>
+      </div>
+    </section>
+
+    <!-- Act 3 — On the bus -->
+    <div class="act-header"><p class="act-label">On the bus</p></div>
+    <section id="moment-section">
+      <p class="section-label"><span>A moment</span></p>
+      <div class="moment-grid">
+        <button class="moment-tile" id="open-review" style="display:none">
+          <span class="meyebrow">Review</span>
+          <span class="mtitle" id="review-preview">Spaced repetition.</span>
+        </button>
+        <button class="moment-tile" id="open-quote">
+          <span class="meyebrow">Quote of the day</span>
+          <span class="mtitle" id="quote-preview">A line to sit with.</span>
+        </button>
+        <button class="moment-tile" id="open-word">
+          <span class="meyebrow">Word of the day</span>
+          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Act 4 — Arriving at the desk (pivot to action) -->
+    <div class="act-header"><p class="act-label">At the desk</p></div>
+    <section id="priorities-section">
       <p class="ritual-eyebrow">
         <span>Today's three</span>
         <span class="ritual-saved" id="priorities-saved">Saved</span>
@@ -4327,15 +4373,6 @@
       </details>
     </section>
 
-    <section id="checklist-section">
-      <p class="section-label"><span>Checklist</span><span id="checklist-progress"></span></p>
-      <div class="checklist" id="checklist"></div>
-      <div class="checklist-celebrate" id="checklist-celebrate">
-        <span class="cc-icon">✓</span>
-        <span class="cc-label">Full house. Well done.</span>
-      </div>
-    </section>
-
     <section id="todo-section">
       <p class="section-label section-label-toggle" id="todo-label" role="button" tabindex="0" aria-controls="todo-body" aria-expanded="true">
         <span>To-do</span>
@@ -4361,24 +4398,8 @@
       </div>
     </section>
 
-    <section id="moment-section">
-      <p class="section-label"><span>A moment</span></p>
-      <div class="moment-grid">
-        <button class="moment-tile" id="open-review" style="display:none">
-          <span class="meyebrow">Review</span>
-          <span class="mtitle" id="review-preview">Spaced repetition.</span>
-        </button>
-        <button class="moment-tile" id="open-quote">
-          <span class="meyebrow">Quote of the day</span>
-          <span class="mtitle" id="quote-preview">A line to sit with.</span>
-        </button>
-        <button class="moment-tile" id="open-word">
-          <span class="meyebrow">Word of the day</span>
-          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
-        </button>
-      </div>
-    </section>
-
+    <!-- Act 5 — Throughout the workday (HERO) -->
+    <div class="act-header"><p class="act-label">Today</p></div>
     <section id="today-section">
       <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
       <div class="tiles" id="tiles"></div>
@@ -4394,9 +4415,29 @@
       </div>
     </section>
 
+    <!-- Act 6 — Evening (light usage) -->
+    <div class="act-header"><p class="act-label">This evening</p></div>
     <section id="thoughts-section">
       <p class="section-label"><span>Thoughts</span></p>
       <div id="thoughts-body"></div>
+    </section>
+
+    <!-- Act 7 — Meta layer -->
+    <div class="act-header"><p class="act-label">The chain</p></div>
+    <section id="chain-section">
+      <p class="section-label">
+        <span>The chain</span>
+        <button id="open-year">View year</button>
+      </p>
+      <div class="chain" id="chain"></div>
+      <div class="chain-legend">
+        <span id="chain-start-label">8 weeks ago</span>
+        <span>this week</span>
+      </div>
+      <div id="seal-slot"></div>
+      <div id="flowers-slot"></div>
+      <div id="week8-slot"></div>
+      <div id="missed-twice-slot"></div>
     </section>
 
     <section id="play-section">
