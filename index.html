@@ -3024,20 +3024,24 @@
     color: var(--ink-faint);
     font-style: italic;
   }
-  .wt-exercise-reps {
+  /* Five set boxes per exercise. Empty box shows the set ordinal faded
+     ("1", "2"…). Filled box shows the rep count (or seconds, for plank
+     variants) plus a small weight badge if relevant. Tap to enter or
+     edit the value via an inline number input. */
+  .wt-set-row {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 4px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
     margin-top: 8px;
   }
-  .wt-rep-box {
+  .wt-set-box {
     position: relative;
-    aspect-ratio: 1 / 1;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    aspect-ratio: 1.2 / 1;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
     background: var(--surface-2);
-    font-size: 10px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
     font-weight: 500;
     color: var(--ink-faint);
     display: flex;
@@ -3049,25 +3053,66 @@
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     padding: 0;
   }
-  .wt-rep-box:hover { border-color: var(--border-strong); }
-  .wt-rep-box:active { transform: scale(0.92); }
-  .wt-rep-box.is-on {
+  .wt-set-box:hover { border-color: var(--border-strong); }
+  .wt-set-box:active { transform: scale(0.95); }
+  .wt-set-box.is-filled {
+    border: 1px solid var(--green-deep);
     background: var(--green-deep);
-    border-color: var(--green-deep);
     color: #F8F1DD;
   }
-  /* Tiny weight badge in the corner of a ticked box, e.g. a "7" at
-     the bottom-right means "logged at 7 kg." Bodyweight ticks have
-     no badge. */
-  .wt-rep-box-weight {
+  .wt-set-box.is-editing {
+    border-style: solid;
+    border-color: var(--ochre);
+    background: var(--surface);
+  }
+  .wt-set-num {
     position: absolute;
-    bottom: 1px;
-    right: 3px;
-    font-size: 8px;
+    top: 3px;
+    left: 6px;
+    font-size: 9px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    opacity: 0.75;
+  }
+  .wt-set-box.is-filled .wt-set-num { color: rgba(248, 241, 221, 0.55); }
+  .wt-set-weight {
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 9px;
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     line-height: 1;
     opacity: 0.85;
     letter-spacing: 0;
+  }
+  .wt-set-unit {
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    margin-left: 2px;
+    opacity: 0.7;
+  }
+  .wt-set-input {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    padding: 0;
+    -moz-appearance: textfield;
+  }
+  .wt-set-input::-webkit-outer-spin-button,
+  .wt-set-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   /* "Last session" ghost line under the rep grid. Faded, small —
@@ -4719,24 +4764,15 @@
       s.notify.morning = true;
     }
 
-    // Workout log shape change: per-day per-slug entries used to be an
-    // array of rep counts; now they're an object keyed by rep count
-    // mapping to weight (or null for bodyweight). Convert in place;
-    // pre-weight ticks land as null-weight entries and the user can
-    // re-tick at the right weight if they care.
-    if (s.workoutLog && typeof s.workoutLog === 'object') {
-      for (const date in s.workoutLog) {
-        const day = s.workoutLog[date];
-        if (!day || typeof day !== 'object') continue;
-        for (const slug in day) {
-          const v = day[slug];
-          if (Array.isArray(v)) {
-            const obj = {};
-            for (const r of v) if (typeof r === 'number' && r > 0) obj[String(r)] = null;
-            day[slug] = obj;
-          }
-        }
-      }
+    // Workout log shape change (v2): per-day per-slug entries are now
+    // an array of {reps, weight} sets in the order they were performed.
+    // The previous model (rep-milestone ticks at 10/20/30…/100) is
+    // incompatible — wipe on first load of a v2 client. The exercise
+    // list also changed in this revision so migration would be lossy
+    // anyway. Idempotent via the version flag.
+    if (s.workoutLogVersion !== 2) {
+      s.workoutLog = {};
+      s.workoutLogVersion = 2;
     }
     return s;
   }
@@ -4820,7 +4856,7 @@
         const cloudAt = data.updated_at || '';
         if (cloudAt > localAt) {
           // Cloud wins — replace local
-          state = { ...defaultState(), ...data.state };
+          state = migrateState({ ...defaultState(), ...data.state });
           saveLocal();
           renderAll();
         } else if (localAt > cloudAt) {
@@ -7106,31 +7142,28 @@
           }
         }
 
-        // Workout log — exercises hit that day with rep counts and (where
-        // logged) the weight used. Format:
-        //   - Goblet Squats (7kg): 10, 20, 30 reps           ← all-same weight
-        //   - Bicep Curls: 10@5kg, 20@7kg, 30@7kg reps        ← mixed weights
-        //   - Push-ups: 10, 20, 30 reps                       ← bodyweight
+        // Workout log — sets performed that day, in order. Format:
+        //   - Goblet Squats (7kg): 12, 10, 8, 7, 6 reps        ← all-same weight
+        //   - Bicep Curls: 12@10kg, 10@10kg, 8@7kg reps         ← mixed weights
+        //   - Push-ups: 30, 25, 22 reps                         ← bodyweight
+        //   - Plank: 60, 45, 30 seconds                         ← time-based
         const workoutDay = (state.workoutLog && state.workoutLog[dIso]) || {};
         const workoutEntries = Object.keys(workoutDay)
           .map(slug => {
             const ex = WORKOUT_EXERCISES.find(e => workoutSlug(e.name) === slug);
-            const map = workoutEntryAsMap(workoutDay[slug]);
-            const reps = Object.keys(map).map(Number).sort((a, b) => a - b);
-            if (!ex || !reps.length) return null;
-            const weights = reps.map(r => map[String(r)]).filter(w => typeof w === 'number');
-            const allWeighted = weights.length === reps.length;
+            if (!ex) return null;
+            const sets = workoutSetsFor(workoutDay, slug).filter(Boolean);
+            if (!sets.length) return null;
+            const unitWord = isTimeBased(ex) ? 'seconds' : 'reps';
+            const weights = sets.map(s => s.weight);
+            const allWeighted = weights.every(w => typeof w === 'number');
             const allSame = allWeighted && weights.every(w => w === weights[0]);
-            if (weights.length === 0) {
-              return `  - ${ex.name}: ${reps.join(', ')} ${ex.unit}`;
+            if (!allWeighted) {
+              return `  - ${ex.name}: ${sets.map(s => s.reps).join(', ')} ${unitWord}`;
             } else if (allSame) {
-              return `  - ${ex.name} (${weights[0]}kg): ${reps.join(', ')} ${ex.unit}`;
+              return `  - ${ex.name} (${weights[0]}kg): ${sets.map(s => s.reps).join(', ')} ${unitWord}`;
             } else {
-              const parts = reps.map(r => {
-                const w = map[String(r)];
-                return typeof w === 'number' ? `${r}@${w}kg` : String(r);
-              });
-              return `  - ${ex.name}: ${parts.join(', ')} ${ex.unit}`;
+              return `  - ${ex.name}: ${sets.map(s => `${s.reps}@${s.weight}kg`).join(', ')} ${unitWord}`;
             }
           })
           .filter(Boolean);
@@ -7489,7 +7522,7 @@
           const data = await importDataFromFile(file);
           const proceed = confirm('This will replace all your current data with the backup. Continue?');
           if (!proceed) { fileInput.value = ''; return; }
-          state = { ...defaultState(), ...data };
+          state = migrateState({ ...defaultState(), ...data });
           save();
           renderAll();
           closeSheet();
@@ -9000,9 +9033,14 @@
     { group: 'core', name: 'Bicycle Crunches',             unit: 'reps',           weighted: false },
   ];
 
-  const WORKOUT_REP_STEPS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  const WORKOUT_SET_COUNT = 5;          // 5 set boxes per exercise per day
   const WORKOUT_WEIGHTS   = [5, 7, 10]; // kg
   const DEFAULT_WORKOUT_WEIGHT = 7;
+
+  // True when the rep value should be read as seconds instead of count
+  // (Plank, Side Plank). Drives the "sec" label on the cell and the "s"
+  // suffix in the ghost line.
+  function isTimeBased(ex) { return /sec/i.test(ex.unit); }
 
   // Override map for image files whose name doesn't match the slug
   // pattern. Slug → filename (with extension). Anything not in this
@@ -9094,7 +9132,7 @@
     workoutDayISO = toISODate(new Date());
     openSheet(`
       <h2>Workouts</h2>
-      <p class="subtle">Tick what you did today. Each box is a set at that rep count. Tap an exercise name for the cue card.</p>
+      <p class="subtle">Five boxes per exercise — one per set. Tap a box and type how many reps you hit going to failure. Last 1–2 reps of the final set should be hard (RIR 1–2). Tap an exercise name for the cue card.</p>
       <div id="workout-tracker-body"></div>
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Done</button>
@@ -9104,68 +9142,84 @@
     sheet.querySelector('#cancel').addEventListener('click', closeSheet);
   }
 
-  // Normalize whatever shape the entry currently is into the canonical
-  // { '10': weight, '20': weight } object form. Used wherever we read.
-  function workoutEntryAsMap(entry) {
-    if (!entry) return {};
-    if (Array.isArray(entry)) {
-      const obj = {};
-      for (const r of entry) if (typeof r === 'number' && r > 0) obj[String(r)] = null;
-      return obj;
+  // Canonical shape: state.workoutLog[date][slug] is an array of
+  // { reps, weight } objects in performed order, max length WORKOUT_SET_COUNT.
+  // `reps` is the count entered for that set (or seconds for time-based
+  // exercises). `weight` is the kg used, or null for bodyweight moves.
+  // Returns a fresh array padded to WORKOUT_SET_COUNT with nulls so callers
+  // can index by set position without bounds checks.
+  function workoutSetsFor(dayLog, slug) {
+    const raw = (dayLog && dayLog[slug]) || [];
+    const out = new Array(WORKOUT_SET_COUNT).fill(null);
+    if (Array.isArray(raw)) {
+      for (let i = 0; i < Math.min(raw.length, WORKOUT_SET_COUNT); i++) {
+        const s = raw[i];
+        if (s && typeof s === 'object' && typeof s.reps === 'number' && s.reps > 0) {
+          out[i] = { reps: s.reps, weight: (typeof s.weight === 'number' ? s.weight : null) };
+        }
+      }
     }
-    if (typeof entry === 'object') return entry;
-    return {};
+    return out;
   }
 
-  // Total ticks across all exercises for a given day's log.
-  function workoutDayTotalTicks(dayLog) {
+  // Count of filled sets (non-null) for a day across all exercises.
+  function workoutDayTotalSets(dayLog) {
     let total = 0;
-    for (const slug in dayLog) total += Object.keys(workoutEntryAsMap(dayLog[slug])).length;
+    for (const slug in dayLog) {
+      const arr = dayLog[slug];
+      if (Array.isArray(arr)) for (const s of arr) if (s && typeof s.reps === 'number' && s.reps > 0) total++;
+    }
     return total;
   }
 
-  // Most recent prior day (strictly before beforeISO) that has a non-empty
-  // entry for this slug. Returns { iso, map } or null. "Most recent prior
-  // session" rather than literal "last week" — gracefully skips missed weeks.
-  function findLastWorkoutSession(slug, beforeISO) {
-    const log = state.workoutLog || {};
-    const dates = Object.keys(log).filter(iso => iso < beforeISO).sort();
-    for (let i = dates.length - 1; i >= 0; i--) {
-      const map = workoutEntryAsMap((log[dates[i]] || {})[slug]);
-      if (Object.keys(map).length) return { iso: dates[i], map };
-    }
-    return null;
-  }
-
-  // Render the faded "Last <date>: <reps>" hint below the rep grid.
-  // Format mirrors the export ("10, 20, 30 @ 7kg" / mixed "10@5kg, 20@7kg" /
-  // bodyweight "10, 20, 30") so the on-screen text matches the data shape.
-  function renderWorkoutLastGhost(last) {
-    if (!last) return '';
-    const reps = Object.keys(last.map).map(Number).sort((a, b) => a - b);
-    if (!reps.length) return '';
-    const weights = reps.map(r => last.map[String(r)]);
-    const allWeighted = weights.every(w => typeof w === 'number');
-    const allSame = allWeighted && weights.every(w => w === weights[0]);
-    let body;
-    if (!allWeighted) body = reps.join(', ');
-    else if (allSame) body = `${reps.join(', ')} @ ${weights[0]}kg`;
-    else body = reps.map(r => `${r}@${last.map[String(r)]}kg`).join(', ');
-    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-    const dateLabel = fmt.format(parseISO(last.iso));
-    return `<div class="wt-exercise-last"><span class="wt-last-prefix">Last</span><span class="wt-last-date">${escapeHTML(dateLabel)}</span>: ${escapeHTML(body)}</div>`;
-  }
-
-  // Total ticks within a single group on the given day. Used by the
-  // collapsible group header.
+  // Count of filled sets within a single group for the given day.
   function workoutGroupCount(dayLog, groupKey) {
     let n = 0;
     for (const ex of WORKOUT_EXERCISES) {
       if (ex.group !== groupKey) continue;
       const slug = workoutSlug(ex.name);
-      n += Object.keys(workoutEntryAsMap(dayLog[slug])).length;
+      const arr = dayLog[slug];
+      if (Array.isArray(arr)) for (const s of arr) if (s && typeof s.reps === 'number' && s.reps > 0) n++;
     }
     return n;
+  }
+
+  // Most recent prior day (strictly before beforeISO) that has at least one
+  // filled set for this slug. Returns { iso, sets } or null. "Most recent
+  // prior session" rather than literal "last week" — skips missed weeks.
+  function findLastWorkoutSession(slug, beforeISO) {
+    const log = state.workoutLog || {};
+    const dates = Object.keys(log).filter(iso => iso < beforeISO).sort();
+    for (let i = dates.length - 1; i >= 0; i--) {
+      const sets = workoutSetsFor(log[dates[i]], slug).filter(Boolean);
+      if (sets.length) return { iso: dates[i], sets };
+    }
+    return null;
+  }
+
+  // Render the faded "Last <date>: <set list>" hint below the set grid.
+  // Bodyweight reps:        "12, 10, 8, 7, 6"
+  // Reps with single weight:"12, 10, 8, 7, 6 @ 7kg"
+  // Reps with mixed weight: "12@10kg, 10@10kg, 8@7kg, 8@7kg, 7@7kg"
+  // Time-based (Plank etc.):"60s, 45s, 30s"
+  function renderWorkoutLastGhost(ex, last) {
+    if (!last || !last.sets.length) return '';
+    const timeBased = isTimeBased(ex);
+    const fmtVal = (n) => timeBased ? `${n}s` : String(n);
+    const weights = last.sets.map(s => s.weight);
+    const allWeighted = weights.every(w => typeof w === 'number');
+    const allSame = allWeighted && weights.every(w => w === weights[0]);
+    let body;
+    if (!allWeighted) {
+      body = last.sets.map(s => fmtVal(s.reps)).join(', ');
+    } else if (allSame) {
+      body = `${last.sets.map(s => fmtVal(s.reps)).join(', ')} @ ${weights[0]}kg`;
+    } else {
+      body = last.sets.map(s => `${fmtVal(s.reps)}@${s.weight}kg`).join(', ');
+    }
+    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    const dateLabel = fmt.format(parseISO(last.iso));
+    return `<div class="wt-exercise-last"><span class="wt-last-prefix">Last</span><span class="wt-last-date">${escapeHTML(dateLabel)}</span>: ${escapeHTML(body)}</div>`;
   }
 
   function renderWorkoutTrackerBody() {
@@ -9174,7 +9228,7 @@
     const iso = workoutDayISO;
     const todayISO = toISODate(new Date());
     const dayLog = (state.workoutLog && state.workoutLog[iso]) || {};
-    const totalTicks = workoutDayTotalTicks(dayLog);
+    const totalTicks = workoutDayTotalSets(dayLog);
 
     const startISO = state.startDate;
     const canPrev = iso > startISO;
@@ -9188,7 +9242,7 @@
 
     const groupsHTML = WORKOUT_GROUPS.map(g => {
       const exercises = WORKOUT_EXERCISES.filter(e => e.group === g.key);
-      const rows = exercises.map(ex => renderWorkoutExercise(ex, workoutEntryAsMap(dayLog[workoutSlug(ex.name)]))).join('');
+      const rows = exercises.map(ex => renderWorkoutExercise(ex, workoutSetsFor(dayLog, workoutSlug(ex.name)))).join('');
       const count = workoutGroupCount(dayLog, g.key);
       const countText = count > 0 ? `${count} set${count === 1 ? '' : 's'}` : '';
       return `
@@ -9285,36 +9339,106 @@
       });
     });
 
-    // --- Rep-box ticks (writes the active weight) ---
-    body.querySelectorAll('.wt-rep-box').forEach(box => {
+    // --- Set boxes (tap to enter the rep count for that set) ---
+    body.querySelectorAll('.wt-set-box').forEach(box => {
       box.addEventListener('click', (e) => {
         e.stopPropagation();
-        const slug = box.dataset.slug;
-        const reps = Number(box.dataset.reps);
-        if (!slug || !reps) return;
-        const card = box.closest('.wt-exercise');
-        const ex = WORKOUT_EXERCISES.find(x => workoutSlug(x.name) === slug);
-        const weight = (ex && ex.weighted && card?.dataset.activeWeight)
-          ? Number(card.dataset.activeWeight)
-          : null;
-        toggleWorkoutRep(workoutDayISO, slug, reps, weight);
-
-        // Re-read state and update DOM in place (no re-render, no scroll-jump).
-        const repsMap = workoutEntryAsMap((state.workoutLog[workoutDayISO] || {})[slug]);
-        const isOn = Object.prototype.hasOwnProperty.call(repsMap, String(reps));
-        box.classList.toggle('is-on', isOn);
-        box.setAttribute('aria-pressed', String(isOn));
-        const w = repsMap[String(reps)];
-        const badge = (isOn && typeof w === 'number')
-          ? `<span class="wt-rep-box-weight">${w}</span>`
-          : '';
-        box.innerHTML = `${reps}${badge}`;
-        if (card) card.classList.toggle('has-any', Object.keys(repsMap).length > 0);
-
-        // Refresh group counts + top summary.
-        updateWorkoutCounts(body);
+        if (box.classList.contains('is-editing')) return;
+        beginSetEdit(box, body);
       });
     });
+  }
+
+  // Swap the box's display for an inline number input. On commit (blur or
+  // Enter), persist the value with the card's active weight; empty value
+  // clears that set. On Escape, abandon without writing.
+  function beginSetEdit(box, body) {
+    const card = box.closest('.wt-exercise');
+    if (!card) return;
+    const slug = card.dataset.slug;
+    const setIdx = Number(box.dataset.setIdx);
+    const ex = WORKOUT_EXERCISES.find(x => workoutSlug(x.name) === slug);
+    if (!ex || !Number.isInteger(setIdx)) return;
+
+    const current = workoutSetsFor(state.workoutLog[workoutDayISO] || {}, slug)[setIdx];
+    const startVal = current ? String(current.reps) : '';
+    const setNumHTML = `<span class="wt-set-num">${setIdx + 1}</span>`;
+    box.classList.add('is-editing');
+    box.classList.remove('is-filled');
+    box.innerHTML = `${setNumHTML}<input type="number" class="wt-set-input" inputmode="numeric" min="1" step="1" value="${startVal}">`;
+    const input = box.querySelector('input');
+    input.focus();
+    input.select();
+
+    let committed = false;
+    const commit = () => {
+      if (committed) return;
+      committed = true;
+      const n = parseInt(input.value, 10);
+      const weight = ex.weighted ? Number(card.dataset.activeWeight || DEFAULT_WORKOUT_WEIGHT) : null;
+      if (Number.isFinite(n) && n > 0) {
+        setWorkoutSet(workoutDayISO, slug, setIdx, n, weight);
+      } else {
+        clearWorkoutSet(workoutDayISO, slug, setIdx);
+      }
+      // Re-read and repaint just this card. Cheaper than a full re-render
+      // and avoids scroll-jump.
+      repaintWorkoutCard(card, ex);
+      updateWorkoutCounts(body);
+    };
+    const cancel = () => {
+      if (committed) return;
+      committed = true;
+      repaintWorkoutCard(card, ex);
+    };
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); cancel(); }
+    });
+  }
+
+  // Re-render the boxes / weight pills / ghost line of a single exercise
+  // card from current state. Used after a set edit to update the display
+  // without re-rendering the whole sheet.
+  function repaintWorkoutCard(card, ex) {
+    const slug = card.dataset.slug;
+    const sets = workoutSetsFor(state.workoutLog[workoutDayISO] || {}, slug);
+    const filled = sets.filter(Boolean);
+
+    // Active weight: most recent filled set's weight, else previous default.
+    if (ex.weighted && filled.length) {
+      const lastWeight = filled[filled.length - 1].weight;
+      if (typeof lastWeight === 'number') {
+        card.dataset.activeWeight = String(lastWeight);
+        card.querySelectorAll('.wt-weight-btn').forEach(b => {
+          b.classList.toggle('is-active', Number(b.dataset.weight) === lastWeight);
+        });
+      }
+    }
+
+    // Replace the set row.
+    const row = card.querySelector('.wt-set-row');
+    if (row) row.innerHTML = renderWorkoutSetBoxesHTML(ex, sets);
+
+    // Re-bind tap handlers on the new boxes.
+    const body = card.closest('#workout-tracker-body');
+    row?.querySelectorAll('.wt-set-box').forEach(b => {
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (b.classList.contains('is-editing')) return;
+        beginSetEdit(b, body);
+      });
+    });
+
+    // Replace the ghost line (it doesn't change with today's edits, but
+    // re-rendering is harmless and keeps the markup consistent).
+    const oldGhost = card.querySelector('.wt-exercise-last');
+    if (oldGhost) oldGhost.remove();
+    const ghostHTML = renderWorkoutLastGhost(ex, findLastWorkoutSession(slug, workoutDayISO));
+    if (ghostHTML) card.insertAdjacentHTML('beforeend', ghostHTML);
+
+    card.classList.toggle('has-any', filled.length > 0);
   }
 
   // Patch group-count badges and the top-of-sheet summary in place
@@ -9330,22 +9454,22 @@
     });
     const summary = body.querySelector('.wt-summary');
     if (summary) {
-      const total = workoutDayTotalTicks(dayLog);
+      const total = workoutDayTotalSets(dayLog);
       summary.innerHTML = total > 0
         ? `<strong>${total}</strong> set${total === 1 ? '' : 's'} logged on this day.`
         : `Nothing logged on this day yet. Tap a group below to start.`;
     }
   }
 
-  function renderWorkoutExercise(ex, repsMap) {
+  function renderWorkoutExercise(ex, sets) {
     const slug = workoutSlug(ex.name);
-    const map = repsMap || {};
-    // Active weight: the most-recently-stored weight for this card,
-    // else the configured default. Drives where new ticks land.
+    const filled = sets.filter(Boolean);
+    // Active weight: the weight used on the most recently filled set,
+    // else the configured default. Pre-fills the next set's weight.
     let activeWeight = DEFAULT_WORKOUT_WEIGHT;
-    if (ex.weighted) {
-      const used = Object.values(map).filter(v => typeof v === 'number');
-      if (used.length) activeWeight = used[used.length - 1];
+    if (ex.weighted && filled.length) {
+      const w = filled[filled.length - 1].weight;
+      if (typeof w === 'number') activeWeight = w;
     }
     const weightButtons = ex.weighted ? `
       <div class="wt-weight-row">
@@ -9354,14 +9478,8 @@
         `).join('')}
       </div>
     ` : '';
-    const boxes = WORKOUT_REP_STEPS.map(n => {
-      const isOn = Object.prototype.hasOwnProperty.call(map, String(n));
-      const w = map[String(n)];
-      const badge = (isOn && typeof w === 'number') ? `<span class="wt-rep-box-weight">${w}</span>` : '';
-      return `<button type="button" class="wt-rep-box${isOn ? ' is-on' : ''}" data-slug="${slug}" data-reps="${n}" aria-pressed="${isOn}">${n}${badge}</button>`;
-    }).join('');
-    const hasAny = Object.keys(map).length > 0;
-    const lastGhost = renderWorkoutLastGhost(findLastWorkoutSession(slug, workoutDayISO));
+    const hasAny = filled.length > 0;
+    const lastGhost = renderWorkoutLastGhost(ex, findLastWorkoutSession(slug, workoutDayISO));
     return `
       <div class="wt-exercise${hasAny ? ' has-any' : ''}" data-slug="${slug}" data-active-weight="${activeWeight}">
         <div class="wt-exercise-head">
@@ -9372,37 +9490,56 @@
           <img alt="${escapeHTML(ex.name)} cue" data-needs-load="1" />
         </div>
         ${weightButtons}
-        <div class="wt-exercise-reps">${boxes}</div>
+        <div class="wt-set-row">${renderWorkoutSetBoxesHTML(ex, sets)}</div>
         ${lastGhost}
       </div>
     `;
   }
 
-  // Toggle a single (slug, reps) entry for the given day. Stores the
-  // weight (kg) used at that rep count, or null for bodyweight moves.
-  // The entry is an object { '10': 5, '20': 7, ... } — weight per rep
-  // milestone. Tapping an already-ticked box removes that entry.
-  function toggleWorkoutRep(iso, slug, reps, weight) {
+  // Render just the set boxes — used both at full render and when
+  // repainting a single card after a set edit.
+  function renderWorkoutSetBoxesHTML(ex, sets) {
+    const timeBased = isTimeBased(ex);
+    const unitText = timeBased ? 'sec' : 'reps';
+    return sets.map((s, i) => {
+      const filled = !!s;
+      const numLabel = `<span class="wt-set-num">${i + 1}</span>`;
+      if (!filled) {
+        return `<button type="button" class="wt-set-box" data-set-idx="${i}" aria-label="Set ${i + 1}, empty">${numLabel}</button>`;
+      }
+      const wBadge = (typeof s.weight === 'number') ? `<span class="wt-set-weight">${s.weight}kg</span>` : '';
+      return `<button type="button" class="wt-set-box is-filled" data-set-idx="${i}" aria-label="Set ${i + 1}, ${s.reps} ${unitText}">${numLabel}${s.reps}<span class="wt-set-unit">${unitText}</span>${wBadge}</button>`;
+    }).join('');
+  }
+
+  // Write a single set at the given position. The day's array is padded
+  // with nulls up to that position so positional indexing is preserved
+  // (set 3 stays in slot 3 even if slots 1 and 2 are empty).
+  function setWorkoutSet(iso, slug, setIdx, reps, weight) {
     if (!state.workoutLog) state.workoutLog = {};
     if (!state.workoutLog[iso]) state.workoutLog[iso] = {};
     const day = state.workoutLog[iso];
-    let entry = day[slug];
-    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-      // Coerce legacy array shape into the object form on first write.
-      const obj = {};
-      if (Array.isArray(entry)) {
-        for (const r of entry) if (typeof r === 'number') obj[String(r)] = null;
-      }
-      entry = obj;
-      day[slug] = entry;
-    }
-    const repsKey = String(reps);
-    if (Object.prototype.hasOwnProperty.call(entry, repsKey)) {
-      delete entry[repsKey];
-    } else {
-      entry[repsKey] = (typeof weight === 'number' && isFinite(weight)) ? weight : null;
-    }
-    if (Object.keys(entry).length === 0) delete day[slug];
+    let arr = day[slug];
+    if (!Array.isArray(arr)) { arr = []; day[slug] = arr; }
+    while (arr.length <= setIdx) arr.push(null);
+    arr[setIdx] = {
+      reps,
+      weight: (typeof weight === 'number' && isFinite(weight)) ? weight : null,
+    };
+    save();
+  }
+
+  // Clear a set at the given position. Trims trailing nulls so the
+  // serialized form stays compact; removes the slug entirely once
+  // empty, and the date once no slugs remain.
+  function clearWorkoutSet(iso, slug, setIdx) {
+    if (!state.workoutLog || !state.workoutLog[iso]) return;
+    const day = state.workoutLog[iso];
+    const arr = day[slug];
+    if (!Array.isArray(arr)) return;
+    if (setIdx < arr.length) arr[setIdx] = null;
+    while (arr.length && arr[arr.length - 1] == null) arr.pop();
+    if (arr.length === 0) delete day[slug];
     if (Object.keys(day).length === 0) delete state.workoutLog[iso];
     save();
   }
