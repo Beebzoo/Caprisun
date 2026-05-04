@@ -1310,6 +1310,67 @@
     margin: 0;
   }
 
+  /* Cardio (treadmill) sub-section in the gym log sheet. Three small
+     fields side by side: time, distance, calories. Pace renders below
+     as live-computed read-only text. */
+  .cardio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .cardio-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cardio-input-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+  }
+  .cardio-input-wrap input {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0;
+    -moz-appearance: textfield;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .cardio-input-wrap input::-webkit-outer-spin-button,
+  .cardio-input-wrap input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .cardio-input-wrap small {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .cardio-pace {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-align: center;
+    min-height: 1.2em;
+  }
+
   /* Color picker for week review */
   .color-grid {
     display: grid;
@@ -1577,6 +1638,10 @@
     color: var(--ink-faint);
     display: block;
     margin-top: 2px;
+  }
+  .day-activity-row .asub-cardio {
+    color: var(--ink-soft);
+    font-style: italic;
   }
   .mini-stepper {
     display: flex;
@@ -4667,6 +4732,7 @@
    */
   const defaultState = () => ({
     sessions: {},
+    cardio: {},
     weekColors: {},
     dayColors: {},
     dayNotes: {},
@@ -5317,6 +5383,26 @@
     }
     if (mins.length === 0) return activity.defaultAvg;
     return Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
+  }
+
+  // One-liner summary of a cardio entry: "5.0 km · 30 min · 6:00/km · 280 kcal".
+  // Used on the day sheet under the gym row and in the export. Pace and the
+  // leading km/min terms are conditional on having both numbers; calories
+  // tack on at the end when present.
+  function formatCardioSummary(cardio) {
+    if (!cardio) return '';
+    const { minutes, km, kcal } = cardio;
+    const parts = [];
+    if (km > 0) parts.push(`${km.toFixed(1).replace(/\.0$/, '')} km`);
+    if (minutes > 0) parts.push(`${minutes} min`);
+    if (km > 0 && minutes > 0) {
+      const paceMin = minutes / km;
+      const m = Math.floor(paceMin);
+      const s = Math.round((paceMin - m) * 60);
+      parts.push(`${m}:${String(s).padStart(2, '0')}/km`);
+    }
+    if (kcal > 0) parts.push(`${kcal} kcal`);
+    return parts.join(' · ');
   }
 
   function sessionsForDate(dateISO) {
@@ -6418,6 +6504,39 @@
     const avg = avgFor(activity);
     let value = current > 0 ? current : avg;
 
+    // Gym gets an extra "Cardio (treadmill)" section — minutes, km,
+    // calories. Pace is computed live from the first two. Stored
+    // independently of the gym minutes total, so the user can put
+    // total-gym-time in the duration field and just-the-run details
+    // here without double-accounting.
+    const isGym = activity.key === 'gym';
+    const existingCardio = (isGym && state.cardio[dateISO]) || null;
+    const cardioInit = {
+      minutes: existingCardio?.minutes || 0,
+      km:      existingCardio?.km      || 0,
+      kcal:    existingCardio?.kcal    || 0,
+    };
+    const cardioSectionHTML = isGym ? `
+      <div class="sheet-section">
+        <p class="sheet-section-label">Cardio (treadmill, optional)</p>
+        <div class="cardio-grid">
+          <label class="cardio-field">
+            <span>Time</span>
+            <span class="cardio-input-wrap"><input id="cardio-min" type="number" inputmode="numeric" min="0" step="1" value="${cardioInit.minutes || ''}" placeholder="0"><small>min</small></span>
+          </label>
+          <label class="cardio-field">
+            <span>Distance</span>
+            <span class="cardio-input-wrap"><input id="cardio-km" type="number" inputmode="decimal" min="0" step="0.1" value="${cardioInit.km || ''}" placeholder="0"><small>km</small></span>
+          </label>
+          <label class="cardio-field">
+            <span>Calories</span>
+            <span class="cardio-input-wrap"><input id="cardio-kcal" type="number" inputmode="numeric" min="0" step="1" value="${cardioInit.kcal || ''}" placeholder="0"><small>kcal</small></span>
+          </label>
+        </div>
+        <p class="cardio-pace" id="cardio-pace"></p>
+      </div>
+    ` : '';
+
     openSheet(`
       <h2>${activity.name}</h2>
       <p class="subtle">${current > 0 ? `Logged ${current} min today. Adjust or remove.` : `Tap save to log your usual ${avg} min — or adjust first.`}</p>
@@ -6429,6 +6548,7 @@
           <button id="inc" aria-label="Increase">+</button>
         </div>
       </div>
+      ${cardioSectionHTML}
       <div class="sheet-actions">
         <button class="btn btn-ghost" id="cancel">Cancel</button>
         <button class="btn btn-primary" id="save">${current > 0 ? 'Update' : 'Log it'}</button>
@@ -6446,6 +6566,45 @@
     valEl.addEventListener('input', () => { value = readVal(); });
     valEl.addEventListener('blur', () => { value = readVal(); writeVal(value); });
     valEl.addEventListener('focus', () => { valEl.select(); });
+
+    // Cardio inputs: read on save, render pace live as the user types.
+    let readCardio = () => null;
+    if (isGym) {
+      const minEl  = sheet.querySelector('#cardio-min');
+      const kmEl   = sheet.querySelector('#cardio-km');
+      const kcalEl = sheet.querySelector('#cardio-kcal');
+      const paceEl = sheet.querySelector('#cardio-pace');
+      const num = (el, parser = parseFloat) => {
+        const n = parser(el.value);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+      };
+      readCardio = () => {
+        const minutes = num(minEl, (v) => parseInt(v, 10));
+        const km      = num(kmEl);
+        const kcal    = num(kcalEl, (v) => parseInt(v, 10));
+        if (!minutes && !km && !kcal) return null;
+        return { minutes, km, kcal };
+      };
+      const refreshPace = () => {
+        const c = readCardio();
+        if (c && c.minutes > 0 && c.km > 0) {
+          const paceMin = c.minutes / c.km;
+          const m = Math.floor(paceMin);
+          const s = Math.round((paceMin - m) * 60);
+          const paceStr = `${m}:${String(s).padStart(2, '0')}`;
+          const speed = (c.km / (c.minutes / 60)).toFixed(1);
+          paceEl.textContent = `Pace ${paceStr} /km · ${speed} km/h`;
+        } else {
+          paceEl.textContent = '';
+        }
+      };
+      [minEl, kmEl, kcalEl].forEach(el => {
+        el.addEventListener('input', refreshPace);
+        el.addEventListener('focus', () => el.select());
+      });
+      refreshPace();
+    }
+
     wireSheet({
       '#dec': () => step(-5),
       '#inc': () => step(5),
@@ -6456,6 +6615,12 @@
         if (!state.sessions[dateISO]) state.sessions[dateISO] = {};
         if (value <= 0) delete state.sessions[dateISO][activity.key];
         else state.sessions[dateISO][activity.key] = value;
+        if (isGym) {
+          const c = readCardio();
+          if (!state.cardio) state.cardio = {};
+          if (c) state.cardio[dateISO] = c;
+          else delete state.cardio[dateISO];
+        }
         save();
         renderTiles();
         closeSheet();
@@ -6472,6 +6637,10 @@
       '#remove': () => {
         if (state.sessions[dateISO]) {
           delete state.sessions[dateISO][activity.key];
+          save();
+        }
+        if (isGym && state.cardio) {
+          delete state.cardio[dateISO];
           save();
         }
         renderTiles();
@@ -6736,11 +6905,14 @@
 
     const activityRows = ACTIVITIES.map(act => {
       const mins = sessions[act.key] || 0;
+      const cardio = (act.key === 'gym') ? (state.cardio[dateISO] || null) : null;
+      const cardioLine = cardio ? `<span class="asub asub-cardio">${formatCardioSummary(cardio)}</span>` : '';
       return `
         <div class="day-activity-row" data-key="${act.key}">
           <span>
             <span class="aname">${act.name}</span>
             <span class="asub">Avg ${avgFor(act)} min</span>
+            ${cardioLine}
           </span>
           <span class="mini-stepper">
             <button data-delta="-5" aria-label="Decrease">−</button>
@@ -7106,7 +7278,10 @@
       for (let i = 0; i < 7; i++) {
         const { date, iso: dIso, sessions } = weekDays[i];
         const parts = [];
-        if (sessions.gym) parts.push(`Gym ${sessions.gym}m`);
+        if (sessions.gym) {
+          const cardio = state.cardio && state.cardio[dIso];
+          parts.push(cardio ? `Gym ${sessions.gym}m (${formatCardioSummary(cardio)})` : `Gym ${sessions.gym}m`);
+        }
         if (sessions.yoga) parts.push(`Yoga ${sessions.yoga}m`);
         if (sessions.meditation) parts.push(`Meditation ${sessions.meditation}m`);
         if (sessions.reading) parts.push(`Reading ${sessions.reading}m`);
