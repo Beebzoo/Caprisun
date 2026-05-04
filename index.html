@@ -3070,6 +3070,23 @@
     letter-spacing: 0;
   }
 
+  /* "Last session" ghost line under the rep grid. Faded, small —
+     visible while logging so the previous numbers are always in sight. */
+  .wt-exercise-last {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.4;
+  }
+  .wt-exercise-last .wt-last-prefix {
+    font-style: italic;
+    margin-right: 4px;
+  }
+  .wt-exercise-last .wt-last-date {
+    color: var(--ink-soft);
+  }
+
   /* Weight selector for dumbbell exercises: three pills, one active. */
   .wt-weight-row {
     display: flex;
@@ -9107,6 +9124,38 @@
     return total;
   }
 
+  // Most recent prior day (strictly before beforeISO) that has a non-empty
+  // entry for this slug. Returns { iso, map } or null. "Most recent prior
+  // session" rather than literal "last week" — gracefully skips missed weeks.
+  function findLastWorkoutSession(slug, beforeISO) {
+    const log = state.workoutLog || {};
+    const dates = Object.keys(log).filter(iso => iso < beforeISO).sort();
+    for (let i = dates.length - 1; i >= 0; i--) {
+      const map = workoutEntryAsMap((log[dates[i]] || {})[slug]);
+      if (Object.keys(map).length) return { iso: dates[i], map };
+    }
+    return null;
+  }
+
+  // Render the faded "Last <date>: <reps>" hint below the rep grid.
+  // Format mirrors the export ("10, 20, 30 @ 7kg" / mixed "10@5kg, 20@7kg" /
+  // bodyweight "10, 20, 30") so the on-screen text matches the data shape.
+  function renderWorkoutLastGhost(last) {
+    if (!last) return '';
+    const reps = Object.keys(last.map).map(Number).sort((a, b) => a - b);
+    if (!reps.length) return '';
+    const weights = reps.map(r => last.map[String(r)]);
+    const allWeighted = weights.every(w => typeof w === 'number');
+    const allSame = allWeighted && weights.every(w => w === weights[0]);
+    let body;
+    if (!allWeighted) body = reps.join(', ');
+    else if (allSame) body = `${reps.join(', ')} @ ${weights[0]}kg`;
+    else body = reps.map(r => `${r}@${last.map[String(r)]}kg`).join(', ');
+    const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    const dateLabel = fmt.format(parseISO(last.iso));
+    return `<div class="wt-exercise-last"><span class="wt-last-prefix">Last</span><span class="wt-last-date">${escapeHTML(dateLabel)}</span>: ${escapeHTML(body)}</div>`;
+  }
+
   // Total ticks within a single group on the given day. Used by the
   // collapsible group header.
   function workoutGroupCount(dayLog, groupKey) {
@@ -9312,6 +9361,7 @@
       return `<button type="button" class="wt-rep-box${isOn ? ' is-on' : ''}" data-slug="${slug}" data-reps="${n}" aria-pressed="${isOn}">${n}${badge}</button>`;
     }).join('');
     const hasAny = Object.keys(map).length > 0;
+    const lastGhost = renderWorkoutLastGhost(findLastWorkoutSession(slug, workoutDayISO));
     return `
       <div class="wt-exercise${hasAny ? ' has-any' : ''}" data-slug="${slug}" data-active-weight="${activeWeight}">
         <div class="wt-exercise-head">
@@ -9323,6 +9373,7 @@
         </div>
         ${weightButtons}
         <div class="wt-exercise-reps">${boxes}</div>
+        ${lastGhost}
       </div>
     `;
   }
