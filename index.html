@@ -4129,25 +4129,239 @@
     font-family: 'Inter', sans-serif;
   }
 
-  .splash-spacer { flex: 1; }
+  .splash-spacer { flex: 1; min-height: 16px; }
 
-  .splash-tap-hint {
+  /* Choice cards — Today / Workout. Replace the old "tap to begin"
+     hint. Two horizontally-laid cards on wide screens, stacked on
+     narrow ones. Each card swells subtly on hover/focus.            */
+  .splash-choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding-bottom: 8px;
+  }
+  @media (max-width: 380px) {
+    .splash-choices { grid-template-columns: 1fr; }
+  }
+  .splash-choice {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 18px 18px 20px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: transform var(--t-base) var(--ease),
+                box-shadow var(--t-base) var(--ease),
+                background var(--t-base) var(--ease);
+    box-shadow: 0 1px 0 rgba(58, 44, 28, 0.04);
+  }
+  .splash-choice:hover,
+  .splash-choice:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(58, 44, 28, 0.16);
+    outline: none;
+  }
+  .splash-choice.workout {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--surface);
+  }
+  .splash-choice .sc-eyebrow {
     font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 500;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .splash-choice.workout .sc-eyebrow { color: var(--ochre-soft); }
+  .splash-choice .sc-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .splash-choice .sc-arrow {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    font-size: 18px;
+    opacity: 0.5;
+    transition: transform var(--t-base) var(--ease), opacity var(--t-base) var(--ease);
+  }
+  .splash-choice:hover .sc-arrow,
+  .splash-choice:focus-visible .sc-arrow {
+    transform: translateX(3px);
+    opacity: 1;
+  }
+
+  /* Page wrappers — extra top room so the fixed home pill doesn't
+     overlap the day-name header on mobile. */
+  #today-page, #workout-page { padding-top: 60px; }
+
+  /* Small "home" pill that returns to the splash from a page. */
+  .home-pill {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(58, 44, 28, 0.04);
+  }
+  .home-pill:hover { background: var(--surface-2); }
+  .home-pill .hp-arrow { font-size: 14px; line-height: 1; }
+
+  /* Workout page hero — PPLC chooser + quick stats */
+  .wk-hero { margin: 8px 0 24px; }
+  .wk-hero-eyebrow {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+  .wk-pplc {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .wk-pplc-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    color: var(--surface);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform var(--t-fast) var(--ease), filter var(--t-fast) var(--ease);
+  }
+  .wk-pplc-card:hover { transform: translateY(-1px); filter: brightness(1.05); }
+  .wk-pplc-card.push  { background: var(--green-leaf); }
+  .wk-pplc-card.pull  { background: #2C5282; }
+  .wk-pplc-card.legs  { background: var(--ochre); color: var(--ink); }
+  .wk-pplc-card.core  { background: var(--terracotta); }
+  .wk-pplc-letter {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .wk-pplc-name {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .wk-pplc-count {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+
+  /* 7-day mini bar chart — sets logged per day */
+  .wk-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .wk-stat-card {
+    padding: 14px 14px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .wk-stat-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+  .wk-stat-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .wk-stat-sub {
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 11px;
     color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    margin: 0;
-    text-align: center;
+    margin-top: 4px;
   }
+  .wk-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 36px;
+    margin-top: 4px;
+  }
+  .wk-bar {
+    flex: 1;
+    background: var(--green-soft);
+    border-radius: 2px;
+    min-height: 2px;
+    opacity: 0.85;
+  }
+  .wk-bar.empty { background: var(--border); opacity: 0.6; }
+  .wk-bar.today { background: var(--green-deep); }
+  .wk-bar-labels {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 9px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .wk-bar-labels span { flex: 1; text-align: center; }
 
   /* Entry stagger */
   .splash-overlay.anim .splash-greeting,
   .splash-overlay.anim .splash-day,
   .splash-overlay.anim .splash-date-row,
   .splash-overlay.anim .splash-quote,
-  .splash-overlay.anim .splash-tap-hint {
+  .splash-overlay.anim .splash-choices {
     opacity: 0;
     transform: translateY(8px);
     will-change: opacity, transform;
@@ -4156,11 +4370,7 @@
   .splash-overlay.anim .splash-day       { animation: splashRise 700ms cubic-bezier(0.19, 1, 0.22, 1) 240ms forwards; }
   .splash-overlay.anim .splash-date-row  { animation: splashRise 700ms cubic-bezier(0.19, 1, 0.22, 1) 360ms forwards; }
   .splash-overlay.anim .splash-quote     { animation: splashRise 800ms cubic-bezier(0.19, 1, 0.22, 1) 520ms forwards; }
-  .splash-overlay.anim .splash-tap-hint  {
-    animation:
-      splashRise 600ms cubic-bezier(0.19, 1, 0.22, 1) 900ms forwards,
-      splashPulse 2.4s cubic-bezier(0.19, 1, 0.22, 1) 1.1s infinite;
-  }
+  .splash-overlay.anim .splash-choices   { animation: splashRise 700ms cubic-bezier(0.19, 1, 0.22, 1) 880ms forwards; }
 
   @keyframes splashRise  { to { opacity: 1; transform: translateY(0); } }
   @keyframes splashPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
@@ -4170,7 +4380,7 @@
     .splash-overlay.anim .splash-day,
     .splash-overlay.anim .splash-date-row,
     .splash-overlay.anim .splash-quote,
-    .splash-overlay.anim .splash-tap-hint {
+    .splash-overlay.anim .splash-choices {
       opacity: 1; transform: none; animation: none;
     }
   }
@@ -4228,12 +4438,26 @@
 
       <div class="splash-spacer"></div>
 
-      <p class="splash-tap-hint">Tap anywhere to begin</p>
+      <div class="splash-choices" role="group" aria-label="Where to next">
+        <button type="button" class="splash-choice today" id="splashChooseToday">
+          <span class="sc-eyebrow">Plan, reflect, log</span>
+          <span class="sc-title">Today</span>
+          <span class="sc-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="splash-choice workout" id="splashChooseWorkout">
+          <span class="sc-eyebrow">Push · Pull · Legs · Core</span>
+          <span class="sc-title">Workout</span>
+          <span class="sc-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
     </div>
   </div>
   <!-- === END SPLASH MARKUP ===================================== -->
 
-  <main class="app">
+  <main class="app" id="today-page" hidden>
+    <button type="button" class="home-pill" id="todayHomeBtn" aria-label="Back to home">
+      <span class="hp-arrow">‹</span><span>Home</span>
+    </button>
     <header>
       <h1 class="day-name" id="day-name">Tuesday</h1>
       <div class="day-date" id="date"></div>
@@ -4447,11 +4671,6 @@
         <span class="ptitle">10 questions</span>
         <span class="psub" id="play-sub">How many can you get?</span>
       </button>
-      <button class="play-card" id="open-workouts" style="margin-top:10px">
-        <span class="pmeyebrow">Workouts</span>
-        <span class="ptitle">Dumbbell library</span>
-        <span class="psub">Browse, learn, build a plan.</span>
-      </button>
       <button class="play-card" id="open-stats" style="margin-top:10px">
         <span class="pmeyebrow">Stats</span>
         <span class="ptitle">Your chain in numbers</span>
@@ -4473,6 +4692,53 @@
       <button id="open-year-2">History</button>
     </div>
   </main>
+
+  <!-- ============================================================ -->
+  <!-- === BEGIN WORKOUT PAGE ==================================== -->
+  <!-- Dedicated workout view. Reuses renderWorkoutTrackerBody()    -->
+  <!-- to populate #workout-tracker-body once the page is shown.    -->
+  <!-- ============================================================ -->
+  <main class="app" id="workout-page" hidden>
+    <button type="button" class="home-pill" id="workoutHomeBtn" aria-label="Back to home">
+      <span class="hp-arrow">‹</span><span>Home</span>
+    </button>
+    <header>
+      <h1 class="day-name" id="wk-day-name">Workout</h1>
+      <div class="day-date" id="wk-date"></div>
+    </header>
+
+    <section class="wk-hero">
+      <p class="wk-hero-eyebrow">Choose your split</p>
+      <div class="wk-pplc" id="wk-pplc-cards"></div>
+
+      <div class="wk-stats" id="wk-stats">
+        <div class="wk-stat-card">
+          <p class="wk-stat-label">This week</p>
+          <p class="wk-stat-value" id="wk-stat-week-sets">0</p>
+          <p class="wk-stat-sub" id="wk-stat-week-sub">sets logged</p>
+        </div>
+        <div class="wk-stat-card">
+          <p class="wk-stat-label">Last 7 days</p>
+          <div class="wk-bars" id="wk-stat-bars"></div>
+          <div class="wk-bar-labels" id="wk-stat-bar-labels"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="workout-page-tracker">
+      <p class="section-label"><span>Today's log</span><span id="wk-day-rel"></span></p>
+      <p class="subtle" style="margin: 0 0 12px; color: var(--ink-soft); font-size: 13px;">
+        Five boxes per exercise — one per set. Tap a box and type how many reps you hit going to failure. Last 1–2 reps of the final set should be hard (RIR 1–2).
+      </p>
+      <div id="workout-tracker-body"></div>
+    </section>
+
+    <div class="footer-mark">
+      <img class="footer-bird" src="Pics/720x480.png" alt="" />
+      <p class="footer serif">Keep the chain.</p>
+    </div>
+  </main>
+  <!-- === END WORKOUT PAGE ====================================== -->
 
   <!-- Overlay / sheet — reused for log, week review, year view, settings -->
   <div class="overlay" id="overlay">
@@ -9360,22 +9626,110 @@
     tryNext();
   }
 
-  // Day cursor for the workout sheet. Persisted in module scope so
-  // navigating prev/next survives until the sheet closes.
+  // Day cursor for the workout view. Persisted in module scope so
+  // prev/next navigation survives across renders.
   let workoutDayISO = null;
 
-  function openWorkouts() {
+  function openWorkouts(opts) {
     workoutDayISO = toISODate(new Date());
-    openSheet(`
-      <h2>Workouts</h2>
-      <p class="subtle">Five boxes per exercise — one per set. Tap a box and type how many reps you hit going to failure. Last 1–2 reps of the final set should be hard (RIR 1–2). Tap an exercise name for the cue card.</p>
-      <div id="workout-tracker-body"></div>
-      <div class="sheet-actions">
-        <button class="btn btn-ghost" id="cancel">Done</button>
-      </div>
-    `);
+    const splash      = document.getElementById('splashOverlay');
+    const todayPage   = document.getElementById('today-page');
+    const workoutPage = document.getElementById('workout-page');
+    if (splash) splash.hidden = true;
+    if (todayPage) todayPage.hidden = true;
+    if (workoutPage) workoutPage.hidden = false;
+    document.body.style.overflow = '';
+    window.scrollTo(0, 0);
+    renderWorkoutPageHeader();
+    renderWorkoutHero();
     renderWorkoutTrackerBody();
-    sheet.querySelector('#cancel').addEventListener('click', closeSheet);
+    const focusGroup = opts && opts.focusGroup;
+    if (focusGroup) expandWorkoutGroup(focusGroup, /*scroll*/ true);
+  }
+
+  // Update the day name + full date in the Workout page header to match
+  // the same formatting used on the Today page.
+  function renderWorkoutPageHeader() {
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const now = new Date();
+    const nameEl = document.getElementById('wk-day-name');
+    const dateEl = document.getElementById('wk-date');
+    if (nameEl) nameEl.textContent = days[now.getDay()];
+    if (dateEl) dateEl.textContent = `${now.getDate()} ${months[now.getMonth()]}`;
+    const rel = document.getElementById('wk-day-rel');
+    if (rel) rel.textContent = 'Today';
+  }
+
+  // PPLC chooser cards + 7-day bar chart + week sets stat.
+  function renderWorkoutHero() {
+    const todayISO = toISODate(new Date());
+    const dayLog = (state.workoutLog && state.workoutLog[todayISO]) || {};
+
+    const cardsEl = document.getElementById('wk-pplc-cards');
+    if (cardsEl) {
+      cardsEl.innerHTML = WORKOUT_GROUPS.map(g => {
+        const count = workoutGroupCount(dayLog, g.key);
+        const sub = count > 0 ? `${count} set${count === 1 ? '' : 's'} today` : 'Tap to begin';
+        return `
+          <button type="button" class="wk-pplc-card ${g.key}" data-group="${g.key}">
+            <span class="wk-pplc-letter">${g.label.charAt(0)}</span>
+            <span class="wk-pplc-name">${escapeHTML(g.label)}</span>
+            <span class="wk-pplc-count">${escapeHTML(sub)}</span>
+          </button>`;
+      }).join('');
+      cardsEl.querySelectorAll('.wk-pplc-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const g = card.getAttribute('data-group');
+          if (g) expandWorkoutGroup(g, /*scroll*/ true);
+        });
+      });
+    }
+
+    // 7-day bar chart of total sets logged each day, plus week total.
+    const bars = [];
+    let weekTotal = 0;
+    for (let i = 6; i >= 0; i--) {
+      const iso = toISODate(addDays(new Date(), -i));
+      const log = (state.workoutLog && state.workoutLog[iso]) || {};
+      const sets = workoutDayTotalSets(log);
+      bars.push({ iso, sets, isToday: i === 0 });
+      weekTotal += sets;
+    }
+    const max = Math.max(1, ...bars.map(b => b.sets));
+    const barsEl = document.getElementById('wk-stat-bars');
+    if (barsEl) {
+      barsEl.innerHTML = bars.map(b => {
+        const h = b.sets === 0 ? 6 : Math.max(8, Math.round((b.sets / max) * 36));
+        const cls = ['wk-bar'];
+        if (b.sets === 0) cls.push('empty');
+        if (b.isToday)    cls.push('today');
+        return `<div class="${cls.join(' ')}" style="height:${h}px" title="${b.iso}: ${b.sets} sets"></div>`;
+      }).join('');
+    }
+    const labelsEl = document.getElementById('wk-stat-bar-labels');
+    if (labelsEl) {
+      const dn = ['S','M','T','W','T','F','S'];
+      labelsEl.innerHTML = bars.map(b => `<span>${dn[parseISO(b.iso).getDay()]}</span>`).join('');
+    }
+    const wkSetsEl = document.getElementById('wk-stat-week-sets');
+    const wkSubEl  = document.getElementById('wk-stat-week-sub');
+    if (wkSetsEl) wkSetsEl.textContent = String(weekTotal);
+    if (wkSubEl)  wkSubEl.textContent = weekTotal === 1 ? 'set logged' : 'sets logged';
+  }
+
+  // Expand a PPLC group in the tracker body and (optionally) scroll to it.
+  function expandWorkoutGroup(groupKey, scroll) {
+    const g = document.querySelector(`#workout-tracker-body .wt-group.${groupKey}`);
+    if (!g) return;
+    g.classList.add('is-open');
+    const header = g.querySelector('.wt-group-header');
+    if (header) header.setAttribute('aria-expanded', 'true');
+    if (scroll) {
+      requestAnimationFrame(() => {
+        g.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
   }
 
   // Canonical shape: state.workoutLog[date][slug] is an array of
@@ -10616,7 +10970,6 @@
   document.getElementById('open-quote').addEventListener('click', () => openQuote());
   document.getElementById('open-word').addEventListener('click', () => openWord());
   document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
-  document.getElementById('open-workouts').addEventListener('click', openWorkouts);
   document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
   document.getElementById('open-stats').addEventListener('click', openStats);
   document.getElementById('open-stats-2').addEventListener('click', openStats);
@@ -10637,20 +10990,15 @@
 
   // ============================================================
   // === BEGIN SPLASH SCRIPT ====================================
-  // Daily editorial splash. Shows once per local day; tap to
-  // dismiss with a View-Transitions morph into the home view.
-  // Uses the existing pickQuoteForDate() so the splash quote
-  // matches the Quote of the Day tile.
+  // Editorial splash + landing page. Shown on every app open; the
+  // user picks Today or Workout to enter the app. Splash quote uses
+  // pickQuoteForDate() to match the Quote of the Day tile.
   // ============================================================
-  (function showSplashIfNeeded() {
+  (function setupLanding() {
     var splashOverlay = document.getElementById('splashOverlay');
-    if (!splashOverlay) return;
-
-    var todayKey = toISODate(new Date());
-    var SPLASH_KEY = 'caprisun.splash.last';
-    try {
-      if (localStorage.getItem(SPLASH_KEY) === todayKey) return; // already shown today
-    } catch (e) {}
+    var todayPage     = document.getElementById('today-page');
+    var workoutPage   = document.getElementById('workout-page');
+    if (!splashOverlay || !todayPage || !workoutPage) return;
 
     var SPLASH_DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     var SPLASH_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -10661,25 +11009,38 @@
       return 'Good evening.';
     }
 
-    var splashNow = new Date();
-    document.getElementById('splashGreeting').textContent = splashGreetingFor(splashNow.getHours());
-    document.getElementById('splashDay').textContent      = SPLASH_DAYS[splashNow.getDay()];
-    document.getElementById('splashDateNum').textContent  = String(splashNow.getDate()).padStart(2, '0');
-    document.getElementById('splashMonth').textContent    = SPLASH_MONTHS[splashNow.getMonth()];
+    function paintSplash() {
+      var now = new Date();
+      document.getElementById('splashGreeting').textContent = splashGreetingFor(now.getHours());
+      document.getElementById('splashDay').textContent      = SPLASH_DAYS[now.getDay()];
+      document.getElementById('splashDateNum').textContent  = String(now.getDate()).padStart(2, '0');
+      document.getElementById('splashMonth').textContent    = SPLASH_MONTHS[now.getMonth()];
+      var q = pickQuoteForDate(now);
+      document.getElementById('splashQuoteBody').textContent = q.text;
+      document.getElementById('splashAttrib').textContent    = q.author + ' · ' + q.year;
+    }
 
-    var splashQ = pickQuoteForDate(splashNow);
-    document.getElementById('splashQuoteBody').textContent = splashQ.text;
-    document.getElementById('splashAttrib').textContent    = splashQ.author + ' · ' + splashQ.year;
+    var prevOverflow = '';
 
-    splashOverlay.hidden = false;
-    var prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    function showLanding() {
+      paintSplash();
+      todayPage.hidden = true;
+      workoutPage.hidden = true;
+      // Re-trigger entry stagger by toggling the .anim class.
+      splashOverlay.classList.remove('anim');
+      // force reflow
+      void splashOverlay.offsetWidth;
+      splashOverlay.classList.add('anim');
+      splashOverlay.hidden = false;
+      prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
 
-    function dismissSplash() {
-      try { localStorage.setItem(SPLASH_KEY, todayKey); } catch (e) {}
+    function leaveLanding(then) {
       var hide = function () {
         splashOverlay.hidden = true;
         document.body.style.overflow = prevOverflow;
+        if (typeof then === 'function') then();
       };
       if (document.startViewTransition &&
           !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -10689,10 +11050,36 @@
       }
     }
 
-    splashOverlay.addEventListener('click', dismissSplash);
-    splashOverlay.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dismissSplash(); }
+    function showTodayPage() {
+      leaveLanding(function () {
+        workoutPage.hidden = true;
+        todayPage.hidden = false;
+        window.scrollTo(0, 0);
+      });
+    }
+
+
+    // Choice card handlers — each routes to its page with a soft transition.
+    document.getElementById('splashChooseToday').addEventListener('click', function (e) {
+      e.stopPropagation();
+      showTodayPage();
     });
+    document.getElementById('splashChooseWorkout').addEventListener('click', function (e) {
+      e.stopPropagation();
+      leaveLanding(function () {
+        // openWorkouts() handles workout-page paint + swap.
+        if (typeof openWorkouts === 'function') openWorkouts();
+      });
+    });
+
+    // Home pills — return to the landing splash.
+    var todayHome   = document.getElementById('todayHomeBtn');
+    var workoutHome = document.getElementById('workoutHomeBtn');
+    if (todayHome)   todayHome.addEventListener('click', showLanding);
+    if (workoutHome) workoutHome.addEventListener('click', showLanding);
+
+    // Initial state on app open: show landing.
+    showLanding();
   })();
   // === END SPLASH SCRIPT ======================================
 
