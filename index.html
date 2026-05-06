@@ -4356,6 +4356,123 @@
   }
   .wk-bar-labels span { flex: 1; text-align: center; }
 
+  /* Mind & body — clickable tiles for Yoga / Meditation / Reading
+     reusing the existing openLog() sheet. */
+  .wk-section {
+    margin: 0 0 22px;
+  }
+  .wk-section-title {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: var(--track-label);
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+  .wk-mind-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .wk-mind-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  }
+  .wk-mind-tile:hover { transform: translateY(-1px); }
+  .wk-mind-tile.done {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--surface);
+  }
+  .wk-mind-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .wk-mind-mins {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    opacity: 0.8;
+  }
+  .wk-mind-avg {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    opacity: 0.55;
+  }
+
+  /* 28-day activity heatmap — one row per activity, 28 cells (oldest
+     left, today right). Done = coloured, missed = faint. Cell colour
+     mirrors the PPLC group colour where applicable. */
+  .wk-heatmap {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .wk-heatmap-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .wk-heatmap-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .wk-heatmap-cells {
+    display: grid;
+    grid-template-columns: repeat(28, 1fr);
+    gap: 2px;
+  }
+  .wk-heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--border);
+    opacity: 0.45;
+  }
+  .wk-heatmap-cell.on { opacity: 1; }
+  .wk-heatmap-cell.today { box-shadow: inset 0 0 0 1px var(--ink); }
+  .wk-heatmap-axis {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 8px;
+    margin-top: 4px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 9px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .wk-heatmap-axis-cells {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .wk-heatmap-axis-cells span { text-align: left; }
+  .wk-heatmap-axis-cells span:last-child { text-align: right; }
+
+  /* Per-PPLC card — this-week sets line under today's count. */
+  .wk-pplc-week {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    opacity: 0.65;
+    margin-top: 1px;
+  }
+
   /* Entry stagger */
   .splash-overlay.anim .splash-greeting,
   .splash-overlay.anim .splash-day,
@@ -4721,6 +4838,22 @@
           <p class="wk-stat-label">Last 7 days</p>
           <div class="wk-bars" id="wk-stat-bars"></div>
           <div class="wk-bar-labels" id="wk-stat-bar-labels"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wk-section">
+      <p class="wk-section-title">Mind &amp; body</p>
+      <div class="wk-mind-tiles" id="wk-mind-tiles"></div>
+    </section>
+
+    <section class="wk-section">
+      <p class="wk-section-title">Last 4 weeks</p>
+      <div class="wk-heatmap" id="wk-heatmap"></div>
+      <div class="wk-heatmap-axis">
+        <span></span>
+        <div class="wk-heatmap-axis-cells">
+          <span>4w ago</span><span>3w</span><span>2w</span><span>this week</span>
         </div>
       </div>
     </section>
@@ -6741,6 +6874,16 @@
 
   // --- Rendering: today tiles ----------------------------------------------
 
+  // Refresh both Today's #tiles and the Workout-page mind tiles +
+  // heatmap. Called from log save paths so logging stays in sync no
+  // matter which page initiated it. Workout renderers are no-ops when
+  // their target nodes aren't in the DOM yet.
+  function refreshActivityViews() {
+    renderTiles();
+    if (typeof renderWorkoutMindTiles === 'function') renderWorkoutMindTiles();
+    if (typeof renderWorkoutHeatmap   === 'function') renderWorkoutHeatmap();
+  }
+
   function renderTiles() {
     if (isPreStart()) return;
     const today = new Date();
@@ -6949,7 +7092,7 @@
           else delete state.cardio[dateISO];
         }
         save();
-        renderTiles();
+        refreshActivityViews();
         closeSheet();
         // Pulse only on the un-logged → logged transition; subsequent edits
         // (e.g. adjusting minutes) shouldn't re-trigger the celebration.
@@ -6970,7 +7113,7 @@
           delete state.cardio[dateISO];
           save();
         }
-        renderTiles();
+        refreshActivityViews();
         closeSheet();
       },
     });
@@ -7472,7 +7615,7 @@
       else delete state.dayNotes[dateISO];
 
       save();
-      renderTiles();
+      refreshActivityViews();
       renderChecklist();
       renderTodayNoteBtn();
       closeSheet();
@@ -9642,6 +9785,8 @@
     window.scrollTo(0, 0);
     renderWorkoutPageHeader();
     renderWorkoutHero();
+    renderWorkoutMindTiles();
+    renderWorkoutHeatmap();
     renderWorkoutTrackerBody();
     const focusGroup = opts && opts.focusGroup;
     if (focusGroup) expandWorkoutGroup(focusGroup, /*scroll*/ true);
@@ -9663,19 +9808,31 @@
 
   // PPLC chooser cards + 7-day bar chart + week sets stat.
   function renderWorkoutHero() {
-    const todayISO = toISODate(new Date());
+    const today = new Date();
+    const todayISO = toISODate(today);
     const dayLog = (state.workoutLog && state.workoutLog[todayISO]) || {};
+
+    // Aggregate this week's per-group set count (last 7 days incl. today).
+    const weekByGroup = { push: 0, pull: 0, legs: 0, core: 0 };
+    for (let i = 6; i >= 0; i--) {
+      const iso = toISODate(addDays(today, -i));
+      const log = (state.workoutLog && state.workoutLog[iso]) || {};
+      for (const g of WORKOUT_GROUPS) weekByGroup[g.key] += workoutGroupCount(log, g.key);
+    }
 
     const cardsEl = document.getElementById('wk-pplc-cards');
     if (cardsEl) {
       cardsEl.innerHTML = WORKOUT_GROUPS.map(g => {
         const count = workoutGroupCount(dayLog, g.key);
         const sub = count > 0 ? `${count} set${count === 1 ? '' : 's'} today` : 'Tap to begin';
+        const wk  = weekByGroup[g.key];
+        const wkLine = wk > 0 ? `${wk} this week` : 'None this week';
         return `
           <button type="button" class="wk-pplc-card ${g.key}" data-group="${g.key}">
             <span class="wk-pplc-letter">${g.label.charAt(0)}</span>
             <span class="wk-pplc-name">${escapeHTML(g.label)}</span>
             <span class="wk-pplc-count">${escapeHTML(sub)}</span>
+            <span class="wk-pplc-week">${escapeHTML(wkLine)}</span>
           </button>`;
       }).join('');
       cardsEl.querySelectorAll('.wk-pplc-card').forEach(card => {
@@ -9716,6 +9873,85 @@
     const wkSubEl  = document.getElementById('wk-stat-week-sub');
     if (wkSetsEl) wkSetsEl.textContent = String(weekTotal);
     if (wkSubEl)  wkSubEl.textContent = weekTotal === 1 ? 'set logged' : 'sets logged';
+  }
+
+  // Mind & body tiles — Yoga / Meditation / Reading. Reuse openLog()
+  // so logging mirrors the Today-page tiles (single source of truth in
+  // state.sessions).
+  const WK_MIND_KEYS = ['yoga', 'meditation', 'reading'];
+
+  function renderWorkoutMindTiles() {
+    const el = document.getElementById('wk-mind-tiles');
+    if (!el) return;
+    const todayISO = toISODate(new Date());
+    const today = (state.sessions && state.sessions[todayISO]) || {};
+    const tiles = WK_MIND_KEYS
+      .map(k => ACTIVITIES.find(a => a.key === k))
+      .filter(Boolean);
+    el.innerHTML = tiles.map(act => {
+      const mins = today[act.key] || 0;
+      const cls  = mins > 0 ? 'wk-mind-tile done' : 'wk-mind-tile';
+      const label = mins > 0 ? `${mins} min today` : 'Tap to log';
+      return `
+        <button type="button" class="${cls}" data-key="${act.key}">
+          <span class="wk-mind-name">${escapeHTML(act.name)}</span>
+          <span class="wk-mind-mins">${escapeHTML(label)}</span>
+          <span class="wk-mind-avg">Avg ${avgFor(act)} min</span>
+        </button>`;
+    }).join('');
+    el.querySelectorAll('.wk-mind-tile').forEach(t => {
+      t.addEventListener('click', () => {
+        const key = t.getAttribute('data-key');
+        const act = ACTIVITIES.find(a => a.key === key);
+        if (act) openLog(act, todayISO);
+      });
+    });
+  }
+
+  // 28-day heatmap — one row per activity. Push/Pull/Legs/Core read
+  // workoutLog group counts; Yoga/Meditation/Reading read sessions.
+  function renderWorkoutHeatmap() {
+    const el = document.getElementById('wk-heatmap');
+    if (!el) return;
+    const today = new Date();
+    const todayISO = toISODate(today);
+    const days = [];
+    for (let i = 27; i >= 0; i--) days.push(toISODate(addDays(today, -i)));
+
+    const groupColors = {
+      push: 'var(--green-leaf)',
+      pull: '#2C5282',
+      legs: 'var(--ochre)',
+      core: 'var(--terracotta)',
+    };
+
+    const rows = [
+      ...WORKOUT_GROUPS.map(g => ({
+        label: g.label.charAt(0) + g.label.slice(1).toLowerCase(),
+        color: groupColors[g.key],
+        check: iso => workoutGroupCount((state.workoutLog || {})[iso] || {}, g.key) > 0,
+      })),
+      { label: 'Yoga',       color: 'var(--green-deep)', check: iso => (((state.sessions || {})[iso]) || {}).yoga       > 0 },
+      { label: 'Meditation', color: 'var(--green-deep)', check: iso => (((state.sessions || {})[iso]) || {}).meditation > 0 },
+      { label: 'Reading',    color: 'var(--ochre)',      check: iso => (((state.sessions || {})[iso]) || {}).reading    > 0 },
+    ];
+
+    el.innerHTML = rows.map(r => {
+      const cells = days.map(iso => {
+        const on = r.check(iso);
+        const isToday = iso === todayISO;
+        const cls = ['wk-heatmap-cell'];
+        if (on) cls.push('on');
+        if (isToday) cls.push('today');
+        const style = on ? `background:${r.color}` : '';
+        return `<div class="${cls.join(' ')}" style="${style}" title="${iso}"></div>`;
+      }).join('');
+      return `
+        <div class="wk-heatmap-row">
+          <span class="wk-heatmap-label">${escapeHTML(r.label)}</span>
+          <div class="wk-heatmap-cells">${cells}</div>
+        </div>`;
+    }).join('');
   }
 
   // Expand a PPLC group in the tracker body and (optionally) scroll to it.
@@ -10117,6 +10353,7 @@
       weight: (typeof weight === 'number' && isFinite(weight)) ? weight : null,
     };
     save();
+    refreshWorkoutStats();
   }
 
   // Clear a set at the given position. Trims trailing nulls so the
@@ -10132,6 +10369,17 @@
     if (arr.length === 0) delete day[slug];
     if (Object.keys(day).length === 0) delete state.workoutLog[iso];
     save();
+    refreshWorkoutStats();
+  }
+
+  // Lightweight refresh of the Workout-page stat cards + heatmap.
+  // Skips when the workout page isn't mounted/visible to avoid wasted
+  // work during sheet-based set logging in older code paths.
+  function refreshWorkoutStats() {
+    const page = document.getElementById('workout-page');
+    if (!page || page.hidden) return;
+    if (typeof renderWorkoutHero    === 'function') renderWorkoutHero();
+    if (typeof renderWorkoutHeatmap === 'function') renderWorkoutHeatmap();
   }
 
 
