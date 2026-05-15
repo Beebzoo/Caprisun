@@ -4658,6 +4658,108 @@
     .wk-daily { grid-template-columns: 1fr; }
   }
 
+  /* This-week review — hero card showing gym sets / cardio minutes /
+     paddle sessions across the seven days of the current Mon–Sun.    */
+  .wk-week-review {
+    margin: 0 0 22px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .wk-week-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 4px;
+  }
+  .wk-week-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .wk-week-range {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .wk-week-totals {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 0 0 14px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .wk-week-totals .wkt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wk-week-totals .wkt-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 100px;
+  }
+  .wk-week-totals .wkt-dot.gym    { background: var(--green-leaf); }
+  .wk-week-totals .wkt-dot.cardio { background: var(--ochre); }
+  .wk-week-totals .wkt-dot.paddle { background: var(--terracotta); }
+  .wk-week-totals .wkt-val { color: var(--ink); font-weight: 600; }
+
+  /* 7-column chart. Each column = stacked vertical bar with three
+     activity segments. Empty days still show a column with a faint
+     baseline so the week reads as a rhythm, not just data points. */
+  .wk-week-chart {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    align-items: end;
+    height: 120px;
+    margin: 0 0 8px;
+  }
+  .wk-week-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 2px;
+    position: relative;
+  }
+  .wk-week-col-base {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .wk-week-col.today .wk-week-col-base { background: var(--ink); }
+  .wk-week-seg {
+    border-radius: 3px;
+    transition: height var(--t-base) var(--ease);
+    min-height: 0;
+  }
+  .wk-week-seg.gym    { background: var(--green-leaf); }
+  .wk-week-seg.cardio { background: var(--ochre); }
+  .wk-week-seg.paddle { background: var(--terracotta); }
+  .wk-week-axis {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  .wk-week-axis span.today {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
   /* Entry stagger */
   .splash-overlay.anim .splash-greeting,
   .splash-overlay.anim .splash-day,
@@ -4767,6 +4869,16 @@
 
     <div id="sync-stale-slot"></div>
     <div id="backup-nudge-slot"></div>
+
+    <section class="wk-week-review" id="wk-week-review" hidden>
+      <div class="wk-week-head">
+        <p class="wk-week-title">This week</p>
+        <span class="wk-week-range" id="wk-week-range"></span>
+      </div>
+      <div class="wk-week-totals" id="wk-week-totals"></div>
+      <div class="wk-week-chart" id="wk-week-chart"></div>
+      <div class="wk-week-axis" id="wk-week-axis"></div>
+    </section>
 
     <div class="wk-gym-tabs" role="tablist" aria-label="Gym">
       <button type="button" class="wk-gym-tab active" id="wk-tab-home" role="tab" aria-selected="true">Home gym</button>
@@ -9801,6 +9913,7 @@
     document.body.style.overflow = '';
     window.scrollTo(0, 0);
     renderWorkoutPageHeader();
+    renderWeekReview();
     renderWorkoutHero();
     renderWorkoutMindTiles();
     renderWorkoutHeatmap();
@@ -9929,6 +10042,90 @@
     });
   }
 
+  // --- This-week review ----------------------------------------------------
+
+  // Three stacked segments per day, normalised independently so each
+  // activity reads on its own scale (units differ: sets vs minutes vs
+  // sessions). Today's column gets a darker baseline.
+  function renderWeekReview() {
+    const review = document.getElementById('wk-week-review');
+    const chartEl = document.getElementById('wk-week-chart');
+    const axisEl  = document.getElementById('wk-week-axis');
+    const totalsEl = document.getElementById('wk-week-totals');
+    const rangeEl  = document.getElementById('wk-week-range');
+    if (!review || !chartEl || !axisEl || !totalsEl || !rangeEl) return;
+
+    const today = new Date();
+    const todayISO = toISODate(today);
+    const monday = startOfWeek(today);
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(monday, i);
+      const iso = toISODate(d);
+      const dayLog = (state.workoutLog || {})[iso] || {};
+      let gymSets = 0;
+      for (const g of WORKOUT_GROUPS) gymSets += workoutGroupCount(dayLog, g.key);
+      const mac = (state.macGym || {})[iso] || { entries: [] };
+      const cardioMin = (mac.entries || []).reduce((a, e) => a + (Number(e.minutes) || 0), 0);
+      const paddleList = (state.paddleLog || {})[iso] || [];
+      const paddleMin  = paddleList.reduce((a, e) => a + (Number(e.minutes) || 0), 0);
+      const paddleCount = paddleList.length;
+      days.push({ d, iso, gymSets, cardioMin, paddleMin, paddleCount });
+    }
+
+    // Independent max per metric so any non-zero value reads as a bar.
+    const maxGym    = Math.max(1, ...days.map(x => x.gymSets));
+    const maxCardio = Math.max(1, ...days.map(x => x.cardioMin));
+    // Paddle: use minutes if logged, otherwise count of sessions, so a
+    // tap-without-duration still shows up.
+    const paddleVal = (x) => x.paddleMin > 0 ? x.paddleMin : x.paddleCount * 30;
+    const maxPaddle = Math.max(1, ...days.map(paddleVal));
+
+    // Each activity segment can occupy up to ~33% of the column. Empty
+    // segments collapse so the column reads compactly when only one
+    // activity logged that day.
+    const SEG_MAX = 33;
+    chartEl.innerHTML = days.map((x) => {
+      const isToday = x.iso === todayISO;
+      const gymH    = x.gymSets    > 0 ? Math.max(6, (x.gymSets    / maxGym)    * SEG_MAX) : 0;
+      const cardioH = x.cardioMin  > 0 ? Math.max(6, (x.cardioMin  / maxCardio) * SEG_MAX) : 0;
+      const pV = paddleVal(x);
+      const paddleH = pV           > 0 ? Math.max(6, (pV           / maxPaddle) * SEG_MAX) : 0;
+      return `
+        <div class="wk-week-col${isToday ? ' today' : ''}">
+          ${paddleH ? `<span class="wk-week-seg paddle" style="height:${paddleH}%"></span>` : ''}
+          ${cardioH ? `<span class="wk-week-seg cardio" style="height:${cardioH}%"></span>` : ''}
+          ${gymH    ? `<span class="wk-week-seg gym"    style="height:${gymH}%"></span>`    : ''}
+          <span class="wk-week-col-base"></span>
+        </div>`;
+    }).join('');
+
+    const dayLetters = ['M','T','W','T','F','S','S'];
+    axisEl.innerHTML = days.map((x, i) => {
+      const isToday = x.iso === todayISO;
+      return `<span class="${isToday ? 'today' : ''}">${dayLetters[i]}</span>`;
+    }).join('');
+
+    const totalGym    = days.reduce((a, x) => a + x.gymSets, 0);
+    const totalCardio = days.reduce((a, x) => a + x.cardioMin, 0);
+    const totalPaddleCount = days.reduce((a, x) => a + x.paddleCount, 0);
+    const totalPaddleMin   = days.reduce((a, x) => a + x.paddleMin, 0);
+    const paddleSuffix = totalPaddleMin > 0
+      ? `paddle&nbsp;·&nbsp;${totalPaddleMin}&nbsp;min`
+      : `paddle`;
+
+    totalsEl.innerHTML = `
+      <span class="wkt"><span class="wkt-dot gym"></span><span class="wkt-val">${totalGym}</span>&nbsp;gym&nbsp;sets</span>
+      <span class="wkt"><span class="wkt-dot cardio"></span><span class="wkt-val">${totalCardio}</span>&nbsp;cardio&nbsp;min</span>
+      <span class="wkt"><span class="wkt-dot paddle"></span><span class="wkt-val">${totalPaddleCount}</span>&nbsp;${paddleSuffix}</span>
+    `;
+
+    const fmtDay = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
+    rangeEl.textContent = `${fmtDay.format(monday)} – ${fmtDay.format(addDays(monday, 6))}`;
+
+    review.hidden = false;
+  }
+
   // --- Gym tabs (Home gym / MAC gym) ---------------------------------------
 
   // Swap which pane is visible; the tab buttons drive this.
@@ -9963,6 +10160,7 @@
     state.paddleLog[iso].push(entry);
     save();
     renderPaddleCard();
+    renderWeekReview();
     // Ask for duration after logging — leaving it blank is fine.
     const raw = window.prompt('Paddle logged. Minutes? (Cancel to skip)');
     if (raw == null) return;
@@ -9971,6 +10169,7 @@
       entry.minutes = n;
       save();
       renderPaddleCard();
+      renderWeekReview();
     }
   }
 
@@ -10035,6 +10234,7 @@
     minutesEl.value = '';
     if (distanceEl) distanceEl.value = '';
     renderMacGym();
+    renderWeekReview();
   }
 
   function deleteMacEntry(id) {
@@ -10042,6 +10242,7 @@
     day.entries = day.entries.filter(e => e.id !== id);
     save();
     renderMacGym();
+    renderWeekReview();
   }
 
   function renderMacGym() {
@@ -10549,6 +10750,7 @@
   function refreshWorkoutStats() {
     const page = document.getElementById('workout-page');
     if (!page || page.hidden) return;
+    if (typeof renderWeekReview     === 'function') renderWeekReview();
     if (typeof renderWorkoutHero    === 'function') renderWorkoutHero();
     if (typeof renderWorkoutHeatmap === 'function') renderWorkoutHeatmap();
   }
