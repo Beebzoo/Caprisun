@@ -4136,15 +4136,12 @@
      narrow ones. Each card swells subtly on hover/focus.            */
   .splash-choices {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 12px;
     width: 100%;
-    max-width: 420px;
+    max-width: 320px;
     margin: 0 auto;
     padding-bottom: 8px;
-  }
-  @media (max-width: 380px) {
-    .splash-choices { grid-template-columns: 1fr; }
   }
   .splash-choice {
     position: relative;
@@ -4207,7 +4204,7 @@
 
   /* Page wrappers — extra top room so the fixed home pill doesn't
      overlap the day-name header on mobile. */
-  #today-page, #workout-page { padding-top: 60px; }
+  #workout-page { padding-top: 60px; }
 
   /* Small "home" pill that returns to the splash from a page. */
   .home-pill {
@@ -4473,6 +4470,194 @@
     margin-top: 1px;
   }
 
+  /* Gym tabs — Home gym / MAC gym swap the hero + tracker contents.   */
+  .wk-gym-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 0 0 18px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .wk-gym-tab {
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: calc(var(--radius) - 2px);
+    cursor: pointer;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  }
+  .wk-gym-tab:hover { color: var(--ink); }
+  .wk-gym-tab.active {
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  /* Paddle quick-log card — single tap to log, prompts for optional
+     duration on the same press. */
+  .wk-paddle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    margin: 0 0 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+    width: 100%;
+  }
+  .wk-paddle:hover { transform: translateY(-1px); }
+  .wk-paddle.done {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--surface);
+  }
+  .wk-paddle-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .wk-paddle-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .wk-paddle-sub {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 11px;
+    opacity: 0.75;
+  }
+  .wk-paddle-cta {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 100px;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+  }
+
+  /* MAC gym — structured cardio rows + free-text notes. */
+  .wk-mac-add {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: 8px;
+    margin: 0 0 12px;
+  }
+  .wk-mac-add select,
+  .wk-mac-add input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    min-width: 0;
+  }
+  .wk-mac-add-btn {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--surface);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .wk-mac-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 16px;
+  }
+  .wk-mac-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+  }
+  .wk-mac-row .wk-mac-machine { font-weight: 600; }
+  .wk-mac-row .wk-mac-meta { color: var(--ink-soft); }
+  .wk-mac-row .wk-mac-del {
+    border: none;
+    background: transparent;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .wk-mac-row .wk-mac-del:hover { color: var(--terracotta); }
+  .wk-mac-empty {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding: 14px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    margin: 0 0 14px;
+  }
+  .wk-mac-notes {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: vertical;
+  }
+  @media (max-width: 520px) {
+    .wk-mac-add,
+    .wk-mac-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .wk-mac-add .wk-mac-add-btn,
+    .wk-mac-row .wk-mac-del {
+      grid-column: 1 / -1;
+      justify-self: end;
+    }
+  }
+
+  /* Daily strip on workout page — Word of the day + Quiz. The
+     Quote of the day still lives on the splash. */
+  .wk-daily {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  @media (max-width: 480px) {
+    .wk-daily { grid-template-columns: 1fr; }
+  }
+
   /* Entry stagger */
   .splash-overlay.anim .splash-greeting,
   .splash-overlay.anim .splash-day,
@@ -4555,15 +4740,10 @@
 
       <div class="splash-spacer"></div>
 
-      <div class="splash-choices" role="group" aria-label="Where to next">
-        <button type="button" class="splash-choice today" id="splashChooseToday">
-          <span class="sc-eyebrow">Plan, reflect, log</span>
-          <span class="sc-title">Today</span>
-          <span class="sc-arrow" aria-hidden="true">→</span>
-        </button>
+      <div class="splash-choices" role="group" aria-label="Continue">
         <button type="button" class="splash-choice workout" id="splashChooseWorkout">
-          <span class="sc-eyebrow">Push · Pull · Legs · Core</span>
-          <span class="sc-title">Workout</span>
+          <span class="sc-eyebrow">Push · Pull · Legs · Core · MAC · Paddle</span>
+          <span class="sc-title">Enter</span>
           <span class="sc-arrow" aria-hidden="true">→</span>
         </button>
       </div>
@@ -4571,280 +4751,106 @@
   </div>
   <!-- === END SPLASH MARKUP ===================================== -->
 
-  <main class="app" id="today-page" hidden>
-    <button type="button" class="home-pill" id="todayHomeBtn" aria-label="Back to home">
-      <span class="hp-arrow">‹</span><span>Home</span>
-    </button>
-    <header>
-      <h1 class="day-name" id="day-name">Tuesday</h1>
-      <div class="day-date" id="date"></div>
-      <p class="greeting">
-        <span id="greeting">Good morning.</span>
-        <span class="greet-icons" aria-hidden="true">
-          <img class="icon-maple" src="Pics/Meaple_Leaf_of_Canada.svg.png" alt="" />
-          <svg class="icon-mountain" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 21 L9 7 L13.5 14 L16 10.5 L22 21 Z" fill="currentColor" />
-            <path d="M8 10 L9 7 L10.1 9.2 L9.5 9.8 L8.4 9.8 Z" fill="#F5F1E8" />
-            <path d="M15.2 12 L16 10.5 L17 12 L16.5 12.3 L15.7 12.3 Z" fill="#F5F1E8" />
-          </svg>
-        </span>
-      </p>
-      <p class="motivation" id="motivation"></p>
-    </header>
-
-    <div id="sync-stale-slot"></div>
-    <div id="backup-nudge-slot"></div>
-
-    <!-- Act 1 — In bed / first moments -->
-    <div class="act-header first"><p class="act-label">This morning</p></div>
-    <section id="morning-ritual-section">
-      <p class="section-label"><span>Morning ritual</span></p>
-
-      <div class="ritual-card">
-        <div class="ritual-row">
-          <label for="bed-time">Last night, in bed at</label>
-          <input type="time" id="bed-time" />
-        </div>
-        <div class="ritual-row">
-          <label for="wake-time">Up this morning at</label>
-          <input type="time" id="wake-time" />
-        </div>
-        <div class="ritual-summary placeholder" id="sleep-summary">Enter both times to see your sleep.</div>
-        <div class="ritual-sleep-avg" id="sleep-avg"></div>
-
-        <details class="wearable-toggle" id="wearable-toggle">
-          <summary>From your wearable</summary>
-          <div class="wearable-row">
-            <div class="wearable-cell">
-              <label for="sleep-score">Sleep score</label>
-              <input id="sleep-score" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="—" aria-label="Sleep score, 0 to 100" />
-            </div>
-            <div class="wearable-cell">
-              <label for="readiness-score">Readiness</label>
-              <input id="readiness-score" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="—" aria-label="Daily readiness, 0 to 100" />
-            </div>
-            <div class="wearable-cell">
-              <label for="rhr-score">Resting HR</label>
-              <input id="rhr-score" type="number" min="30" max="130" step="1" inputmode="numeric" placeholder="—" aria-label="Resting heart rate, beats per minute" />
-            </div>
-          </div>
-          <p class="wearable-hint">Optional — log when you check the watch. Sleep score and readiness drift week-to-week; resting HR moves slowest of all and reveals itself across months.</p>
-        </details>
-
-        <div class="ritual-mood">
-          <p class="ritual-mood-label">How did you wake up?</p>
-          <div class="mood-dots" id="mood-dots">
-            <button class="mood-dot" data-mood="1" aria-label="Drained">1</button>
-            <button class="mood-dot" data-mood="2" aria-label="Low">2</button>
-            <button class="mood-dot" data-mood="3" aria-label="Okay">3</button>
-            <button class="mood-dot" data-mood="4" aria-label="Good">4</button>
-            <button class="mood-dot" data-mood="5" aria-label="Great">5</button>
-          </div>
-        </div>
-      </div>
-
-      <p class="ritual-eyebrow">
-        <span>Yesterday</span>
-        <span class="rdate" id="yesterday-date"></span>
-        <span class="ritual-saved" id="recap-saved">Saved</span>
-      </p>
-      <p class="ritual-readback" id="yesterday-plan-readback" style="display:none"></p>
-      <textarea class="ritual-text" id="yesterday-recap" placeholder="A short recap — what you did, how it felt."></textarea>
-    </section>
-
-    <!-- Act 2 — Getting ready / commute start -->
-    <div class="act-header"><p class="act-label">On the way</p></div>
-    <section id="checklist-section">
-      <p class="section-label"><span>Checklist</span><span id="checklist-progress"></span></p>
-      <div class="checklist" id="checklist"></div>
-      <div class="checklist-celebrate" id="checklist-celebrate">
-        <span class="cc-icon">✓</span>
-        <span class="cc-label">Full house. Well done.</span>
-      </div>
-    </section>
-
-    <!-- Act 3 — On the bus -->
-    <div class="act-header"><p class="act-label">On the bus</p></div>
-    <section id="moment-section">
-      <p class="section-label"><span>A moment</span></p>
-      <div class="moment-grid">
-        <button class="moment-tile" id="open-review" style="display:none">
-          <span class="meyebrow">Review</span>
-          <span class="mtitle" id="review-preview">Spaced repetition.</span>
-        </button>
-        <button class="moment-tile" id="open-quote">
-          <span class="meyebrow">Quote of the day</span>
-          <span class="mtitle" id="quote-preview">A line to sit with.</span>
-        </button>
-        <button class="moment-tile" id="open-word">
-          <span class="meyebrow">Word of the day</span>
-          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Act 4 — Arriving at the desk (pivot to action) -->
-    <div class="act-header"><p class="act-label">At the desk</p></div>
-    <section id="priorities-section">
-      <p class="ritual-eyebrow">
-        <span>Today's three</span>
-        <span class="ritual-saved" id="priorities-saved">Saved</span>
-      </p>
-      <div class="priorities-list" id="priorities-list">
-        <div class="priority-row" data-idx="0">
-          <span class="priority-num">1</span>
-          <input class="priority-text" data-idx="0" maxlength="80" placeholder="The most important thing today" />
-          <button class="priority-done" data-idx="0" aria-label="Mark done"><span class="ptick"></span></button>
-        </div>
-        <div class="priority-row" data-idx="1">
-          <span class="priority-num">2</span>
-          <input class="priority-text" data-idx="1" maxlength="80" placeholder="Another priority" />
-          <button class="priority-done" data-idx="1" aria-label="Mark done"><span class="ptick"></span></button>
-        </div>
-        <div class="priority-row" data-idx="2">
-          <span class="priority-num">3</span>
-          <input class="priority-text" data-idx="2" maxlength="80" placeholder="One more" />
-          <button class="priority-done" data-idx="2" aria-label="Mark done"><span class="ptick"></span></button>
-        </div>
-      </div>
-
-      <details class="priority-notes-toggle" id="priority-notes-toggle">
-        <summary><span>Anything else for today</span><span class="ritual-saved" id="plan-saved">Saved</span></summary>
-        <textarea class="ritual-text" id="today-plan" placeholder="Notes — context, gotchas, who you're seeing."></textarea>
-      </details>
-    </section>
-
-    <section id="todo-section">
-      <p class="section-label section-label-toggle" id="todo-label" role="button" tabindex="0" aria-controls="todo-body" aria-expanded="true">
-        <span>To-do</span>
-        <span class="section-label-right">
-          <span id="todo-summary"></span>
-          <span class="section-chevron" aria-hidden="true"></span>
-        </span>
-      </p>
-      <div class="todo-body" id="todo-body">
-        <div class="todo-add">
-          <input id="todo-text" type="text" maxlength="120" placeholder="Add a to-do (e.g. Call dentist)" />
-          <div class="todo-add-row">
-            <input id="todo-due" type="date" aria-label="Optional deadline" />
-            <button class="btn btn-primary todo-add-btn" id="todo-add-btn">Add</button>
-          </div>
-        </div>
-        <div class="todo-list" id="todo-list"></div>
-        <details class="todo-done-toggle" id="todo-done-toggle" style="display:none">
-          <summary><span id="todo-done-summary">Done</span></summary>
-          <div class="todo-done-list" id="todo-done-list"></div>
-          <button class="btn btn-ghost todo-clear" id="todo-clear">Clear done</button>
-        </details>
-      </div>
-    </section>
-
-    <!-- Act 5 — Throughout the workday (HERO) -->
-    <div class="act-header"><p class="act-label">Today</p></div>
-    <section id="today-section">
-      <p class="section-label"><span>Today</span><span id="plan-label"></span></p>
-      <div class="tiles" id="tiles"></div>
-      <button class="today-note-btn" id="today-note-btn">Leave a note for today…</button>
-    </section>
-
-    <section id="prestart-section" style="display:none">
-      <div class="start-banner">
-        <p class="eyebrow">The chain starts</p>
-        <h3 id="start-title">Monday, 27 April</h3>
-        <p id="start-sub">A fresh week. The first link.</p>
-        <div class="countdown" id="start-countdown">In 4 days</div>
-      </div>
-    </section>
-
-    <!-- Act 6 — Evening (light usage) -->
-    <div class="act-header"><p class="act-label">This evening</p></div>
-    <section id="thoughts-section">
-      <p class="section-label"><span>Thoughts</span></p>
-      <div id="thoughts-body"></div>
-    </section>
-
-    <!-- Act 7 — Meta layer -->
-    <div class="act-header"><p class="act-label">The chain</p></div>
-    <section id="chain-section">
-      <p class="section-label">
-        <span>The chain</span>
-        <button id="open-year">View year</button>
-      </p>
-      <div class="chain" id="chain"></div>
-      <div class="chain-legend">
-        <span id="chain-start-label">8 weeks ago</span>
-        <span>this week</span>
-      </div>
-      <div id="seal-slot"></div>
-      <div id="flowers-slot"></div>
-      <div id="week8-slot"></div>
-      <div id="missed-twice-slot"></div>
-    </section>
-
-    <section id="play-section">
-      <p class="section-label"><span>Play</span></p>
-      <button class="play-card" id="open-quiz-hub">
-        <span class="pmeyebrow">Trivia round</span>
-        <span class="ptitle">10 questions</span>
-        <span class="psub" id="play-sub">How many can you get?</span>
-      </button>
-      <button class="play-card" id="open-stats" style="margin-top:10px">
-        <span class="pmeyebrow">Stats</span>
-        <span class="ptitle">Your chain in numbers</span>
-        <span class="psub">Weeks sealed, streaks, mood mix.</span>
-      </button>
-    </section>
-
-    <div class="footer-mark">
-      <img class="footer-bird" src="Pics/720x480.png" alt="" />
-      <p class="footer serif">Keep the chain.</p>
-    </div>
-    <div class="footer-actions">
-      <button id="open-guide">Guide</button>
-      <button id="open-recent">Recent</button>
-      <button id="open-archive">Archive</button>
-      <button id="open-workouts-2">Workouts</button>
-      <button id="open-stats-2">Stats</button>
-      <button id="open-settings">Settings</button>
-      <button id="open-year-2">History</button>
-    </div>
-  </main>
-
   <!-- ============================================================ -->
   <!-- === BEGIN WORKOUT PAGE ==================================== -->
   <!-- Dedicated workout view. Reuses renderWorkoutTrackerBody()    -->
   <!-- to populate #workout-tracker-body once the page is shown.    -->
   <!-- ============================================================ -->
   <main class="app" id="workout-page" hidden>
-    <button type="button" class="home-pill" id="workoutHomeBtn" aria-label="Back to home">
-      <span class="hp-arrow">‹</span><span>Home</span>
+    <button type="button" class="home-pill" id="workoutHomeBtn" aria-label="Back to splash">
+      <span class="hp-arrow">‹</span><span>Splash</span>
     </button>
     <header>
       <h1 class="day-name" id="wk-day-name">Workout</h1>
       <div class="day-date" id="wk-date"></div>
     </header>
 
-    <section class="wk-hero">
-      <p class="wk-hero-eyebrow">Choose your split</p>
-      <div class="wk-pplc" id="wk-pplc-cards"></div>
+    <div id="sync-stale-slot"></div>
+    <div id="backup-nudge-slot"></div>
 
-      <div class="wk-stats" id="wk-stats">
-        <div class="wk-stat-card">
-          <p class="wk-stat-label">This week</p>
-          <p class="wk-stat-value" id="wk-stat-week-sets">0</p>
-          <p class="wk-stat-sub" id="wk-stat-week-sub">sets logged</p>
+    <div class="wk-gym-tabs" role="tablist" aria-label="Gym">
+      <button type="button" class="wk-gym-tab active" id="wk-tab-home" role="tab" aria-selected="true">Home gym</button>
+      <button type="button" class="wk-gym-tab" id="wk-tab-mac" role="tab" aria-selected="false">MAC gym</button>
+    </div>
+
+    <button type="button" class="wk-paddle" id="wk-paddle-btn">
+      <span class="wk-paddle-left">
+        <span class="wk-paddle-title">Paddle</span>
+        <span class="wk-paddle-sub" id="wk-paddle-sub">Tap to log a session</span>
+      </span>
+      <span class="wk-paddle-cta" id="wk-paddle-cta">Log</span>
+    </button>
+
+    <!-- Home gym pane — PPLC front and centre -->
+    <div id="wk-pane-home">
+      <section class="wk-hero">
+        <p class="wk-hero-eyebrow">Choose your split</p>
+        <div class="wk-pplc" id="wk-pplc-cards"></div>
+
+        <div class="wk-stats" id="wk-stats">
+          <div class="wk-stat-card">
+            <p class="wk-stat-label">This week</p>
+            <p class="wk-stat-value" id="wk-stat-week-sets">0</p>
+            <p class="wk-stat-sub" id="wk-stat-week-sub">sets logged</p>
+          </div>
+          <div class="wk-stat-card">
+            <p class="wk-stat-label">Last 7 days</p>
+            <div class="wk-bars" id="wk-stat-bars"></div>
+            <div class="wk-bar-labels" id="wk-stat-bar-labels"></div>
+          </div>
         </div>
-        <div class="wk-stat-card">
-          <p class="wk-stat-label">Last 7 days</p>
-          <div class="wk-bars" id="wk-stat-bars"></div>
-          <div class="wk-bar-labels" id="wk-stat-bar-labels"></div>
+      </section>
+
+      <section id="workout-page-tracker">
+        <p class="section-label"><span>Today's log</span><span id="wk-day-rel"></span></p>
+        <p class="subtle" style="margin: 0 0 12px; color: var(--ink-soft); font-size: 13px;">
+          Five boxes per exercise — one per set. Tap a box and type how many reps you hit going to failure. Last 1–2 reps of the final set should be hard (RIR 1–2).
+        </p>
+        <div id="workout-tracker-body"></div>
+      </section>
+    </div>
+
+    <!-- MAC gym pane — cardio rows + free-text notes -->
+    <div id="wk-pane-mac" hidden>
+      <section class="wk-section">
+        <p class="wk-section-title">MAC gym · cardio</p>
+        <div class="wk-mac-add">
+          <select id="wk-mac-machine" aria-label="Machine">
+            <option value="treadmill">Treadmill</option>
+            <option value="bike">Bike</option>
+            <option value="rower">Rower</option>
+            <option value="elliptical">Elliptical</option>
+            <option value="stairs">Stairs</option>
+            <option value="other">Other</option>
+          </select>
+          <input id="wk-mac-minutes" type="number" min="1" max="600" step="1" inputmode="numeric" placeholder="Minutes" aria-label="Minutes" />
+          <input id="wk-mac-distance" type="text" inputmode="decimal" placeholder="Distance (opt)" aria-label="Distance" />
+          <button type="button" class="wk-mac-add-btn" id="wk-mac-add-btn">Add</button>
         </div>
-      </div>
-    </section>
+        <div class="wk-mac-list" id="wk-mac-list"></div>
+        <p class="wk-section-title" style="margin-top: 10px;">Notes</p>
+        <textarea class="wk-mac-notes" id="wk-mac-notes" placeholder="Anything else from the session — weights you did, how it felt, what to push next time."></textarea>
+      </section>
+    </div>
 
     <section class="wk-section">
       <p class="wk-section-title">Mind &amp; body</p>
       <div class="wk-mind-tiles" id="wk-mind-tiles"></div>
+    </section>
+
+    <section class="wk-section">
+      <p class="wk-section-title">Today</p>
+      <div class="wk-daily">
+        <button class="moment-tile" id="open-word">
+          <span class="meyebrow">Word of the day</span>
+          <span class="mtitle" id="word-preview">An old English word worth knowing.</span>
+        </button>
+        <button class="play-card" id="open-quiz-hub">
+          <span class="pmeyebrow">Trivia round</span>
+          <span class="ptitle">10 questions</span>
+          <span class="psub" id="play-sub">How many can you get?</span>
+        </button>
+      </div>
     </section>
 
     <section class="wk-section">
@@ -4858,17 +4864,17 @@
       </div>
     </section>
 
-    <section id="workout-page-tracker">
-      <p class="section-label"><span>Today's log</span><span id="wk-day-rel"></span></p>
-      <p class="subtle" style="margin: 0 0 12px; color: var(--ink-soft); font-size: 13px;">
-        Five boxes per exercise — one per set. Tap a box and type how many reps you hit going to failure. Last 1–2 reps of the final set should be hard (RIR 1–2).
-      </p>
-      <div id="workout-tracker-body"></div>
-    </section>
-
     <div class="footer-mark">
       <img class="footer-bird" src="Pics/720x480.png" alt="" />
       <p class="footer serif">Keep the chain.</p>
+    </div>
+    <div class="footer-actions">
+      <button id="open-guide">Guide</button>
+      <button id="open-recent">Recent</button>
+      <button id="open-archive">Archive</button>
+      <button id="open-stats-2">Stats</button>
+      <button id="open-settings">Settings</button>
+      <button id="open-year-2">History</button>
     </div>
   </main>
   <!-- === END WORKOUT PAGE ====================================== -->
@@ -5186,6 +5192,8 @@
    *   quizPrefs      { mode: 'choice' | 'type' | 'mixed', category: string | null }
    *
    *   workoutLog     { 'YYYY-MM-DD': { [slug]: number[] } }               per-day rep-milestones ticked
+   *   macGym         { 'YYYY-MM-DD': { entries: [{id, machine, minutes, distance}], notes: string } }
+   *   paddleLog      { 'YYYY-MM-DD': [{ at: 'HH:MM', minutes: number|null }] }   per-day paddle sessions
    *
    *   notify         { sundaySeal: boolean }                             sole opt-in notification
    *   startDate      'YYYY-MM-DD'                                        first Monday the chain is live
@@ -5228,6 +5236,8 @@
     quizResults: {},
     quizPrefs: { mode: 'choice', category: null },
     workoutLog: {},
+    macGym: {},
+    paddleLog: {},
     notify: { sundaySeal: false, morning: true },
     startDate: '2026-05-04',
   });
@@ -5980,14 +5990,16 @@
       h < 12 ? 'Good morning.' :
       h < 17 ? 'Good afternoon.' :
       h < 21 ? 'Good evening.' : 'Good night.';
-    document.getElementById('greeting').textContent = greet;
+    const greetEl = document.getElementById('greeting');
+    if (greetEl) greetEl.textContent = greet;
 
     const dayName = new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(now);
     const dayEl = document.getElementById('day-name');
     if (dayEl) dayEl.textContent = dayName;
 
     const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' });
-    document.getElementById('date').textContent = dateFmt.format(now);
+    const dateEl = document.getElementById('date');
+    if (dateEl) dateEl.textContent = dateFmt.format(now);
 
     const motEl = document.getElementById('motivation');
     if (motEl) {
@@ -6024,6 +6036,7 @@
 
   function renderChain() {
     const chain = document.getElementById('chain');
+    if (!chain) return;
     chain.innerHTML = '';
     const thisMonday = startOfWeek(new Date());
     const startMonday = getStartMonday();
@@ -6862,14 +6875,18 @@
 
   function renderPreStart() {
     const pre = isPreStart();
-    document.getElementById('today-section').style.display = pre ? 'none' : '';
-    document.getElementById('prestart-section').style.display = pre ? '' : 'none';
+    const todaySection    = document.getElementById('today-section');
+    const prestartSection = document.getElementById('prestart-section');
+    if (todaySection)    todaySection.style.display    = pre ? 'none' : '';
+    if (prestartSection) prestartSection.style.display = pre ? '' : 'none';
     if (!pre) return;
     const start = parseISO(state.startDate);
     const fmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    document.getElementById('start-title').textContent = fmt.format(start);
+    const titleEl = document.getElementById('start-title');
+    const cdEl    = document.getElementById('start-countdown');
+    if (titleEl) titleEl.textContent = fmt.format(start);
     const days = daysBetween(new Date(), start);
-    document.getElementById('start-countdown').textContent = days <= 0 ? 'Starts today' : `In ${days} day${days === 1 ? '' : 's'}`;
+    if (cdEl) cdEl.textContent = days <= 0 ? 'Starts today' : `In ${days} day${days === 1 ? '' : 's'}`;
   }
 
   // --- Rendering: today tiles ----------------------------------------------
@@ -6886,13 +6903,15 @@
 
   function renderTiles() {
     if (isPreStart()) return;
+    const container = document.getElementById('tiles');
+    if (!container) return;
     const today = new Date();
     const todayISO = toISODate(today);
     const plan = PLAN_BY_DAY[today.getDay()] || [];
     const plannedNames = plan.map(k => ACTIVITIES.find(a => a.key === k)?.name).filter(Boolean);
-    document.getElementById('plan-label').textContent = plannedNames.length ? `Plan: ${plannedNames.join(' · ')}` : '';
+    const planLabel = document.getElementById('plan-label');
+    if (planLabel) planLabel.textContent = plannedNames.length ? `Plan: ${plannedNames.join(' · ')}` : '';
 
-    const container = document.getElementById('tiles');
     container.innerHTML = '';
 
     for (const act of ACTIVITIES) {
@@ -9776,10 +9795,8 @@
   function openWorkouts(opts) {
     workoutDayISO = toISODate(new Date());
     const splash      = document.getElementById('splashOverlay');
-    const todayPage   = document.getElementById('today-page');
     const workoutPage = document.getElementById('workout-page');
     if (splash) splash.hidden = true;
-    if (todayPage) todayPage.hidden = true;
     if (workoutPage) workoutPage.hidden = false;
     document.body.style.overflow = '';
     window.scrollTo(0, 0);
@@ -9788,6 +9805,10 @@
     renderWorkoutMindTiles();
     renderWorkoutHeatmap();
     renderWorkoutTrackerBody();
+    renderPaddleCard();
+    renderMacGym();
+    renderMomentTiles();
+    renderPlayTile();
     const focusGroup = opts && opts.focusGroup;
     if (focusGroup) expandWorkoutGroup(focusGroup, /*scroll*/ true);
   }
@@ -9906,6 +9927,156 @@
         if (act) openLog(act, todayISO);
       });
     });
+  }
+
+  // --- Gym tabs (Home gym / MAC gym) ---------------------------------------
+
+  // Swap which pane is visible; the tab buttons drive this.
+  function setGymTab(which) {
+    const homePane = document.getElementById('wk-pane-home');
+    const macPane  = document.getElementById('wk-pane-mac');
+    const homeTab  = document.getElementById('wk-tab-home');
+    const macTab   = document.getElementById('wk-tab-mac');
+    if (!homePane || !macPane || !homeTab || !macTab) return;
+    const isMac = which === 'mac';
+    homePane.hidden = isMac;
+    macPane.hidden  = !isMac;
+    homeTab.classList.toggle('active', !isMac);
+    macTab.classList.toggle('active', isMac);
+    homeTab.setAttribute('aria-selected', String(!isMac));
+    macTab.setAttribute('aria-selected', String(isMac));
+  }
+
+  // --- Paddle ---------------------------------------------------------------
+
+  // One entry = one session: { at: 'HH:MM', minutes: number|null }.
+  // Tap logs a session immediately; we then ask for optional minutes
+  // and patch the just-added entry once the user answers.
+  function logPaddleSession() {
+    const iso = toISODate(new Date());
+    if (!state.paddleLog) state.paddleLog = {};
+    if (!state.paddleLog[iso]) state.paddleLog[iso] = [];
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const entry = { at: `${hh}:${mm}`, minutes: null };
+    state.paddleLog[iso].push(entry);
+    save();
+    renderPaddleCard();
+    // Ask for duration after logging — leaving it blank is fine.
+    const raw = window.prompt('Paddle logged. Minutes? (Cancel to skip)');
+    if (raw == null) return;
+    const n = parseInt(String(raw).trim(), 10);
+    if (Number.isFinite(n) && n > 0 && n < 600) {
+      entry.minutes = n;
+      save();
+      renderPaddleCard();
+    }
+  }
+
+  function renderPaddleCard() {
+    const sub = document.getElementById('wk-paddle-sub');
+    const btn = document.getElementById('wk-paddle-btn');
+    const cta = document.getElementById('wk-paddle-cta');
+    if (!sub || !btn || !cta) return;
+    const iso = toISODate(new Date());
+    const list = (state.paddleLog && state.paddleLog[iso]) || [];
+    if (list.length === 0) {
+      sub.textContent = 'Tap to log a session';
+      cta.textContent = 'Log';
+      btn.classList.remove('done');
+    } else {
+      const total = list.reduce((a, e) => a + (e.minutes || 0), 0);
+      const count = list.length;
+      const parts = [`${count} session${count === 1 ? '' : 's'} today`];
+      if (total > 0) parts.push(`${total} min`);
+      sub.textContent = parts.join(' · ');
+      cta.textContent = 'Log again';
+      btn.classList.add('done');
+    }
+  }
+
+  // --- MAC gym -------------------------------------------------------------
+
+  const MAC_MACHINE_NAMES = {
+    treadmill: 'Treadmill',
+    bike: 'Bike',
+    rower: 'Rower',
+    elliptical: 'Elliptical',
+    stairs: 'Stairs',
+    other: 'Other',
+  };
+
+  function macEntryToday() {
+    const iso = toISODate(new Date());
+    if (!state.macGym) state.macGym = {};
+    if (!state.macGym[iso]) state.macGym[iso] = { entries: [], notes: '' };
+    return state.macGym[iso];
+  }
+
+  function addMacCardio() {
+    const machineEl  = document.getElementById('wk-mac-machine');
+    const minutesEl  = document.getElementById('wk-mac-minutes');
+    const distanceEl = document.getElementById('wk-mac-distance');
+    if (!machineEl || !minutesEl) return;
+    const minutes = parseInt(minutesEl.value, 10);
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+      minutesEl.focus();
+      return;
+    }
+    const day = macEntryToday();
+    day.entries.push({
+      id: 'mac_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      machine: machineEl.value,
+      minutes,
+      distance: (distanceEl?.value || '').trim(),
+    });
+    save();
+    minutesEl.value = '';
+    if (distanceEl) distanceEl.value = '';
+    renderMacGym();
+  }
+
+  function deleteMacEntry(id) {
+    const day = macEntryToday();
+    day.entries = day.entries.filter(e => e.id !== id);
+    save();
+    renderMacGym();
+  }
+
+  function renderMacGym() {
+    const list  = document.getElementById('wk-mac-list');
+    const notes = document.getElementById('wk-mac-notes');
+    if (!list || !notes) return;
+    const day = macEntryToday();
+    if (!day.entries.length) {
+      list.innerHTML = '<div class="wk-mac-empty">No cardio logged for today yet.</div>';
+    } else {
+      list.innerHTML = day.entries.map(e => {
+        const machine = MAC_MACHINE_NAMES[e.machine] || e.machine || 'Other';
+        const meta = [`${e.minutes} min`];
+        if (e.distance) meta.push(escapeHTML(e.distance));
+        return `
+          <div class="wk-mac-row">
+            <span class="wk-mac-machine">${escapeHTML(machine)}</span>
+            <span class="wk-mac-meta">${meta[0]}</span>
+            <span class="wk-mac-meta">${meta[1] || ''}</span>
+            <button type="button" class="wk-mac-del" data-id="${escapeHTML(e.id)}" aria-label="Remove">×</button>
+          </div>`;
+      }).join('');
+      list.querySelectorAll('.wk-mac-del').forEach(b => {
+        b.addEventListener('click', () => deleteMacEntry(b.getAttribute('data-id')));
+      });
+    }
+    if (document.activeElement !== notes) notes.value = day.notes || '';
+  }
+
+  function saveMacNotes() {
+    const notes = document.getElementById('wk-mac-notes');
+    if (!notes) return;
+    const day = macEntryToday();
+    day.notes = notes.value || '';
+    save();
   }
 
   // 28-day heatmap — one row per activity. Push/Pull/Legs/Core read
@@ -11211,23 +11382,43 @@
     renderPlayTile();
   }
 
-  document.getElementById('open-year').addEventListener('click', openYearView);
-  document.getElementById('open-year-2').addEventListener('click', openYearView);
-  document.getElementById('open-settings').addEventListener('click', openSettings);
-  document.getElementById('open-guide').addEventListener('click', openGuide);
-  document.getElementById('open-quote').addEventListener('click', () => openQuote());
-  document.getElementById('open-word').addEventListener('click', () => openWord());
-  document.getElementById('open-quiz-hub').addEventListener('click', openQuizHub);
-  document.getElementById('open-workouts-2').addEventListener('click', openWorkouts);
-  document.getElementById('open-stats').addEventListener('click', openStats);
-  document.getElementById('open-stats-2').addEventListener('click', openStats);
-  document.getElementById('open-archive').addEventListener('click', () => openArchive());
-  document.getElementById('open-recent').addEventListener('click', openRecent);
-  document.getElementById('open-review').addEventListener('click', openReview);
-  document.getElementById('today-note-btn').addEventListener('click', () => {
-    const iso = toISODate(new Date());
-    openDay(iso);
+  const on = (id, ev, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(ev, fn);
+  };
+  on('open-year-2',   'click', openYearView);
+  on('open-settings', 'click', openSettings);
+  on('open-guide',    'click', openGuide);
+  on('open-word',     'click', () => openWord());
+  on('open-quiz-hub', 'click', openQuizHub);
+  on('open-stats-2',  'click', openStats);
+  on('open-archive',  'click', () => openArchive());
+  on('open-recent',   'click', openRecent);
+
+  // Workout-page controls — gym tabs, paddle, MAC gym.
+  on('wk-tab-home',    'click', () => setGymTab('home'));
+  on('wk-tab-mac',     'click', () => setGymTab('mac'));
+  on('wk-paddle-btn',  'click', logPaddleSession);
+  on('wk-mac-add-btn', 'click', addMacCardio);
+  on('wk-mac-minutes', 'keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addMacCardio(); }
   });
+  on('wk-mac-distance', 'keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addMacCardio(); }
+  });
+  (function wireMacNotes() {
+    const notes = document.getElementById('wk-mac-notes');
+    if (!notes) return;
+    let timer;
+    notes.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(saveMacNotes, 600);
+    });
+    notes.addEventListener('blur', () => {
+      clearTimeout(timer);
+      saveMacNotes();
+    });
+  })();
 
   renderAll();
   wireMorningRitual();
@@ -11238,23 +11429,29 @@
 
   // ============================================================
   // === BEGIN SPLASH SCRIPT ====================================
-  // Editorial splash + landing page. Shown on every app open; the
-  // user picks Today or Workout to enter the app. Splash quote uses
-  // pickQuoteForDate() to match the Quote of the Day tile.
+  // Editorial splash + landing page. Shown once per local day (or
+  // any time the user taps the Splash pill from the workout page).
+  // Splash quote uses pickQuoteForDate() to match the previous
+  // Quote of the Day tile.
   // ============================================================
   (function setupLanding() {
     var splashOverlay = document.getElementById('splashOverlay');
-    var todayPage     = document.getElementById('today-page');
     var workoutPage   = document.getElementById('workout-page');
-    if (!splashOverlay || !todayPage || !workoutPage) return;
+    if (!splashOverlay || !workoutPage) return;
 
     var SPLASH_DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     var SPLASH_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var SHOWN_KEY = 'caprisun.splash.shown';
+
     function splashGreetingFor(h) {
       if (h < 5)  return 'Good night.';
       if (h < 12) return 'Good morning.';
       if (h < 18) return 'Good afternoon.';
       return 'Good evening.';
+    }
+
+    function todayKey() {
+      return toISODate(new Date());
     }
 
     function paintSplash() {
@@ -11272,11 +11469,8 @@
 
     function showLanding() {
       paintSplash();
-      todayPage.hidden = true;
       workoutPage.hidden = true;
-      // Re-trigger entry stagger by toggling the .anim class.
       splashOverlay.classList.remove('anim');
-      // force reflow
       void splashOverlay.offsetWidth;
       splashOverlay.classList.add('anim');
       splashOverlay.hidden = false;
@@ -11285,6 +11479,7 @@
     }
 
     function leaveLanding(then) {
+      try { localStorage.setItem(SHOWN_KEY, todayKey()); } catch (e) {}
       var hide = function () {
         splashOverlay.hidden = true;
         document.body.style.overflow = prevOverflow;
@@ -11298,36 +11493,37 @@
       }
     }
 
-    function showTodayPage() {
-      leaveLanding(function () {
-        workoutPage.hidden = true;
-        todayPage.hidden = false;
-        window.scrollTo(0, 0);
-      });
-    }
-
-
-    // Choice card handlers — each routes to its page with a soft transition.
-    document.getElementById('splashChooseToday').addEventListener('click', function (e) {
-      e.stopPropagation();
-      showTodayPage();
-    });
     document.getElementById('splashChooseWorkout').addEventListener('click', function (e) {
       e.stopPropagation();
       leaveLanding(function () {
-        // openWorkouts() handles workout-page paint + swap.
         if (typeof openWorkouts === 'function') openWorkouts();
       });
     });
 
-    // Home pills — return to the landing splash.
-    var todayHome   = document.getElementById('todayHomeBtn');
+    // Tap anywhere on the overlay (outside the button) also dismisses
+    // and enters the workout page. Keeps the splash gentle to escape.
+    splashOverlay.addEventListener('click', function (e) {
+      if (e.target.closest('.splash-choice')) return;
+      leaveLanding(function () {
+        if (typeof openWorkouts === 'function') openWorkouts();
+      });
+    });
+
+    // The workout page's home pill re-opens the splash for the day.
     var workoutHome = document.getElementById('workoutHomeBtn');
-    if (todayHome)   todayHome.addEventListener('click', showLanding);
     if (workoutHome) workoutHome.addEventListener('click', showLanding);
 
-    // Initial state on app open: show landing.
-    showLanding();
+    // Initial state on app open: workout-first. Show the splash only
+    // if it hasn't been dismissed yet today; otherwise go straight to
+    // the workout page.
+    var shown = '';
+    try { shown = localStorage.getItem(SHOWN_KEY) || ''; } catch (e) {}
+    if (shown === todayKey()) {
+      splashOverlay.hidden = true;
+      if (typeof openWorkouts === 'function') openWorkouts();
+    } else {
+      showLanding();
+    }
   })();
   // === END SPLASH SCRIPT ======================================
 
